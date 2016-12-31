@@ -1,0 +1,32 @@
+        {% extends "navbar.html" %}
+        {% block content %}
+        <div id="page-wrapper">
+            <div class="row">
+                <div class="col-lg-12">
+                  <h2 class="page-header">Bank Accounts</h1>
+                </div>
+                <!-- /.col-lg-12 -->
+            </div>
+            <div class="col-lg-12">
+                <div class="table-responsive">
+                    <table id="table" data-toggle="table" data-url="{{ data_url }}" data-search="false" data-pagination="false" data-side-pagination="server">
+                        <thead>
+                            <tr>
+                                <th data-field='bank'>Bank</th>
+                                <th data-field='number_as_html'>Account Number</th>
+                                <th data-field='desc'>Description</th>
+                                <th data-field='bankaccounttype_desc'>Type</th>
+                                <th data-field='total_balance_as_html' data-width='120'>Balance</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+                <!-- /.table-responsive -->
+            </div>
+            <!-- /.col-lg-12 -->
+        </div>
+        <!-- /#page-wrapper -->
+    </div>
+    <!-- /#wrapper -->
+    {% endblock %}
+

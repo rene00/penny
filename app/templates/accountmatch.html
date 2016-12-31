@@ -1,0 +1,161 @@
+        {% extends "navbar.html" %}
+        {% block content %}
+        <div id="page-wrapper">
+            <div class="row">
+                <div class="col-lg-12">
+                    <h2 class="page-header">Account Match</h2>
+                </div>
+                <!-- /.col-lg-12 -->
+                {% if accountmatch %}
+                <form action="{{ url_for('accountmatches.accountmatch', id=accountmatch.id) }}" method="POST">
+                {% else %}
+                <form action="{{ url_for('accountmatches.add') }}" method="POST">
+                {% endif %}
+                {{ form.hidden_tag()}}
+                {{ form.csrf_token }}
+                {% include 'includes/display_flash_message.html' %}
+                <div class="col-lg-12">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <tbody>
+                                <tr>
+                                    <td>Name</td>
+                                    <td>
+                                        {% if form.name.errors -%}
+                                        <div class="form-group has-error">
+                                            <label class="control-label" for="inputError">{{ form.name.errors[0] }}</label>
+                                        {% endif -%}
+                                        {{ form.name(rows="1", class="form-control") }}
+                                        {% if form.name.errors -%}
+                                        </div>
+                                        {% endif -%}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Description</td>
+                                    <td>
+                                        {% if form.desc.errors -%}
+                                        <div class="form-group has-error">
+                                            <label class="control-label" for="inputError">{{ form.desc.errors[0] }}</label>
+                                        {% endif -%}
+                                        {{ form.desc(rows="1", class="form-control") }}
+                                        {% if form.desc.errors -%}
+                                        </div>
+                                        {% endif -%}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Account</td>
+                                    <td>
+                                        {% if form.account.errors -%}
+                                        <div class="form-group has-error">
+                                            <label class="control-label" for="inputError">{{ form.account.errors[0] }}</label>
+                                        {% endif -%}
+                                        <select id="account" name="account" class="form-control">
+                                            {% for choice in form.account.choices %}
+                                            {% set key = choice.0 %}
+                                            {% set value = choice.1 %}
+                                            <option value="{{ key }}"{% if form.account.default == key %} selected="selected"{% endif %}>{{ value }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        {% if form.account.errors -%}
+                                        </div>
+                                        {% endif -%}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Bank Account</td>
+                                    <td>
+                                        {% if form.bankaccount.errors -%}
+                                        <div class="form-group has-error">
+                                            <label class="control-label" for="inputError">{{ form.bankaccount.errors[0] }}</label>
+                                        {% endif -%}
+                                        <select id="bankaccount" name="bankaccount" class="form-control">
+                                            {% for choice in form.bankaccount.choices %}
+                                            {% set key = choice.0 %}
+                                            {% set value = choice.1 %}
+                                            <option value="{{ key }}"{% if form.bankaccount.default == key %} selected="selected"{% endif %}>{{ value }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        {% if form.bankaccount.errors -%}
+                                        </div>
+                                        {% endif -%}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Filter</td>
+                                    <td>
+                                    {% if form_filter -%}
+                                    {% if form_filter.regex.errors -%}
+                                        <div class="form-group has-error">
+                                            <label class="control-label" for="inputError">{{ form_filter.regex.errors[0] }}</label>
+                                    {% endif -%}
+                                    <p>{{ form_filter.regex(rows="1", class="form-control") }}</p>
+                                    {% if form_filter.regex.errors -%}
+                                        </div>
+                                    {% endif -%}
+                                    {% endif %}
+
+                                {% for filter in filters %}
+                                    {% set input_id = 'filter_regex_' + filter.id|string %}
+                                    {% set input_name = 'filter_regex_' + filter.id|string %}
+                                    <p><input class="form-control" id="{{ input_id }}" name="{{ input_name }}" rows="1" type="text" value="{{ filter.regex }}"></p>
+                                {% endfor -%}
+                                    </td>
+                                </tr>
+                                {# Debit and Credit not supported yet.
+                                {% if accountmatch %}
+                                <tr>
+                                    <td>Debit</td>
+                                    <td>{{ accountmatch.debit }}
+                                </tr>
+                                {% endif %}
+                                {% if accountmatch %}
+                                <tr>
+                                    <td>Credit</td>
+                                    <td>{{ accountmatch.credit }}
+                                </tr>
+                                {% endif %}
+                                #}
+                            </tbody>
+                        </table>
+                        {% if request.path == "/accountmatches/add" %}
+                            {% set submit_name = 'add' %}
+                            {% set submit_value = 'Add' %}
+                            {% set display_filter_btn = False %}
+                        {% else %}
+                            {% set submit_name = 'update' %}
+                            {% set submit_value = 'Update' %}
+                            {% set display_filter_btn = True %}
+                        {% endif %}
+
+                        {% if form_filter %}
+                            {% set form_filter_submit_value = "Remove New Filter" %}
+                            {% set form_filter_submit_name = "filter_remove" %}
+                        {% else %}
+                            {% set form_filter_submit_value = "Add New Filter" %}
+                            {% set form_filter_submit_name = "filter_add" %}
+                        {% endif %}
+
+                        <div class="input-group btn-block" style="padding-top:10px;">
+                            {% if display_filter_btn %}
+                            <div class="pull-left" style="padding-right:5px;">
+                                <input type="submit" class="btn btn-primary" name="{{ form_filter_submit_name }}" value="{{ form_filter_submit_value }}">
+                            </div>
+
+                            {% endif %}
+                            <div class="pull-left" style="padding-right:5px;">
+                                <input type="submit" class="btn btn-primary" name="{{ submit_name }}" value="{{ submit_value }}">
+                            </div>
+                        </div>
+                    <!-- /.table-responsive -->
+                </div>
+                <!-- /.col-lg-12 -->
+                 </form>
+            </div>
+            <!-- /.row -->
+        </div>
+        <!-- /#page-wrapper -->
+    </div>
+    <!-- /#wrapper -->
+{% endblock %}

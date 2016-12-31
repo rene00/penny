@@ -1,0 +1,24 @@
+        {% extends "navbar.html" %}
+        {% block content %}
+        <div id="page-wrapper">
+            <div class="row">
+                <div class="col-lg-12">
+                    <h2 class="page-header">Reports</h1>
+                </div>
+                <!-- /.col-lg-12 -->
+                <div class="col-lg-12">
+                    <div class="table-responsive">
+                        <table id="table" data-toggle="table" data-url="{{ data_url }}" data-cache='false' data-pagination="true" data-page-list="[25, 100, 250]" data-page-size="25" data-side-pagination="server" data-sort-order="desc">
+                            <thead>
+                              <tr>
+                                  <th data-field='report_url'>Report Name</th>
+                              </tr>
+                            </thead>
+                        </table>
+                    </div> <!-- /.table-responsive -->
+                </div> <!-- /.col-lg-12 -->
+            </div> <!-- /.row -->
+        </div> <!-- /#page-wrapper -->
+    </div> <!-- /#wrapper -->
+
+    {% endblock %}

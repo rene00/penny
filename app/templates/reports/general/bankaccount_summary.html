@@ -1,0 +1,49 @@
+        {% extends "navbar.html" %}
+        {% block content %}
+        <div id="page-wrapper">
+            <div class="row">
+                <div class="col-lg-12">
+                  <h2 class="page-header">General Bank Account Summary</h1>
+                </div>
+                <!-- /.col-lg-12 -->
+            </div>
+            <div class="col-lg-12">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Bank Account</th>
+                                <th>Entity</th>
+                                <th>Account Description</th>
+                                <th>Account Balance</th>
+                            </tr>
+                        </thead>
+                        {#}
+                        <tbody>
+                            {% for account, data in report.transactions.iteritems() %}
+                            <tr>
+                                <td><a href="{{ url_for('bankaccounts.bankaccount', id=data.id) }}">{{ account }}</a></td>
+                                <td>{{ data.entity }}</td>
+                                <td>{% if data.description %}{{ data.description }}{% endif %}</td>
+                                <td><a href="{{ url_for('transactions_bankaccount.bankaccount', bankaccount_id=data.id) }}">{{ data.balance |convert_to_float }}</a></td>
+                            </tr>
+                            {% endfor %}
+                            <tr>
+                                <td><strong>Grand Total</strong</td>
+                                <td></td>
+                                <td></td>
+                                <td>{{ report.grand_total|convert_to_float }}</td>
+                            </tr>
+                        </tbody>
+                        {#}
+                    </table>
+                </div>
+                <!-- /.table-responsive -->
+            </div>
+            <!-- /.col-lg-12 -->
+        </div>
+        <!-- /#page-wrapper -->
+    </div>
+    <!-- /#wrapper -->
+    {% endblock %}
+
