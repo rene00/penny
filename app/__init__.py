@@ -1,8 +1,8 @@
 from flask import Flask
 from flask_mail import Mail
 from flask_login import LoginManager
-from flask.ext.security import Security, SQLAlchemyUserDatastore
-from flask.ext.log import Logging
+from flask_security import Security, SQLAlchemyUserDatastore
+from flask_log import Logging
 from app import models, resources
 from app.models import db
 from app.lib.flask_security.register import ExtendedRegisterForm

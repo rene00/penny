@@ -3,7 +3,7 @@ from app.common import filetypes
 from app.common.import_transactions import (ImportTransactions,
                                             ImportTransactionsError)
 from app.common.accountmatchrun import AccountMatchRun
-from flask.ext.rq import job
+from flask_rq import job
 from sqlalchemy.orm.exc import NoResultFound
 
 

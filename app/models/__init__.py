@@ -1,8 +1,8 @@
 from app.common.currency import to_cents
 from datetime import datetime
 from flask import url_for
-from flask.ext.security import RoleMixin, UserMixin
-from flask.ext.sqlalchemy import SQLAlchemy
+from flask_security import RoleMixin, UserMixin
+from flask_sqlalchemy import SQLAlchemy
 from marshmallow import Schema, fields
 from sqlalchemy.sql import func
 import hashlib

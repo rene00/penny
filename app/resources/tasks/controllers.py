@@ -1,7 +1,7 @@
 from app.common import tasks as rqtasks
 from flask import (Blueprint, g, flash, render_template, request,
                    current_app as app)
-from flask.ext.security import login_required
+from flask_security import login_required
 
 
 tasks = Blueprint('tasks', __name__)
