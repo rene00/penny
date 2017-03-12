@@ -1,4 +1,5 @@
 alembic==0.8.8
+appdirs==1.4.3
 beautifulsoup4==4.5.1
 blinker==1.4
 cffi==1.8.2
@@ -29,13 +30,14 @@ MarkupSafe==0.23
 marshmallow==2.10.1
 ndg-httpsclient==0.4.2
 ofxparse==0.14
+packaging==16.8
 passlib==1.6.5
-pkg-resources==0.0.0
 py-bcrypt==0.4
 pyasn1==0.1.9
 pycparser==2.14
 PyMySQL==0.7.9
 pyOpenSSL==16.1.0
+pyparsing==2.2.0
 python-editor==1.0.1
 pytz==2016.6.1
 redis==2.10.5
