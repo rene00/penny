@@ -96,11 +96,16 @@ def bankaccount(id, start_date, end_date):
                                             end_date=end_date))
 
 
+@transactions.route('/account',
+                    defaults={
+                        'start_date': None, 'end_date': None, 'id': None
+                    },
+                    methods=['GET'])
 @transactions.route('/account/<int:id>',
                     defaults={'start_date': None, 'end_date': None},
-                    methods=['GET', 'POST'])
+                    methods=['GET'])
 @transactions.route('/account/<int:id>/<int:start_date>/<int:end_date>',
-                    methods=['GET', 'POST'])
+                    methods=['GET'])
 def account(id, start_date, end_date):
     return render_template('transactions.html',
                            data_url=url_for('data_transactions.account',

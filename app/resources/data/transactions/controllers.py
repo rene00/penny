@@ -49,9 +49,17 @@ def transactions():
     return jsonify(data)
 
 
-@data_transactions.route('/account/<int:id>',
-                         defaults={'start_date': None, 'end_date': None})
-@data_transactions.route('/account/<int:id>/<string:start_date>/<string:end_date>')
+@data_transactions.route(
+    '/account',
+    defaults={'start_date': None, 'end_date': None, 'id': None}
+)
+@data_transactions.route(
+    '/account/<int:id>',
+    defaults={'start_date': None, 'end_date': None}
+)
+@data_transactions.route(
+    '/account/<int:id>/<string:start_date>/<string:end_date>'
+)
 @login_required
 def account(id, start_date, end_date):
     """Return data on all transactions for an account."""
