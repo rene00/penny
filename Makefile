@@ -2,7 +2,9 @@
 
 DEFAULT_PYTHON_VERSION ?= 2.7
 VENV = pyvenv-$(DEFAULT_PYTHON_VERSION)
-FLASK_DEBUG := 0
+FLASK_DEBUG ?= 0
+FLASK_HOST ?= 127.0.0.1
+FLASK_PORT ?= 5000
 
 venv: requirements.txt
 	rm -rf $@
@@ -28,7 +30,7 @@ run_www: venv
 	FLASK_APP=penny.py \
 	CONFIG_FILE=conf.py \
 	FLASK_DEBUG=$(FLASK_DEBUG) \
-	venv/bin/flask run --host=127.0.0.1 --port=5000
+	venv/bin/flask run --host=$(FLASK_HOST) --port=$(FLASK_PORT)
 
 run_queue: venv
 	CONFIG_FILE=conf.py \
