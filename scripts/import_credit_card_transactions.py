@@ -18,6 +18,10 @@ from app.models import session, Transaction, BankAccount, User
 from bs4 import BeautifulSoup
 from flask.ext.script import Manager
 from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import TimeoutException
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.exc import IntegrityError
 from xvfbwrapper import Xvfb
@@ -139,8 +143,23 @@ def run(username, password, bankaccount_id, max_page_count,
     )
 
     driver.get(login_url)
+
+    # Wait up to 30 seconds for each token input to appear.
+    for token in ('AccessToken_Username', 'AccessToken_Password'):
+        try:
+            WebDriverWait(driver, 30).until(
+                EC.presence_of_element_located((By.ID, token))
+            )
+        except TimeoutException:
+            print("Unable to find element {0}".format(token))
+            driver.quit()
+            if xvfb:
+                _xvfb.stop()
+            sys.exit(2)
+
     driver.find_element_by_id('AccessToken_Username').send_keys(username)
     driver.find_element_by_id('AccessToken_Password').send_keys(password)
+
     driver.find_element_by_name('SUBMIT').click()
 
     time.sleep(5)
