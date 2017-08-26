@@ -10,44 +10,37 @@ Basic Install
 
 Install and run redis::
 
+    # ubuntu 16.04
     $ sudo apt-get install redis-server
 
-Install and run mariadb::
+    # fedora 26
+    $ sudo dnf install redis
+    $ sudo systemctl start redis.service
+    $ sudo systemctl enable redis.service
 
-    $ sudo apt-get install mariadb-server
+Install fabric::
 
-Setup a MySQL account and table for penny::
+    # fedora 26
+    $ sudo dnf install fabric
 
-    $ mysql
-    ...
-    > CREATE DATABASE penny;
-    > CREATE USER 'penny'@'localhost'
-        IDENTIFIED BY 'penny';
-    > GRANT ALL PRIVILEGES ON penny.*
-        TO 'penny'@'localhost';
-    > FLUSH PRIVILEGES;
-    > QUIT;
+Install the build dependencies::
+
+    # fedora 26
+    $ sudo dnf install openssl-devel libffi-devel sqlite-devel sqlcipher-devel
 
 Clone the latest version of penny::
 
     $ git clone https://github.com/rene00/penny
     $ cd penny
 
-Build penny::
+Setup a virtualenv then build and run penny::
 
-    $ make
-
-Run the database migration scripts::
-
-    $ make db_migrate
-
-Run penny::
-
-    $ make run_www
+    $ mkvirtualenv penny
+    $ fab run
 
 In another terminal, run the queue system::
 
-    $ make run_queue
+    $ fab run_queue
 
 Visit http://localhost:5000 in your browser.
 
