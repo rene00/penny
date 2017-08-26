@@ -1,7 +1,7 @@
 CSRF_ENABLED = True
 SECRET_KEY = 'tatokuddMiWradfo'
 
-SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://penny:penny@localhost:3306/penny'
+SQLALCHEMY_DATABASE_URI = 'sqlite:///penny.db'
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 # customizations for login_manager.
