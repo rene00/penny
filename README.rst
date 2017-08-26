@@ -2,7 +2,7 @@
 Penny
 =====
 
-Penny is finance tracking web application.
+Penny is personal and micro business finance tracking web application.
 
 -------------
 Basic Install
