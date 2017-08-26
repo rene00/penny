@@ -3,6 +3,8 @@ from flask_mail import Mail
 from flask_login import LoginManager
 from flask_security import Security, SQLAlchemyUserDatastore
 from flask_log import Logging
+from flask_migrate import Migrate
+from alembic import command
 from app import models, resources
 from app.models import db
 from app.lib.flask_security.register import ExtendedRegisterForm
@@ -17,6 +19,11 @@ LOGGING_FMT = ("%(asctime)s - %(pathname)s:%(lineno)d "
 flask_log = Logging(app)
 
 db.init_app(app)
+migrate = Migrate(app, db)
+with app.app_context():
+    db.create_all()
+    config = migrate.get_config(None)
+    command.upgrade(config, 'head', sql=False, tag=None)
 
 mail = Mail(app)
 
