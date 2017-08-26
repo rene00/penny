@@ -37,7 +37,9 @@ def run(account_id):
     df.pop('credit')
     df.date = pd.to_datetime(df.date)
     df.set_index('date', inplace=True)
-    print(df.resample('MS').sum())
+    print(df.resample('M').sum().tail(3))
+    print(df.resample('W').sum().tail(12))
+    print(df.resample('D').sum().tail(30))
 
 if __name__ == '__main__':
     manager.run()
