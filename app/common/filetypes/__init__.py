@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup
 import csv
-from StringIO import StringIO
+from io import StringIO
 from ofxparse import OfxParser
 
 
