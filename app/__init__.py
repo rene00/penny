@@ -8,6 +8,7 @@ from alembic import command
 from app import models, resources
 from app.models import db
 from app.lib.flask_security.register import ExtendedRegisterForm
+from app.common.init_data import import_all_types
 
 
 app = Flask(__name__)
@@ -24,6 +25,7 @@ with app.app_context():
     db.create_all()
     config = migrate.get_config(None)
     command.upgrade(config, 'head', sql=False, tag=None)
+    import_all_types()
 
 mail = Mail(app)
 
