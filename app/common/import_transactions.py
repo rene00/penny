@@ -1,4 +1,4 @@
-from StringIO import StringIO
+from io import StringIO
 from app import models
 from app.common import currency
 from bs4 import BeautifulSoup
