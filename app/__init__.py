@@ -22,7 +22,6 @@ flask_log = Logging(app)
 db.init_app(app)
 migrate = Migrate(app, db)
 with app.app_context():
-    db.create_all()
     config = migrate.get_config(None)
     command.upgrade(config, 'head', sql=False, tag=None)
     import_all_types()
