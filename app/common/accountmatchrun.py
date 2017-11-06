@@ -1,8 +1,9 @@
+
+import re
 from app import models
 from app.models import AccountMatch, Transaction
 from flask import current_app as app
 from sqlalchemy.exc import IntegrityError
-import re
 
 session = models.db.session
 
@@ -36,8 +37,10 @@ class AccountMatchRun():
             # match regex.
             for amr in am.accountmatchfilterregexes:
                 try:
+                    app.logger.debug('Compiling regex; regex={0}'.
+                                     format(amr.regex))
                     regex = re.compile(amr.regex)
-                except:
+                except TypeError:
                     app.logger.error('Failed to parse regex; '
                                      'id={amr.id}'.format(amr))
                     continue
@@ -45,6 +48,10 @@ class AccountMatchRun():
                     for transaction in session.query(Transaction). \
                             filter_by(user=self.user, account=None,
                                       bankaccount=am.bankaccount):
-
+                        app.logger.debug(
+                            'Searching transaction memo for a match; '
+                            'memo=({0}), regex={0}'.
+                            format(transaction.memo, amr.regex)
+                        )
                         if regex.search(transaction.memo):
                             self._match_transaction(am, transaction)
