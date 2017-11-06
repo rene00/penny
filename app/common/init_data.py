@@ -51,7 +51,7 @@ def import_bankaccounttypes():
     """Import bankaccounttypes."""
     bankaccounttypes = {
         'Savings': 'Savings',
-        'Credit Line': 'Loan',
+        'Credit Loan': 'Loan',
         'Credit Card': 'Credit Card',
         'Cash': 'Cash'
     }
