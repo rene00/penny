@@ -23,12 +23,18 @@ def import_transactions(id, user_id):
             user = session.query(User).filter_by(id=user_id).one()
         except NoResultFound:
             raise
+        else:
+            _app.logger.info("Attempting to import transactions; user={0}".
+                             format(user.id))
 
         try:
             if filetypes.is_ofx(transactionupload.filepath):
                 filetype = 'ofx'
         except filetypes.FileTypesError:
             raise
+        else:
+            _app.logger.info("File type for import; filetype={0}".
+                             format(filetype))
 
         bankaccount_number = filetypes.get_bankaccount_number_from_ofx(
             transactionupload.filepath)

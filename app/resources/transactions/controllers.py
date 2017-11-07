@@ -324,7 +324,13 @@ def upload(id):
             flash('Failed Uploading Transactions.', 'error')
 
         # Perform Upload tasks.
+        app.logger.info("About to submit import transaction task; "
+                        "transactionupload={0}, user={1}".
+                        format(transactionupload.id, g.user.id))
         tasks.import_transactions.delay(transactionupload.id, g.user.id)
+        app.logger.info("Import transaction task sent; "
+                        "transactionupload={0}, user={1}".
+                        format(transactionupload.id, g.user.id))
 
         flash('Uploaded Transactions.', 'success')
 
