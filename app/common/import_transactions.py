@@ -6,6 +6,7 @@ from ofxparse import OfxParser
 from ofxparse.ofxparse import OfxParserException
 from sqlalchemy.exc import IntegrityError
 import logging as log
+import re
 
 
 class ImportTransactionsError(Exception):
@@ -51,6 +52,12 @@ class ImportTransactions():
             transaction = models.Transaction(date=tx.date, memo=tx.memo,
                                              bankaccount=self.bankaccount,
                                              fitid=None, user=self.user)
+
+            # Strip double whitespace from transaction memo.
+            transaction.memo = re.sub("\s\s+", " ", transaction.memo)
+
+            # Strip leading whitespace from transaction memo.
+            transaction.memo = re.sub("\s$", "", transaction.memo)
 
             # If the OFX id exists, set is as the fitid for the
             # transaction.
