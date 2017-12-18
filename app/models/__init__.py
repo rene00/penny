@@ -297,8 +297,7 @@ Hash: {0.transaction_hash}
         _hash = hashlib.md5()
 
         for param in [obj.date, obj.debit, obj.credit, obj.memo,
-                      obj.fitid, obj.paypalid, obj.account,
-                      obj.bankaccount]:
+                      obj.fitid, obj.paypalid, obj.bankaccount_id]:
             _hash.update(str(param))
 
         return _hash.hexdigest()
