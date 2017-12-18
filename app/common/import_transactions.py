@@ -1,7 +1,6 @@
 from io import StringIO
 from app import models
 from app.common import currency
-from bs4 import BeautifulSoup
 from ofxparse import OfxParser
 from ofxparse.ofxparse import OfxParserException
 from sqlalchemy.exc import IntegrityError
@@ -24,11 +23,8 @@ class ImportTransactions():
         # returned.
         transactions = []
 
-        # roll ofx file through beautifulsoup first to correct any
-        # issues.
-        soup = BeautifulSoup(self.transactions, 'html.parser')
         try:
-            ofx = OfxParser.parse(StringIO(soup))
+            ofx = OfxParser.parse(StringIO(self.transactions))
         except OfxParserException:
             raise
         except UnicodeDecodeError:

@@ -1,7 +1,7 @@
-from bs4 import BeautifulSoup
 import csv
 from io import StringIO
 from ofxparse import OfxParser
+from ofxparse.ofxparse import OfxParserException
 
 
 class FileTypesError(Exception):
@@ -10,8 +10,7 @@ class FileTypesError(Exception):
 
 def is_csv(csv_file):
     with open(csv_file, 'r') as fh:
-        transactions = fh.read()
-    data = csv.DictReader(StringIO(transactions))
+        data = csv.DictReader(fh)
     for row in data:
         field_names = ['date', 'memo', 'debit', 'credit']
         for field in row:
@@ -51,27 +50,25 @@ def is_paypal_csv(csv_file):
 
 
 def is_ofx(ofx_file):
+    ofx = None
+
     with open(ofx_file, 'r') as fh:
-        transactions = fh.read()
-    soup = BeautifulSoup(transactions, "html")
-    ofx = OfxParser.parse(StringIO(soup.prettify()))
-    try:
-        ofx = OfxParser.parse(StringIO(soup.prettify()))
-    except:
-        raise FileTypesError('failed to import ofx file')
+        try:
+            ofx = OfxParser.parse(fh)
+        except (OfxParserException, TypeError):
+            raise FileTypesError('failed to import ofx file')
+
+    if ofx is None:
+        raise FileTypesError('unable to read ofx file')
+    elif not hasattr(ofx, 'account'):
+        raise FileTypesError('unable to read ofx file')
     else:
-        if ofx is None:
-            raise FileTypesError('unable to read ofx file')
-        elif not hasattr(ofx, 'account'):
-            raise FileTypesError('unable to read ofx file')
-        else:
-            return True
+        return True
 
 
 def get_bankaccount_number_from_ofx(ofx_file):
     "Return the bankaccount number from an OFX file."
     with open(ofx_file) as fh:
-        soup = BeautifulSoup(fh.read(), 'html.parser')
-    ofx = OfxParser.parse(StringIO(soup))
+        ofx = OfxParser.parse(fh)
     number = '{}{}'.format(ofx.account.routing_number, ofx.account.number)
     return number
