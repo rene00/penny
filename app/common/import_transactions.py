@@ -24,7 +24,7 @@ class ImportTransactions():
         transactions = []
 
         try:
-            ofx = OfxParser.parse(StringIO(self.transactions))
+            ofx = OfxParser.parse(StringIO(self.transactions), fail_fast=False)
         except OfxParserException:
             raise
         except UnicodeDecodeError:

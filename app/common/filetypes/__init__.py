@@ -54,7 +54,7 @@ def is_ofx(ofx_file):
 
     with open(ofx_file, 'r') as fh:
         try:
-            ofx = OfxParser.parse(fh)
+            ofx = OfxParser.parse(fh, fail_fast=False)
         except (OfxParserException, TypeError):
             raise FileTypesError('failed to import ofx file')
 
@@ -69,6 +69,6 @@ def is_ofx(ofx_file):
 def get_bankaccount_number_from_ofx(ofx_file):
     "Return the bankaccount number from an OFX file."
     with open(ofx_file) as fh:
-        ofx = OfxParser.parse(fh)
+        ofx = OfxParser.parse(fh, fail_fast=False)
     number = '{}{}'.format(ofx.account.routing_number, ofx.account.number)
     return number
