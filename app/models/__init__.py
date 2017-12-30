@@ -287,31 +287,6 @@ Hash: {0.transaction_hash}
         "Return serialized object."
         return TransactionSchema().dump(self).data
 
-    @staticmethod
-    def get_hash(obj):
-        """Generate a SHA256 hash of the transaction."""
-
-        _hash = hashlib.sha256()
-
-        for param in (obj.date, obj.debit, obj.credit, obj.memo,
-                      obj.fitid, obj.paypalid, obj.bankaccount_id):
-
-            # If param is datatime convert to str.
-            if isinstance(param, datetime):
-                param = param.isoformat()
-
-            # If param is an int convert to str.
-            if isinstance(param, int):
-                param = str(param)
-
-            # If param is None, skip it.
-            if param is None:
-                continue
-
-            _hash.update(param.encode('utf-8'))
-
-        return _hash.hexdigest()
-
     @property
     def _credit(self):
         return locale.currency(float(self.credit / float(100)), grouping=True)
