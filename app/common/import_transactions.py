@@ -1,6 +1,6 @@
 from io import StringIO
 from app import models
-from app.common import currency
+from app.common import currency, util
 from ofxparse import OfxParser
 from ofxparse.ofxparse import OfxParserException
 from sqlalchemy.exc import IntegrityError
@@ -68,7 +68,15 @@ class ImportTransactions():
                 currency.get_credit_debit(amount)
 
             # Set the transaction hash.
-            transaction.transaction_hash = transaction.get_hash(transaction)
+            transaction_hash = util.generate_transaction_hash(
+                date=transaction.date,
+                debit=transaction.debit,
+                credit=transaction.credit,
+                memo=transaction.memo,
+                fitid=transaction.fitid,
+                bankaccount_id=transaction.bankaccount.id
+            )
+            transaction.transaction_hash = transaction_hash
 
             models.db.session.add(transaction)
 
