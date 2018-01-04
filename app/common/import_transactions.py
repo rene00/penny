@@ -1,11 +1,11 @@
-from io import StringIO
 from app import models
-from app.common import currency, util
+from app.common import currency, util, filetypes
 from ofxparse import OfxParser
 from ofxparse.ofxparse import OfxParserException
 from sqlalchemy.exc import IntegrityError
 import logging as log
 import re
+import os
 
 
 class ImportTransactionsError(Exception):
@@ -13,22 +13,28 @@ class ImportTransactionsError(Exception):
 
 
 class ImportTransactions():
-    def __init__(self, transactions, bankaccount, user):
-        self.transactions = transactions
+    def __init__(self, transactionupload, bankaccount, user):
+        self.transactionupload = transactionupload
         self.bankaccount = bankaccount
         self.user = user
 
     def process_ofx(self):
+
+        _ofx = filetypes.ofx2bs4(self.transactionupload.filepath)
+
         # List of transactions that have been processed and will be
         # returned.
         transactions = []
 
         try:
-            ofx = OfxParser.parse(StringIO(self.transactions), fail_fast=False)
+            with open(_ofx[1], mode='rb') as fh:
+                ofx = OfxParser.parse(fh, fail_fast=False)
         except OfxParserException:
             raise
         except UnicodeDecodeError:
             raise ImportTransactionsError('failed to import file.')
+        finally:
+            os.unlink(_ofx[1])
 
         # Check that bankaccount numbers match. The number extracted
         # from the ofx file are the ofc routing and account numbers

@@ -2,6 +2,9 @@ import csv
 from io import StringIO
 from ofxparse import OfxParser
 from ofxparse.ofxparse import OfxParserException
+from bs4 import BeautifulSoup
+import tempfile
+import os
 
 
 class FileTypesError(Exception):
@@ -66,9 +69,19 @@ def is_ofx(ofx_file):
         return True
 
 
+def ofx2bs4(ofx_file):
+    """Run ofx through bs4 and save to a tmp file."""
+    tmpfile = tempfile.mkstemp()
+    soup = BeautifulSoup(open(ofx_file), 'html.parser')
+    with open(tmpfile[1], 'wb') as fh:
+        fh.write(soup.prettify('utf-8'))
+    return tmpfile
+
+
 def get_bankaccount_number_from_ofx(ofx_file):
     "Return the bankaccount number from an OFX file."
-    with open(ofx_file) as fh:
+    _ofx = ofx2bs4(ofx_file)
+    with open(_ofx[1]) as fh:
         ofx = OfxParser.parse(fh, fail_fast=False)
-    number = '{}{}'.format(ofx.account.routing_number, ofx.account.number)
-    return number
+    os.unlink(_ofx[1])
+    return '{}{}'.format(ofx.account.routing_number, ofx.account.number)

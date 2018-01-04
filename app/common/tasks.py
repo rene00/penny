@@ -49,13 +49,14 @@ def import_transactions(id, user_id):
             session.commit()
 
         # Read all transactions into a list
-        transactions = None
-        with open(transactionupload.filepath, 'r') as fh:
-            transactions = fh.read()
+        # transactions = None
+        # with open(transactionupload.filepath, 'r') as fh:
+        #    transactions = fh.read()
 
         # Instantiate the ImportTransactions object ready to import.
-        import_transactions = ImportTransactions(transactions, bankaccount,
-                                                 user)
+        import_transactions = ImportTransactions(
+            transactionupload, bankaccount, user
+        )
 
         # Import the transactions.
         imported_transactions = None
