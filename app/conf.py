@@ -1,7 +1,14 @@
+import os
+
 CSRF_ENABLED = True
 SECRET_KEY = 'tatokuddMiWradfo'
 
-SQLALCHEMY_DATABASE_URI = 'sqlite:///penny.db'
+SQLALCHEMY_DATABASE_URI = 'sqlite:///{0}'.format(
+    os.path.join(
+        os.path.abspath(os.path.dirname(__file__)),
+        'penny.db'
+    )
+)
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 # customizations for login_manager.
