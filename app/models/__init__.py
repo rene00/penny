@@ -5,7 +5,6 @@ from flask_security import RoleMixin, UserMixin
 from flask_sqlalchemy import SQLAlchemy
 from marshmallow import Schema, fields
 from sqlalchemy.sql import func
-import hashlib
 import locale
 import pytz
 
@@ -216,7 +215,7 @@ class TransactionSchema(Schema):
         "Return the bankaccount id of the transaction."
         try:
             return obj.bankaccount.id
-        except:
+        except AttributeError:
             return None
 
     def get_account_name(self, obj):

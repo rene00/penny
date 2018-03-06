@@ -39,8 +39,6 @@ security = Security(
     confirm_register_form=ExtendedRegisterForm
 )
 
-from app import views
-
 # resource blueprints.
 app.register_blueprint(resources.accounts)
 app.register_blueprint(resources.accountmatches)

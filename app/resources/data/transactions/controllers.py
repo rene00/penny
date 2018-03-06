@@ -127,7 +127,6 @@ def account(id, start_date, end_date):
 def bankaccount(id, start_date, end_date):
     """Return data on all transactions for an bankaccount."""
 
-
     data = {'rows': []}
 
     search = request.args.get('search')

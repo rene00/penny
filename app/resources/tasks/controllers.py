@@ -2,14 +2,12 @@ from app.common import tasks as rqtasks
 from flask import (Blueprint, g, flash, render_template, request,
                    current_app as app)
 from flask_security import login_required
-
-
-tasks = Blueprint('tasks', __name__)
-
-
 from flask_wtf import Form
 from werkzeug.datastructures import MultiDict
 from wtforms import BooleanField
+
+
+tasks = Blueprint('tasks', __name__)
 
 
 class FormTasks(Form):
