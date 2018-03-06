@@ -1,15 +1,5 @@
-import time
 import hashlib
 import datetime
-
-
-def now(delta=None):
-    "return now as unixtime in milliseconds."
-    if delta is None:
-        return int((time.time() + 0.5) * 1000)
-    else:
-        now = int((time.time() + 0.5) * 1000)
-        return now + delta
 
 
 def merge_dicts(*dict_args):

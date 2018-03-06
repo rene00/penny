@@ -1,5 +1,5 @@
 from app import models
-from app.common import forms, tasks, util
+from app.common import forms, tasks
 from app.common.currency import to_cents, get_credit_debit
 from flask import (Blueprint, abort, g, render_template, url_for,
                    current_app as app, send_from_directory, redirect,
@@ -16,6 +16,7 @@ from app.common.attachments import (get_filepath_for_transaction_attachment,
 import os
 from werkzeug import secure_filename
 import hashlib
+import datetime
 
 
 transactions = Blueprint('transactions', __name__, url_prefix='/transactions')
@@ -298,7 +299,7 @@ def upload(id):
 
         filepath = os.path.join(
             app.config['TRANSACTION_UPLOADS_UPLOAD_FOLDER'],
-            str(g.user.id), str(util.now()),
+            str(g.user.id), datetime.datetime.now().strftime('%s'),
             secure_filename(form.upload.data.filename))
 
         filedir = os.path.dirname(os.path.realpath(filepath))
