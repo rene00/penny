@@ -11,7 +11,7 @@ import pytz
 db = SQLAlchemy()
 session = db.session
 
-locale.setlocale(locale.LC_ALL, 'en_AU.UTF-8')
+locale.setlocale(locale.LC_ALL, 'C.UTF-8')
 
 
 def utcnow():
