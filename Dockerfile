@@ -12,9 +12,7 @@ ENV FLASK_APP=penny.py
 
 ENV CONFIG_FILE=conf.py
 
-ENV LC_ALL=C.UTF-8
-
-ENV LANG=C.UTF-8
+ENV LANG=en_US.UTF-8
 
 WORKDIR /app
 
@@ -22,11 +20,13 @@ RUN echo 'Acquire::http::Proxy "http://10.0.1.13:3128";' > /etc/apt/apt.conf
 
 RUN http_proxy=$http_proxy apt update && apt install -y python3 python \
     python3-pip gcc libffi-dev libxml2-dev libxslt1-dev redis-server \
-    libssl-dev
+    libssl-dev locales
 
-COPY . .
+RUN echo 'en_US.UTF-8 UTF-8' > /etc/locale.gen && /usr/sbin/locale-gen
 
 RUN mkdir -p /app/files/transactions /app/files/uploads
+
+COPY . .
 
 RUN pip3 install -r /app/requirements.txt --index-url ${pip_index_url} \
     --trusted-host ${pip_trusted_host} honcho
