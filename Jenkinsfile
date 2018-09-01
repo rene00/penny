@@ -11,7 +11,7 @@ pipeline {
               sh 'make venv'
             }
         }
-        stage('Build') {
+        stage('Test') {
             steps {
               sh 'venv/bin/python setup.py test'
             }
