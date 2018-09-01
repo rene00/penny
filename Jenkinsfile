@@ -6,7 +6,7 @@ pipeline {
     stages {
         stage('Build') {
             steps {
-              sh 'sudo apt install -y make'
+              sh 'sudo apt install -y make virtualenv gcc libssl-dev dpkg-dev'
               sh 'make venv'
             }
         }
