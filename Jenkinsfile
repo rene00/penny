@@ -7,6 +7,7 @@ pipeline {
         stage('Build') {
             steps {
               sh 'sudo apt install -y make virtualenv gcc libssl-dev dpkg-dev python-dev'
+              sh 'make clean'
               sh 'make venv'
             }
         }
