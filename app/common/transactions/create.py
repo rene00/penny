@@ -4,7 +4,7 @@ from nene.transaction import get_tx_hash
 from nene.memc import Memcache
 
 
-class CreateTransactionError(Exception):
+class CreateTransactionError(StandardError):
     pass
 
 
@@ -79,7 +79,7 @@ class CreateTransaction():
                 current_app.logger.info(
                     'duplicate transaction found on import; '
                     'transaction={transaction}, user={user}'
-                    .format(transaction=self.transaction.id,
-                            user=self.user.id))
+                    .format(transaction.self.transaction.id,
+                        user=self.user.id))
         finally:
             return self.transaction
