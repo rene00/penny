@@ -5,13 +5,14 @@ from flask_security import RoleMixin, UserMixin
 from flask_sqlalchemy import SQLAlchemy
 from marshmallow import Schema, fields
 from sqlalchemy.sql import func
+import hashlib
 import locale
 import pytz
 
 db = SQLAlchemy()
 session = db.session
 
-locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
+locale.setlocale(locale.LC_ALL, 'en_AU.UTF-8')
 
 
 def utcnow():
@@ -215,7 +216,7 @@ class TransactionSchema(Schema):
         "Return the bankaccount id of the transaction."
         try:
             return obj.bankaccount.id
-        except AttributeError:
+        except:
             return None
 
     def get_account_name(self, obj):
