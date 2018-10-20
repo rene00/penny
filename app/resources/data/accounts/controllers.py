@@ -1,6 +1,6 @@
 from app import models
 from flask import (Blueprint, g, jsonify, request)
-from flask.ext.security import login_required
+from flask_security import login_required
 from sqlalchemy.sql import func
 
 data_accounts = Blueprint('data_accounts', __name__,

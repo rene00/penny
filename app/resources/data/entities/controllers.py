@@ -1,6 +1,6 @@
 from app import models
 from flask import (Blueprint, g, jsonify)
-from flask.ext.security import login_required
+from flask_security import login_required
 
 data_entities = Blueprint('data_entities', __name__,
                           url_prefix='/data/entities')

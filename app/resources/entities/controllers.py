@@ -1,7 +1,7 @@
 from app import models
 from app.common import forms
 from flask import Blueprint, g, render_template, url_for, redirect
-from flask.ext.security import login_required
+from flask_security import login_required
 from sqlalchemy.orm.exc import NoResultFound
 from app.resources.entities.forms import FormEntity
 

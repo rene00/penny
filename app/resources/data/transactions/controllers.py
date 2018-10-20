@@ -1,6 +1,6 @@
 from app import models
 from flask import (Blueprint, g, jsonify, request)
-from flask.ext.security import login_required
+from flask_security import login_required
 from sqlalchemy import or_
 from sqlalchemy.sql import func
 from datetime import datetime
@@ -126,6 +126,7 @@ def account(id, start_date, end_date):
 @login_required
 def bankaccount(id, start_date, end_date):
     """Return data on all transactions for an bankaccount."""
+
 
     data = {'rows': []}
 

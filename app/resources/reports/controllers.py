@@ -2,7 +2,7 @@ from app import models
 from app.resources.reports import ReportsProfitLoss
 from datetime import datetime as dt
 from flask import Blueprint, g, render_template, url_for
-from flask.ext.security import login_required
+from flask_security import login_required
 from sqlalchemy.orm.exc import NoResultFound
 
 reports = Blueprint('reports', __name__, url_prefix='/reports')

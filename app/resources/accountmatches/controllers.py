@@ -3,7 +3,7 @@ from app.common import forms
 from app.resources.accountmatches.util import (update_filters, add_filter,
                                                update_details)
 from flask import Blueprint, g, render_template, url_for, redirect, request
-from flask.ext.security import login_required
+from flask_security import login_required
 from sqlalchemy.orm.exc import NoResultFound
 from app.resources.accountmatches.forms import (FormAccountMatch,
                                                 FormAccountMatchFilter)
