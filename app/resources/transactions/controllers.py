@@ -4,7 +4,7 @@ from app.common.currency import to_cents, get_credit_debit
 from flask import (Blueprint, abort, g, render_template, url_for,
                    current_app as app, send_from_directory, redirect,
                    request, flash)
-from flask.ext.security import login_required
+from flask_security import login_required
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import NoResultFound
 from app.resources.transactions.forms import (FormTransaction,
