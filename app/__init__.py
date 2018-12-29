@@ -2,7 +2,6 @@ from flask import Flask
 from flask_mail import Mail
 from flask_login import LoginManager
 from flask_security import Security, SQLAlchemyUserDatastore
-from flask_log import Logging
 from flask_migrate import Migrate
 from alembic import command
 from app import models, resources
@@ -10,14 +9,8 @@ from app.models import db
 from app.lib.flask_security.register import ExtendedRegisterForm
 from app.common.init_data import import_all_types
 
-
 app = Flask(__name__)
 app.config.from_envvar('CONFIG_FILE')
-
-LOGGING_FMT = ("%(asctime)s - %(pathname)s:%(lineno)d "
-               "- %(levelname)s: %(message)s")
-
-flask_log = Logging(app)
 
 db.init_app(app)
 migrate = Migrate(app, db)
