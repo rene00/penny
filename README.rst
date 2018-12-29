@@ -5,48 +5,28 @@ Penny
 Penny is personal and micro business finance tracking web application.
 
 -------------
-Basic Install
+Install & Run
 -------------
 
-Install and run redis::
+Start redis.
 
-    # ubuntu 16.04
-    $ sudo apt-get install redis-server
+Build::
 
-    # fedora 26
-    $ sudo dnf install redis
-    $ sudo systemctl start redis.service
-    $ sudo systemctl enable redis.service
+    $ make build
 
-Install fabric::
+Run web app::
 
-    # fedora 26
-    $ sudo dnf install fabric
-
-Install the build dependencies::
-
-    # fedora 26
-    $ sudo dnf install openssl-devel libffi-devel sqlite-devel sqlcipher-devel
-
-Clone the latest version of penny::
-
-    $ git clone https://github.com/rene00/penny
-    $ cd penny
-
-Setup a virtualenv then build and run penny::
-
-    $ mkvirtualenv penny
-    $ fab run
+    $ make run
 
 In another terminal, run the queue system::
 
-    $ fab run_queue
+    $ make run_queue
 
 Visit http://localhost:5000 in your browser.
 
-------------------------
-Setup and Brief Overview
-------------------------
+-----------
+Get Started
+-----------
 
 Visit http://localhost:5000/register and register your first account.
 
