@@ -7,7 +7,6 @@ click
 cryptography
 enum34
 Flask
-flask-log
 Flask-Login
 Flask-Mail
 Flask-Migrate
