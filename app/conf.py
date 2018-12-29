@@ -34,6 +34,3 @@ RQ_DEFAULT_URL = 'redis://localhost:6379/0'
 
 # Debug
 DEBUG = False
-
-# Logging with Flask-Log
-FLASK_LOG_LEVEL = 'INFO'
