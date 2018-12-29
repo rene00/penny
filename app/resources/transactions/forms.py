@@ -18,7 +18,13 @@ class FormTransaction(Form):
     account = QuerySelectField('account', get_label=get_account_label,
                                allow_blank=True, validators=[],
                                get_pk=lambda a: a.id)
-    bankaccount = QuerySelectField()
+    bankaccount = QuerySelectField(
+        'bankaccount',
+        get_label=get_account_label,
+        allow_blank=True,
+        validators=[],
+        get_pk=lambda b: b.id
+    )
     attachment = FileField(u'Filename', validators=[])
     note = TextAreaField(u'Note', default='', validators=[])
     amount = DecimalField(u'Amount', validators=[])
