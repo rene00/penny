@@ -22,6 +22,8 @@ In another terminal, run the queue system::
 
     $ make run_queue
 
+The queue system is backed by redis and defaults to connecting to redis on localhost:6379.
+
 Visit http://localhost:5000 in your browser.
 
 -----------
