@@ -7,6 +7,9 @@ FLASK_PORT ?= 5000
 build: 
 	pip install -r requirements.txt
 
+docker_build:
+	docker build .
+
 clean: 
 	find . -name '*.pyc' -exec rm -f {} +
 	find . -name '*.pyo' -exec rm -f {} +
