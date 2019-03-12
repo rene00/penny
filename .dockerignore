@@ -99,3 +99,6 @@ README.rst
 # Penny related files
 Makefile
 Dockerfile
+tests
+tox.ini
+README.rst
