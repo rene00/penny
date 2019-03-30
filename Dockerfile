@@ -6,7 +6,13 @@ ENV CONFIG_FILE=conf.py
 
 ENV LANG=en_AU.UTF-8
 
+ENV PYTHONDONTWRITEBYTECODE 1
+
+ENV PYTHONUNBUFFERED 1
+
 WORKDIR /app
+
+RUN echo 'Acquire::http::Proxy "http://proxy:8118";' > /etc/apt/apt.conf.d/99proxy
 
 RUN apt update && apt install -y python3 python \
     python3-pip gcc libffi-dev libxml2-dev libxslt1-dev redis-server \
@@ -20,6 +26,6 @@ COPY . .
 
 RUN pip3 install -r /app/requirements.txt honcho
 
-CMD honcho --app-root=/app start
+ENTRYPOINT ["honcho", "--app-root=/app", "start"]
 
 EXPOSE 5000
