@@ -12,6 +12,7 @@ docker_build:
 
 docker_run:
 	docker run -dit --restart always --publish 5000:5000 \
+		-e CONFIG_FILE=/penny/penny.conf.py \
 		--mount source=penny,target=/penny --name penny penny
 
 clean: 
