@@ -10,6 +10,10 @@ build:
 docker_build:
 	docker build .
 
+docker_run:
+	docker run -dit --restart always --publish 5000:5000 \
+		--mount source=penny,target=/penny --name penny penny
+
 clean: 
 	find . -name '*.pyc' -exec rm -f {} +
 	find . -name '*.pyo' -exec rm -f {} +
