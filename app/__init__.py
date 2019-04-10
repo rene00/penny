@@ -35,9 +35,8 @@ app.config.update(
     DEBUG = False
 )
 
-config_file = os.environ.get('CONFIG_FILE')
-if config_file:
-    app.config.from_envvar(config_file)
+if os.environ.get('CONFIG_FILE'):
+    app.config.from_envvar('CONFIG_FILE')
 
 db.init_app(app)
 migrate = Migrate(app, db)
