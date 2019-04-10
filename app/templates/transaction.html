@@ -46,11 +46,13 @@
                                     <td>Account</td>
                                     <td>
                                         <select id="account" name="account" class="form-control">
+                                        {% if form.account %}
                                         {% for field in form.account %}
                                             {% set key = field.data %}
                                             {% set value = field.label %}
                                             <option value="{{ key }}"{% if form.account.default|int == key|int %} selected="selected"{% endif %}>{{ value }}</option>
                                         {% endfor %}
+                                        {% endif %}
                                         </select>
                                     </td>
                                 </tr>
