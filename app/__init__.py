@@ -8,9 +8,36 @@ from app import models, resources
 from app.models import db
 from app.lib.flask_security.register import ExtendedRegisterForm
 from app.common.init_data import import_all_types
+import os
 
 app = Flask(__name__)
-app.config.from_envvar('CONFIG_FILE')
+
+app.config.update(
+    CSRF_ENABLED=True,
+    SECRET_KEY='s3cr3tk3y',
+    SQLALCHEMY_DATABASE_URI='sqlite:///{0}'.format(
+        os.path.join(os.path.abspath(os.path.dirname(__file__)), 'penny.db')
+    ),
+    SQLALCHEMY_TRACK_MODIFICATIONS=False,
+    SECURITY_CONFIRMABLE=False,
+    SECURITY_LOGIN_USER_TEMPLATE='user/login.html',
+    SECURITY_PASSWORD_HASH='bcrypt',
+    SECURITY_PASSWORD_SALT='s4lt',
+    SECURITY_POST_CONFIRM_VIEW='post_confirm_view',
+    SECURITY_REGISTERABLE=True,
+    SECURITY_REGISTER_USER_TEMPLATE='user/register.html',
+    SECURITY_SEND_PASSWORD_CHANGE_EMAIL=False,
+    SECURITY_SEND_PASSWORD_RESET_NOTICE_EMAIL=False,
+    SECURITY_SEND_REGISTER_EMAIL=False,
+    TRANSACTION_ATTACHMENTS_UPLOAD_FOLDER='files/attachments',
+    TRANSACTION_UPLOADS_UPLOAD_FOLDER='files/uploads',
+    RQ_DEFAULT_URL='redis://localhost:6379/0',
+    DEBUG = False
+)
+
+config_file = os.environ.get('CONFIG_FILE')
+if config_file:
+    app.config.from_envvar(config_file)
 
 db.init_app(app)
 migrate = Migrate(app, db)

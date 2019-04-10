@@ -102,3 +102,4 @@ Dockerfile
 tests
 tox.ini
 README.rst
+app/conf.py
