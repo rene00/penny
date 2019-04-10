@@ -27,7 +27,6 @@ run: run_www
 run_www: 
 	mkdir -p files/transactions files/uploads
 	FLASK_APP=penny.py \
-	CONFIG_FILE=conf.py \
 	FLASK_DEBUG=$(FLASK_DEBUG) \
 	flask run --host=$(FLASK_HOST) --port=$(FLASK_PORT)
 
