@@ -41,7 +41,7 @@ Once you've logged in, create an Entity. Entities are Companies, Sole Traders or
 
 Next, create a Bank Account. A Bank Account has a Type such as Savings or Credit Card. A Bank Account belongs to an Entity.
 
-Next, create a Transaction. A Transactions is linked to a Bank Account, which in turn is linked to an Entity.
+Next, create a Transaction. A Transaction is linked to a Bank Account, which in turn is linked to an Entity.
 
 A Transaction can also be linked to an Account. Accounts have a Type such as Expense or Liability. Accounts are also linked to Entities.
 
