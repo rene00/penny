@@ -9,6 +9,9 @@ from app.models import db
 from app.lib.flask_security.register import ExtendedRegisterForm
 from app.common.init_data import import_all_types
 import os
+from pathlib import Path
+
+PENNY_CONF_FILE = Path('/etc/penny/penny.conf.py')
 
 app = Flask(__name__)
 
@@ -34,6 +37,9 @@ app.config.update(
     RQ_DEFAULT_URL='redis://localhost:6379/0',
     DEBUG = False
 )
+
+if PENNY_CONF_FILE.is_file():
+    app.config.from_pyfile(PENNY_CONF_FILE)
 
 if os.environ.get('CONFIG_FILE'):
     app.config.from_envvar('CONFIG_FILE')
