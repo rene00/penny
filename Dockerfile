@@ -20,7 +20,7 @@ RUN mkdir -p /app/files/transactions /app/files/uploads
 
 COPY . .
 
-RUN pip3 install -r /app/requirements.txt honcho
+RUN pip3 install -r /app/requirements.txt
 
 ENTRYPOINT ["honcho", "--app-root=/app", "start"]
 
