@@ -17,6 +17,7 @@ import os
 from werkzeug import secure_filename
 import hashlib
 import datetime
+import re
 
 
 transactions = Blueprint('transactions', __name__, url_prefix='/transactions')
@@ -195,10 +196,13 @@ def transaction(id):
             transaction.account = None
 
         if form.attachment.data:
-            filepath = get_filepath_for_transaction_attachment(
-                app, transaction, form.attachment.data.filename)
-            form.attachment.data.save(filepath)
-            attachment_hash = get_hash_of_file(filepath)
+            absfilepath, relfilepath = get_filepath_for_transaction_attachment(
+                app.config['TRANSACTION_ATTACHMENTS_UPLOAD_FOLDER'],
+                transaction,
+                form.attachment.data.filename
+            )
+            form.attachment.data.save(absfilepath)
+            attachment_hash = get_hash_of_file(absfilepath)
             try:
                 models.db.session.query(models.TransactionAttachment) \
                     .filter_by(transaction=transaction,
@@ -207,7 +211,7 @@ def transaction(id):
                 attachment = models.TransactionAttachment(
                     transaction=transaction,
                     filename=form.attachment.data.filename,
-                    filepath=filepath, attachment_hash=attachment_hash)
+                    filepath=relfilepath, attachment_hash=attachment_hash)
                 models.db.session.add(attachment)
 
         if form.note.data:
@@ -269,9 +273,17 @@ def add():
 @transactions.route('/attachment/<int:id>', methods=['GET', 'POST'])
 @login_required
 def attachment(id):
-    """Serve transactionattachment files."""
+    """Serve transactionattachment files.
 
-    # trac@24: http://trac.nene.compounddata.com/ticket/24
+    The attachment filepath is the relative to
+    TRANSACTION_ATTACHMENTS_UPLOAD_FOLDER.
+    
+    Joining TRANSACTION_ATTACHMENTS_UPLOAD_FOLDER and the 
+    attachment filepath field will result in the absolute filepath
+    of the transaction file.
+    
+    """
+
     try:
         attachment = models.db.session.query(models.TransactionAttachment) \
             .join(models.Transaction,
@@ -283,10 +295,18 @@ def attachment(id):
     except NoResultFound:
         abort(404)
 
-    filedir = os.path.dirname(os.path.realpath(attachment.filepath))
-    filename = os.path.basename(os.path.realpath(attachment.filepath))
+    file_dir = os.path.join(
+        app.config['TRANSACTION_ATTACHMENTS_UPLOAD_FOLDER'],
+        re.sub(r"^/", "", os.path.dirname(os.path.realpath(attachment.filepath)))
+    )
+    file_name = os.path.basename(os.path.realpath(attachment.filepath))
 
-    return send_from_directory(filedir, filename)
+    app.logger.info(
+        "Serving transaction attachment; file_dir={0}, file_name={1}"
+        .format(file_dir, file_name)
+    )
+
+    return send_from_directory(file_dir, file_name)
 
 
 @transactions.route('/import', defaults={'id': None}, methods=['GET', 'POST'])
