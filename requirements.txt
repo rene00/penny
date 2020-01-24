@@ -52,7 +52,7 @@ pytz==2019.1
 pyxdg==0.25
 redis==3.2.1
 requests==2.21.0
-rq==1.0
+rq==1.2.0
 SecretStorage==2.3.1
 selenium==3.141.0
 six==1.11.0
