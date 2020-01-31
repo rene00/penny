@@ -5,7 +5,7 @@ FLASK_HOST ?= 127.0.0.1
 FLASK_PORT ?= 5000
 
 build: 
-	pip install -r requirements.txt
+	pip3 install --no-cache-dir -r requirements.txt
 
 docker_build:
 	docker build .
