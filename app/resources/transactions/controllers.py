@@ -277,11 +277,10 @@ def attachment(id):
 
     The attachment filepath is the relative to
     TRANSACTION_ATTACHMENTS_UPLOAD_FOLDER.
-    
-    Joining TRANSACTION_ATTACHMENTS_UPLOAD_FOLDER and the 
+
+    Joining TRANSACTION_ATTACHMENTS_UPLOAD_FOLDER and the
     attachment filepath field will result in the absolute filepath
     of the transaction file.
-    
     """
 
     try:
@@ -297,7 +296,13 @@ def attachment(id):
 
     file_dir = os.path.join(
         app.config['TRANSACTION_ATTACHMENTS_UPLOAD_FOLDER'],
-        re.sub(r"^/", "", os.path.dirname(os.path.realpath(attachment.filepath)))
+        re.sub(
+            r"^/",
+            "",
+            os.path.dirname(
+                os.path.realpath(attachment.filepath)
+            )
+        )
     )
     file_name = os.path.basename(os.path.realpath(attachment.filepath))
 

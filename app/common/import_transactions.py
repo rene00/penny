@@ -56,10 +56,10 @@ class ImportTransactions():
                                              fitid=None, user=self.user)
 
             # Strip double whitespace from transaction memo.
-            transaction.memo = re.sub("\s\s+", " ", transaction.memo)
+            transaction.memo = re.sub(r"\s\s+", " ", transaction.memo)
 
             # Strip leading whitespace from transaction memo.
-            transaction.memo = re.sub("\s$", "", transaction.memo)
+            transaction.memo = re.sub(r"\s$", "", transaction.memo)
 
             # If the OFX id exists, set is as the fitid for the
             # transaction.

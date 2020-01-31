@@ -214,10 +214,7 @@ class TransactionSchema(Schema):
 
     def get_bankaccount_id(self, obj):
         "Return the bankaccount id of the transaction."
-        try:
-            return obj.bankaccount.id
-        except:
-            return None
+        return obj.bankaccount.id
 
     def get_account_name(self, obj):
         "Return the account name of the transaction."

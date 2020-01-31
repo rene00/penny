@@ -16,7 +16,10 @@ def get_filepath_for_transaction_attachment(parentdir, transaction, filename):
         secure_filename(filename)
     )
     mkdir_for_transaction(parentdir, relfilepath)
-    return (os.path.join(parentdir, relfilepath), os.path.join('/', relfilepath))
+    return (
+        os.path.join(parentdir, relfilepath),
+        os.path.join('/', relfilepath)
+    )
 
 
 def get_hash_of_file(filepath):

@@ -35,7 +35,7 @@ app.config.update(
     TRANSACTION_ATTACHMENTS_UPLOAD_FOLDER='files/attachments',
     TRANSACTION_UPLOADS_UPLOAD_FOLDER='files/uploads',
     RQ_DEFAULT_URL='redis://localhost:6379/0',
-    DEBUG = False
+    DEBUG=False
 )
 
 if PENNY_CONF_FILE.is_file():
