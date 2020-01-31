@@ -79,7 +79,10 @@ class CreateTransaction():
                 current_app.logger.info(
                     'duplicate transaction found on import; '
                     'transaction={transaction}, user={user}'
-                    .format(transaction.self.transaction.id,
-                        user=self.user.id))
+                    .format(
+                        transaction.self.transaction.id,
+                        user=self.user.id
+                    )
+                )
         finally:
             return self.transaction

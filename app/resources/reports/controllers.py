@@ -4,6 +4,9 @@ from datetime import datetime as dt
 from flask import Blueprint, g, render_template, url_for
 from flask_security import login_required
 from sqlalchemy.orm.exc import NoResultFound
+from flask_wtf import Form
+from wtforms import DateField
+import datetime
 
 reports = Blueprint('reports', __name__, url_prefix='/reports')
 
@@ -15,10 +18,6 @@ def _reports():
         'reports.html', data_url=url_for('data_reports.reports')
     )
 
-
-from flask_wtf import Form
-from wtforms import DateField
-import datetime
 
 DATE_FMT = '%Y%m%d'
 DELTA_DAYS = 31
