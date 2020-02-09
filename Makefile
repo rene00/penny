@@ -1,6 +1,7 @@
 #!/usr/bin/make
 
-FLASK_DEBUG ?= 0
+CONFIG_FILE ?= "./conf.py"
+FLASK_DEBUG ?= 1
 FLASK_HOST ?= 127.0.0.1
 FLASK_PORT ?= 5000
 
@@ -24,14 +25,18 @@ migrate:
 
 run: run_www
 
+install-deps:
+	./scripts/install-deps.sh
+
 run_www: 
 	mkdir -p files/transactions files/uploads
 	FLASK_APP=penny.py \
 	FLASK_DEBUG=$(FLASK_DEBUG) \
+	CONFIG_FILE=$(CONFIG_FILE) \
 	flask run --host=$(FLASK_HOST) --port=$(FLASK_PORT)
 
 run_queue: 
-	CONFIG_FILE=conf.py \
+	CONFIG_FILE=$(CONFIG_FILE) \
 	    rqworker \
 		--url redis://localhost:6379/0 \
 		--verbose \
