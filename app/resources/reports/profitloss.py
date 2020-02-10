@@ -61,14 +61,13 @@ class ReportsProfitLoss():
 
         income_account = models.db.session.query(models.AccountType) \
             .filter(models.AccountType.name == 'Revenue',
-                    models.AccountType.parent == None).one()
+                    models.AccountType.parent == None).one()  # noqa[E711]
 
         expense_account = models.db.session.query(models.AccountType) \
             .filter(models.AccountType.name == 'Expenses',
-                    models.AccountType.parent == None).one()
+                    models.AccountType.parent == None).one()  # noqa[E711]
 
         for tx in txs:
-            app.logger.debug("Processing Transaction; id={0.id}".format(tx))
             amount = (tx.credit + tx.debit)
             account = tx.account
             bankaccount = tx.bankaccount
