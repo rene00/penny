@@ -1,4 +1,4 @@
-from app import app, login_manager, models
+from app import app, login_manager, models, util
 from flask import g, redirect, request, send_from_directory, url_for
 from flask_login import current_user
 from flask_security import logout_user
@@ -50,8 +50,7 @@ def static_from_root():
 
 @app.template_filter('convert_to_float')
 def convert_to_float(cents):
-    locale.setlocale(locale.LC_ALL, 'en_AU.UTF-8')
-    return locale.currency(float(cents / float(100)), grouping=True)
+    return util.convert_to_float(cents)
 
 
 @app.template_filter('convert_to_float_positive')

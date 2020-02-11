@@ -1,11 +1,14 @@
-from app import models
+from app import models, util
 from app.resources.reports import ReportsProfitLoss
+from app.common import forms
 from datetime import datetime as dt
-from flask import Blueprint, g, render_template, url_for
+from flask import Blueprint, g, render_template, url_for, make_response
 from flask_security import login_required
 from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy.sql import func
 from flask_wtf import Form
-from wtforms import DateField
+from wtforms import DateField, SelectField
+from dateutil.rrule import rrule, MONTHLY
 import datetime
 
 reports = Blueprint('reports', __name__, url_prefix='/reports')
@@ -20,10 +23,41 @@ def _reports():
 
 
 DATE_FMT = '%Y%m%d'
-DELTA_DAYS = 31
+DELTA_DAYS = 365
 
 
-class FormReportProfitLoss(Form):
+class FormMonthlyBreakdown(Form):
+    now = datetime.datetime.now()
+    delta = datetime.timedelta(days=DELTA_DAYS)
+
+    account = SelectField(u'Account', validators=[], coerce=int)
+
+    datepicker_start = DateField(
+        'Start Date', format='%d/%m/%Y', validators=[],
+        default=(now - delta))
+
+    datepicker_end = DateField(
+        'End Date', format='%d/%m/%Y', validators=[],
+        default=now)
+
+    def get_account(self):
+        """Return the account."""
+        try:
+            account = models.db.session.query(models.Account) \
+                .filter_by(id=self.account.data, user=g.user).one()
+        except NoResultFound:
+            account = None
+        finally:
+            return account
+
+    def get_start(self, fmt=DATE_FMT):
+        return self.datepicker_start.data.strftime(fmt)
+
+    def get_end(self, fmt=DATE_FMT):
+        return self.datepicker_end.data.strftime(fmt)
+
+
+class FormBasicDates(Form):
 
     now = datetime.datetime.now()
     delta = datetime.timedelta(days=DELTA_DAYS)
@@ -41,6 +75,90 @@ class FormReportProfitLoss(Form):
 
     def get_end(self, fmt=DATE_FMT):
         return self.datepicker_end.data.strftime(fmt)
+
+
+def generate_report_account_monthly(account, start_date, end_date):
+    report = {'transactions': {}}
+    data = {}
+
+    transactions = models.db.session.query(
+            func.date_format(models.Transaction.date, '%Y-%m').label("month"),
+            func.sum(models.Transaction.credit).label("credit"),
+            func.sum(models.Transaction.debit).label("debit"),
+        ) \
+        .filter(
+                models.Transaction.is_deleted == False,  # noqa[W0612]
+                models.Transaction.is_archived == False,
+                models.Transaction.account_id == account.id,
+                models.Transaction.user_id == g.user.id,
+                models.Transaction.date >= start_date,
+                models.Transaction.date <= end_date,
+            ) \
+        .group_by(func.date_format(models.Transaction.date, '%Y-%m-01')) \
+        .order_by(models.Transaction.date)
+
+    for transaction in transactions.all():
+        amount = util.convert_to_float(
+            int(transaction.credit + transaction.debit)
+        )
+        data[transaction.month] = amount
+
+    for d in rrule(freq=MONTHLY, dtstart=start_date, until=end_date):
+        month = d.strftime("%Y-%m")
+        amount = data.get(month, "$0.00")
+        report['transactions'][month] = amount
+
+    return report
+
+
+@reports.route('/account-monthly-breakdown/', methods=['GET', 'POST'])
+@login_required
+def account_monthly_breakdown():
+
+    form = FormMonthlyBreakdown()
+    form.account.choices = forms.get_account_as_choices()
+
+    if form.datepicker_start.data:
+        start_date = form.datepicker_start.data
+    else:
+        try:
+            start_date = dt.strptime(start_date, DATE_FMT)
+        except ValueError:
+            return make_response(
+                render_template('errors/invalid_date_range.html'), 400
+            )
+        else:
+            form.datepicker_start.data = start_date
+
+    if form.datepicker_end.data:
+        end_date = form.datepicker_end.data
+    else:
+        try:
+            end_date = dt.strptime(end_date, DATE_FMT)
+        except ValueError:
+            return make_response(
+                render_template('errors/invalid_date_range.html'), 400
+            )
+        else:
+            form.datepicker_end.data = end_date
+
+    report = {'transactions': {}}
+    account_id = None
+    account_name = None
+
+    if form.validate_on_submit():
+        account = form.get_account()
+        account_id = account.id
+        account_name = account.name
+        report = generate_report_account_monthly(
+            account, start_date, end_date
+        )
+
+    return render_template(
+        'reports/monthly-breakdown.html', report=report, form=form,
+        start_date=form.get_start(), end_date=form.get_end(),
+        account_id=account_id, account_name=account_name
+    )
 
 
 @reports.route('/profitloss/<string:report_resource>/<int:id>',
@@ -67,7 +185,7 @@ def profitloss(report_resource, id, start_date, end_date):
     except NoResultFound:
         return url_for('reports._reports')
 
-    form = FormReportProfitLoss()
+    form = FormBasicDates()
 
     # If user has included dates in URL, take the date strings and
     # convert them to datetime objs.
