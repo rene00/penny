@@ -1,8 +1,6 @@
 from app import models
-from flask import (Blueprint, g, jsonify, request, url_for)
+from flask import (Blueprint, g, jsonify, url_for)
 from flask_security import login_required
-from sqlalchemy import or_
-from sqlalchemy.sql import func
 
 data_reports = Blueprint('data_reports', __name__, url_prefix='/data/reports')
 
@@ -11,7 +9,14 @@ data_reports = Blueprint('data_reports', __name__, url_prefix='/data/reports')
 @login_required
 def reports():
     """Return a list of reports"""
+
     data = {'rows': []}
+
+    # Add account monthly breakdown report
+    data['rows'].append(
+        {'report_url': '<a href="{0}">Account Monthly Breakdown<a>'.
+         format(url_for('reports.account_monthly_breakdown'))}
+    )
 
     # Add entity reports
     for entity in models.db.session.query(models.Entity) \
