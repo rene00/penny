@@ -30,7 +30,7 @@ ipaddress==1.0.23
 itsdangerous==1.1.0
 Jinja2==2.10.1
 keyring==10.6.0
-keyrings.alt==3.0
+keyrings.alt==3.4.0
 lxml==4.5.0
 Mako==1.0.8
 MarkupSafe==1.1.1
