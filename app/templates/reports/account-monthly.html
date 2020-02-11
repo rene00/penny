@@ -36,7 +36,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                        {% for month, amount in report.transactions.items()|sort() %}
+                        {% for month, amount in report.transactions.items()|sort(reverse=true) %}
                             {% set start_month = month + "01" %}
                             {% set end_month = month + "31" %}
                             <tr>
