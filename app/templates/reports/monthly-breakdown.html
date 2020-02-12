@@ -50,20 +50,20 @@
             <h2>Monthly</h2>
             <div class="col-lg-12">
                 <div class="table-responsive">
-                    <table class="table table-bordered table-hover">
+                    <table data-toggle="table" data-pagination="true">
                         <thead>
                             <tr>
-                                <th>Month</th>
-                                <th>Amount</th>
+                                <th data-field="month">Month</th>
+                                <th data-field="amount">Amount</th>
                             </tr>
                         </thead>
                         <tbody>
-                        {% for month, amount in report.transactions.items()|sort(reverse=true) %}
-                            {% set start_month = month + "01" %}
-                            {% set end_month = month + "31" %}
+                        {% for date, month in report.transactions.items()|sort(reverse=true) %}
+                            {% set start_month = month.date|replace("-", "") + "01" %}
+                            {% set end_month = month.date|replace("-", "") + month.daycount|string %}
                             <tr>
-                                <td>{{ month }}</td>
-                                <td><a href="{{ url_for('transactions.account', id=account_id, start_date=start_month|replace("-", ""), end_date=end_month|replace("-", "")) }}">{{ amount }}</a></td>
+                                <td>{{ date }}</td>
+                                <td><a href="{{ url_for('transactions.account', id=account_id, start_date=start_month, end_date=end_month) }}">{{ month.amount }}</a></td>
                             </tr>
                         {% endfor %}
                         </tbody>
