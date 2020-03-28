@@ -1,5 +1,5 @@
 from app import models, util
-from app.resources.reports import ReportsProfitLoss
+from app.resources.reports import ReportsProfitLoss, ReportsSavingsRate
 from app.common import forms
 from datetime import datetime as dt
 from flask import Blueprint, g, render_template, url_for, make_response
@@ -133,6 +133,16 @@ def generate_report_account_monthly(account, start_date, end_date):
         report['transactions'][month.date] = month
 
     return report
+
+
+@reports.route('/savings-rate', methods=['GET'])
+@login_required
+def savings_rate():
+    report = ReportsSavingsRate()
+    return render_template(
+        'reports/savings-rate.html',
+        report=report.generate(),
+    )
 
 
 @reports.route('/account-monthly-breakdown/', methods=['GET', 'POST'])
