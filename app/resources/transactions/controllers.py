@@ -115,7 +115,28 @@ def account(id, start_date, end_date):
                                             end_date=end_date))
 
 
-@transactions.route('/<int:id>', methods=['GET', 'POST'])
+@transactions.route(
+    '/accounttype/<string:accounttype>',
+    defaults={'start_date': None, 'end_date': None},
+    methods=['GET']
+)
+@transactions.route(
+    '/accounttype/<string:accounttype>/<int:start_date>/<int:end_date>',
+    methods=['GET']
+)
+def accounttype(accounttype, start_date, end_date):
+    return render_template(
+        'transactions.html',
+        data_url=url_for(
+            'data_transactions.accounttype',
+            accounttype=accounttype,
+            start_date=start_date,
+            end_date=end_date
+        )
+    )
+
+
+@transactions.route('/<int:id>', methods=['GET', 'POST'])   # noqa[C901]
 @login_required
 def transaction(id):
 

@@ -1,4 +1,4 @@
-from flask import current_app as app
+from flask import current_app as app, g
 from app import models
 from app.common.util import merge_dicts
 
@@ -33,7 +33,8 @@ class ReportsProfitLoss():
                 .join(models.Entity,
                       models.Account.entity_id == models.Entity.id) \
                 .filter(models.Account.entity == self.entity,
-                        models.Transaction.is_deleted == 0)
+                        models.Transaction.is_deleted == 0,
+                        models.Transaction.user == g.user)
         elif self.bankaccount:
             txs = models.db.session.query(models.Transaction) \
                 .join(models.Account,
