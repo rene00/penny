@@ -87,6 +87,14 @@
                                     <td>Transactions</td>
                                     <td><a href="{{ url_for('transactions.account', id=account.id) }}">{{ transactions_amount }}</a></td>
                                 </tr>
+                                <tr>
+                                    <td>Reports</td>
+                                    <td>
+                                        <ul>
+                                            <li><a href="{{ url_for('reports.account_monthly_breakdown', account_id=account.id) }}">Account Monthly Breakdown</a></li>
+                                        </ul>
+                                    </td>
+                                </tr>
                             </tbody>
                         </table>
                         {% if request.path == "/accounts/add" %}
