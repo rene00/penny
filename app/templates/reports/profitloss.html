@@ -46,7 +46,7 @@
                         <tbody>
                         {% for account_id, account in report.transactions.income.items()|sort() %}
                             <tr>
-                                <td>{%if report_resource == 'entity' %}<a href="{{ url_for('bankaccounts.bankaccount', id=account.bankaccount_id) }}">{{ account.bankaccount_bank + ' ' + account.bankaccount_number }}</a>{%elif report_resource == 'bankaccount'%}{{ account.entity_name }}{%endif%}</td><td><a href="{{ url_for('transactions.account', id=account_id, start_date=start_date, end_date=end_date) }}">{{ account.account_name }}</a></td><td>{{ account.amount|convert_to_float }}</td>
+                                <td>{%if report_resource == 'entity' %}<a href="{{ url_for('bankaccounts.bankaccount', id=account.bankaccount_id) }}">{{ account.bankaccount_bank + ' ' + account.bankaccount_number }}</a>{%elif report_resource == 'bankaccount'%}{{ account.entity_name }}{%endif%}</td><td><a href="{{ url_for('accounts.account', id=account_id) }}">{{ account.account_name }}</a></td><td><a href="{{ url_for('transactions.account', id=account_id, start_date=start_date, end_date=end_date) }}">{{ account.amount|convert_to_float }}</a></td>
                             </tr>
                         {% endfor %}
                             <tr>
@@ -75,7 +75,7 @@
                         <tbody>
                         {% for account_id, account in report.transactions.expenses.items()|sort(attribute='1.amount') %}
                             <tr>
-                                <td>{%if report_resource == 'entity'%}<a href="{{ url_for('bankaccounts.bankaccount', id=account.bankaccount_id) }}">{{ account.bankaccount_bank + ' ' + account.bankaccount_number }}</a>{%elif report_resource == 'bankaccount'%}{{ account.entity_name }}{%endif%}</td><td><a href="{{ url_for('transactions.account', id=account_id, start_date=start_date, end_date=end_date) }}">{{ account.account_name }}</a></td> <td>{{ account.amount|convert_to_float }}</td>
+                                <td>{%if report_resource == 'entity' %}<a href="{{ url_for('bankaccounts.bankaccount', id=account.bankaccount_id) }}">{{ account.bankaccount_bank + ' ' + account.bankaccount_number }}</a>{%elif report_resource == 'bankaccount'%}{{ account.entity_name }}{%endif%}</td><td><a href="{{ url_for('accounts.account', id=account_id) }}">{{ account.account_name }}</a></td><td><a href="{{ url_for('transactions.account', id=account_id, start_date=start_date, end_date=end_date) }}">{{ account.amount|convert_to_float }}</a></td>
                             </tr>
                         {% endfor %}
                             <tr>
