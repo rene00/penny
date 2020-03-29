@@ -1,8 +1,9 @@
-from app import models
+from app import models, util
 from app.common import forms
 from flask import Blueprint, g, render_template, url_for, redirect
 from flask_security import login_required
 from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy.sql import func
 from app.resources.accounts.forms import FormAccount
 
 
@@ -50,7 +51,29 @@ def account(id, start_date, end_date):
 
     form.set_defaults(account)
 
-    return render_template('account.html', form=form, account=account)
+    transactions = models.db.session.query(
+        func.sum(models.Transaction.credit).label('credit'),
+        func.sum(models.Transaction.debit).label('debit'),
+    ).filter(
+        models.Transaction.is_deleted == False,  # noqa[W0612]
+        models.Transaction.is_archived == False,
+        models.Transaction.account_id == account.id,
+        models.Transaction.user_id == g.user.id
+    )
+
+    transactions_amount = 0
+    for transaction in transactions.all():
+        print(transaction)
+        transactions_amount = util.convert_to_float(
+            int(transaction.credit + transaction.debit)
+        )
+
+    return render_template(
+        'account.html',
+        form=form,
+        account=account,
+        transactions_amount=transactions_amount
+    )
 
 
 @accounts.route('/accounts/add', methods=['GET', 'POST'])

@@ -83,6 +83,10 @@
                                         {% endif -%}
                                     </td>
                                 </tr>
+                                <tr>
+                                    <td>Transactions</td>
+                                    <td><a href="{{ url_for('transactions.account', id=account.id) }}">{{ transactions_amount }}</a></td>
+                                </tr>
                             </tbody>
                         </table>
                         {% if request.path == "/accounts/add" %}
