@@ -63,10 +63,10 @@ def account(id, start_date, end_date):
 
     transactions_amount = 0
     for transaction in transactions.all():
-        print(transaction)
-        transactions_amount = util.convert_to_float(
-            int(transaction.credit + transaction.debit)
-        )
+        if transaction:
+            transactions_amount = util.convert_to_float(
+                int(transaction.credit + transaction.debit)
+            )
 
     return render_template(
         'account.html',
