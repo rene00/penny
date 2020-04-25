@@ -34,7 +34,7 @@ keyrings.alt==3.4.0
 lxml==4.5.0
 Mako==1.1.2
 MarkupSafe==1.1.1
-marshmallow==2.19.2
+marshmallow==3.5.1
 ndg-httpsclient==0.5.1
 ofxparse==0.20
 packaging==19.0
