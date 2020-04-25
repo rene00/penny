@@ -1,5 +1,5 @@
 import os
-from werkzeug import secure_filename
+from werkzeug.utils import secure_filename
 import hashlib
 
 
