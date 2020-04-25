@@ -63,7 +63,7 @@ def account(id, start_date, end_date):
 
     transactions_amount = 0
     for transaction in transactions.all():
-        if transaction:
+        if transaction.credit and transaction.debit:
             transactions_amount = util.convert_to_float(
                 int(transaction.credit + transaction.debit)
             )
