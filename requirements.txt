@@ -7,7 +7,7 @@ blinker==1.4
 certifi==2019.11.28
 cffi==1.14.0
 chardet==3.0.4
-Click==7.0
+Click==7.1.1
 cryptography==2.9.2
 enum34==1.1.6
 Flask==1.1.1
