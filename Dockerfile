@@ -1,6 +1,6 @@
 FROM ubuntu:18.04
 
-ENV FLASK_APP=penny.py
+ENV FLASK_APP=app
 
 ENV LANG=en_AU.UTF-8
 
