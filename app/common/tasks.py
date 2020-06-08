@@ -5,12 +5,13 @@ from app.common.import_transactions import (ImportTransactions,
 from app.common.accountmatchrun import AccountMatchRun
 from flask_rq import job
 from sqlalchemy.orm.exc import NoResultFound
+import app
 
 
 @job
 def import_transactions(id, user_id):
-    from app import app as _app
-    with _app.app_context():
+    _app = app.create_app()
+    with _app.app_context().push():
         filetype = None
 
         try:
@@ -71,7 +72,7 @@ def import_transactions(id, user_id):
 
 @job
 def run_accountmatchrun(user_id):
-    from app import app as _app
+    _app = app.create_app()
     with _app.app_context():
         try:
             user = session.query(User).filter_by(id=user_id).one()
