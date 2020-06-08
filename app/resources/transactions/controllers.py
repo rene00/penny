@@ -14,7 +14,7 @@ from app.resources.transactions.forms import (FormTransaction,
 from app.common.attachments import (get_filepath_for_transaction_attachment,
                                     get_hash_of_file)
 import os
-from werkzeug import secure_filename
+from werkzeug.utils import secure_filename
 import hashlib
 import datetime
 import re
