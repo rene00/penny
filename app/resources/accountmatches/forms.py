@@ -4,12 +4,22 @@ from wtforms import StringField, TextField, SelectField, validators
 
 
 class FormAccountMatch(Form):
-    name = TextField(u'Name', default='', validators=[validators.DataRequired()])
+    name = TextField(
+        u'Name',
+        default='',
+        validators=[validators.DataRequired()]
+    )
     desc = TextField(u'Description', default='', validators=[])
-    account = SelectField(u'Account', validators=[validators.DataRequired()],
-                          coerce=int)
-    bankaccount = SelectField(u'Account Entity Owner',
-                              validators=[validators.DataRequired()], coerce=int)
+    account = SelectField(
+        u'Account',
+        validators=[validators.DataRequired()],
+        coerce=int
+    )
+    bankaccount = SelectField(
+        u'Account Entity Owner',
+        validators=[validators.DataRequired()],
+        coerce=int
+    )
 
     def reset(self):
         blankdata = MultiDict([])

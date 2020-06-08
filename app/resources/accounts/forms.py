@@ -9,8 +9,11 @@ class FormAccount(Form):
     name = TextField(u'Account Name', default='',
                      validators=[validators.DataRequired()])
     desc = TextField(u'Account Description', default='', validators=[])
-    accounttype = SelectField(u'Account Type',
-                              validators=[validators.DataRequired()], coerce=int)
+    accounttype = SelectField(
+        u'Account Type',
+        validators=[validators.DataRequired()],
+        coerce=int
+    )
     entity = SelectField(u'Account Entity Owner',
                          validators=[validators.DataRequired()], coerce=int)
 
