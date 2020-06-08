@@ -4,7 +4,11 @@ from wtforms import TextField, SelectField, validators
 
 
 class FormEntity(Form):
-    name = TextField(u'Name', default='', validators=[validators.Required()])
+    name = TextField(
+        u'Name',
+        default='',
+        validators=[validators.DataRequired()]
+    )
     entitytype = (SelectField(u'Type', validators=[], coerce=int))
 
     def reset(self):

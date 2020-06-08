@@ -6,7 +6,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import NoResultFound
 
 
-def import_accounttypes():
+def import_accounttypes(db):
     """Import default accounttypes."""
     accounttypes = {
         'Liabilities': ('Current Liability', 'Liability',
@@ -23,31 +23,31 @@ def import_accounttypes():
     for parent, children in accounttypes.items():
         try:
             _parent = (
-                models.db.session.query(models.AccountType).
+                db.session.query(models.AccountType).
                 filter_by(name=parent, parent_id=None).one()
             )
         except NoResultFound:
             _parent = models.AccountType(name=parent, parent_id=None)
-            models.db.session.add(_parent)
+            db.session.add(_parent)
 
         for child in children:
             try:
                 _child = (
-                    models.db.session.query(models.AccountType).
+                    db.session.query(models.AccountType).
                     filter_by(name=child, parent=_parent).one()
                 )
             except NoResultFound:
                 _child = models.AccountType(name=child, parent=_parent)
-                models.db.session.add(_child)
+                db.session.add(_child)
 
         try:
-            models.db.session.commit()
+            db.session.commit()
         except IntegrityError:
-            models.db.session.rollback()
+            db.session.rollback()
             app.logger.error("Failed to import accounttypes.")
 
 
-def import_bankaccounttypes():
+def import_bankaccounttypes(db):
     """Import bankaccounttypes."""
     bankaccounttypes = {
         'Savings': 'Savings',
@@ -58,36 +58,37 @@ def import_bankaccounttypes():
 
     for name, desc in bankaccounttypes.items():
         try:
-            (models.db.session.query(models.BankAccountType).
+            (db.session.query(models.BankAccountType).
                 filter_by(name=name).one())
         except NoResultFound:
             bankaccounttype = models.BankAccountType(name=name, desc=desc)
-            models.db.session.add(bankaccounttype)
+            db.session.add(bankaccounttype)
             try:
-                models.db.session.commit()
+                db.session.commit()
             except IntegrityError:
-                models.db.session.rollback()
+                db.session.rollback()
                 app.logger.error("Failed to import bankaccounttypes.")
 
 
-def import_entitytypes():
+def import_entitytypes(db):
     entitytypes = ('Company', 'Person', 'Sole Trader')
 
     for name in entitytypes:
         try:
-            (models.db.session.query(models.EntityType).
+            (db.session.query(models.EntityType).
              filter_by(name=name).one())
         except NoResultFound:
             entitytype = models.EntityType(name=name)
-            models.db.session.add(entitytype)
+            db.session.add(entitytype)
             try:
-                models.db.session.commit()
+                db.session.commit()
             except IntegrityError:
-                models.db.session.rollback()
+                db.session.rollback()
                 app.logger.error("Failed to import entitytypes.")
 
 
 def import_all_types():
-    import_accounttypes()
-    import_bankaccounttypes()
-    import_entitytypes()
+    db = models.db
+    import_accounttypes(db)
+    import_bankaccounttypes(db)
+    import_entitytypes(db)

@@ -30,7 +30,6 @@ install-deps:
 
 run_www: 
 	mkdir -p files/transactions files/uploads
-	FLASK_APP=penny.py \
 	FLASK_DEBUG=$(FLASK_DEBUG) \
 	CONFIG_FILE=$(CONFIG_FILE) \
 	flask run --host=$(FLASK_HOST) --port=$(FLASK_PORT)

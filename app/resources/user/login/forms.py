@@ -7,9 +7,9 @@ from sqlalchemy.orm.exc import NoResultFound
 
 class LoginForm(Form):
     email = TextAreaField(u'Email', default='',
-                          validators=[validators.Required()])
+                          validators=[validators.DataRequired()])
     password = PasswordField(u'Password', default='',
-                             validators=[validators.Required()])
+                             validators=[validators.DataRequired()])
 
     def validate_email(self, field):
         user = self.get_user()
