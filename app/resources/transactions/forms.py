@@ -51,11 +51,11 @@ class FormTransaction(Form):
 
 class FormTransactionAdd(Form):
     date = DateField(u'Date', default=datetime.now(),
-                     validators=[validators.Required()])
+                     validators=[validators.DataRequired()])
     debit = DecimalField(u'Debit', default=0, validators=[])
     credit = DecimalField(u'Credit', default=0, validators=[])
     memo = TextAreaField(u'Memo', default='',
-                         validators=[validators.Required()])
+                         validators=[validators.DataRequired()])
     account = SelectField(u'Account', validators=[], coerce=int)
     bankaccount = SelectField(u'Bank Account', validators=[], coerce=int)
 
@@ -94,9 +94,9 @@ class FormTransactionAdd(Form):
 
 class FormTransactionSplit(Form):
     split_amount = TextAreaField(u'Amount', default='',
-                                 validators=[validators.Required()])
+                                 validators=[validators.DataRequired()])
     split_memo = TextAreaField(u'Memo', default='',
-                               validators=[validators.Required()])
+                               validators=[validators.DataRequired()])
 
     split_account = QuerySelectField('account', get_label=get_account_label,
                                      allow_blank=True, validators=[],
@@ -127,4 +127,4 @@ class FormTransactionSplit(Form):
 
 
 class FormTransactionUpload(Form):
-    upload = FileField(u'Filename', validators=[validators.Required()])
+    upload = FileField(u'Filename', validators=[validators.DataRequired()])

@@ -7,12 +7,12 @@ from uuid import uuid4
 class FormAccount(Form):
     code = HiddenField()
     name = TextField(u'Account Name', default='',
-                     validators=[validators.Required()])
+                     validators=[validators.DataRequired()])
     desc = TextField(u'Account Description', default='', validators=[])
     accounttype = SelectField(u'Account Type',
-                              validators=[validators.Required()], coerce=int)
+                              validators=[validators.DataRequired()], coerce=int)
     entity = SelectField(u'Account Entity Owner',
-                         validators=[validators.Required()], coerce=int)
+                         validators=[validators.DataRequired()], coerce=int)
 
     def reset(self):
         blankdata = MultiDict([])

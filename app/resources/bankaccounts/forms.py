@@ -6,12 +6,12 @@ from wtforms import TextField, SelectField, validators
 class FormBankAccount(Form):
     bank = TextField(u'Bank', default='', validators=[])
     number = TextField(u'Bank Account Number', default='',
-                       validators=[validators.Required()])
+                       validators=[validators.DataRequired()])
     desc = TextField(u'Bank Account Description', default='', validators=[])
 
     bankaccounttype = (SelectField(u'Bank Account Type', validators=[],
                                    coerce=int))
-    entity = (SelectField(u'Entity', validators=[validators.Required()],
+    entity = (SelectField(u'Entity', validators=[validators.DataRequired()],
                           coerce=int))
     total_balance = TextField(u'Total Balance')
 
