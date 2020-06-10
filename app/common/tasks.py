@@ -11,7 +11,7 @@ import app
 @job
 def import_transactions(id, user_id):
     _app = app.create_app()
-    with _app.app_context().push():
+    with _app.app_context():
         filetype = None
 
         try:

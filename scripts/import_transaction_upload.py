@@ -2,11 +2,12 @@ import sys
 import os
 sys.path.insert(1, os.path.join(sys.path[0], '..'))
 
-from app import app
+from app import create_app
 from app.common.tasks import import_transactions
-from flask.ext.script import Manager
+from flask_script import Manager
 
-manager = Manager(app)
+_app = create_app()
+manager = Manager(_app)
 
 
 @manager.option('--transactionupload-id', dest='transactionupload_id')
