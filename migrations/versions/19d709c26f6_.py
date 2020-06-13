@@ -45,6 +45,8 @@ def upgrade():
     sa.Column('first_name', sa.String(length=1024), nullable=True),
     sa.Column('last_name', sa.String(length=1024), nullable=True),
     sa.Column('date_added', sa.DateTime(), nullable=True),
+    sa.Column('active', sa.Boolean(), nullable=True),
+    sa.Column('alpha_enabled', sa.Boolean(), nullable=True),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('email')
     )

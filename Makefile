@@ -4,6 +4,7 @@ CONFIG_FILE ?= "./conf.py"
 FLASK_DEBUG ?= 1
 FLASK_HOST ?= 127.0.0.1
 FLASK_PORT ?= 5000
+FLASK_APP = penny
 
 build: 
 	pip3 install --no-cache-dir -r requirements.txt
@@ -32,6 +33,7 @@ run_www:
 	mkdir -p files/transactions files/uploads
 	FLASK_DEBUG=$(FLASK_DEBUG) \
 	CONFIG_FILE=$(CONFIG_FILE) \
+	FLASK_APP=$(FLASK_APP) \
 	flask run --host=$(FLASK_HOST) --port=$(FLASK_PORT)
 
 run_queue: 
