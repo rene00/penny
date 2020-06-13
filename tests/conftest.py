@@ -77,7 +77,21 @@ def create_bankaccount(client):
                 "desc": "test-bank-desc",
                 "bankaccounttype": 1,
                 "entitytype": 1,
-                "totl_balance": 0,
+                "total_balance": 0,
+            },
+            follow_redirects=True
+        )
+
+
+def create_account(client):
+    with client:
+        return client.post(
+            "/accounts/add",
+            data={
+                "name": "test-account-name",
+                "desc": "test-account-desc",
+                "bankaccounttype": 1,
+                "accounttype_id": 1,
             },
             follow_redirects=True
         )

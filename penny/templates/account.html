@@ -50,7 +50,7 @@
                                     <td>
                                         {% if form.accounttype.errors -%}
                                         <div class="form-group has-error">
-                                            <label class="control-label" for="inputError">{{ form.type.errors[0] }}</label>
+                                            <label class="control-label" for="inputError">{{ form.accounttype.errors[0] }}</label>
                                         {% endif -%}
                                         <select id="accounttype" name="accounttype" class="form-control">
                                             {% for choice in form.accounttype.choices %}

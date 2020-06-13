@@ -1,14 +1,21 @@
-from flask_wtf import Form
+from flask_wtf import FlaskForm
 from werkzeug.datastructures import MultiDict
-from wtforms import TextField, SelectField, HiddenField, validators
+from wtforms import StringField, SelectField, HiddenField, validators
 from uuid import uuid4
 
 
-class FormAccount(Form):
+class FormAccount(FlaskForm):
     code = HiddenField()
-    name = TextField(u'Account Name', default='',
-                     validators=[validators.DataRequired()])
-    desc = TextField(u'Account Description', default='', validators=[])
+    name = StringField(
+        u'Account Name',
+        default='',
+        validators=[validators.DataRequired()]
+    )
+    desc = StringField(
+        u'Account Description',
+        default='',
+        validators=[]
+    )
     accounttype = SelectField(
         u'Account Type',
         validators=[validators.DataRequired()],
