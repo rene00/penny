@@ -10,6 +10,7 @@ from app.lib.flask_security.register import ExtendedRegisterForm
 from app.common.init_data import import_all_types
 import os
 from pathlib import Path
+import locale
 
 PENNY_CONF_FILE = Path('/etc/penny/penny.conf.py')
 
