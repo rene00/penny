@@ -39,7 +39,7 @@ ofxparse==0.20
 packaging==20.4
 passlib==1.7.2
 bcrypt==3.1.7
-pyasn1==0.4.5
+pyasn1==0.4.8
 pycparser==2.19
 pycrypto==2.6.1
 PyMySQL==0.9.3
