@@ -10,12 +10,12 @@ build:
 	pip3 install --no-cache-dir -r requirements.txt
 
 docker_build:
-	docker build .
+	docker build . -t rene00/penny:latest
 
 docker_run:
 	docker run -dit --restart always --publish 5000:5000 \
-		-e CONFIG_FILE=/penny/penny.conf.py \
-		--mount source=penny,target=/penny --name penny penny
+		-e CONFIG_FILE=/app/penny/conf.py \
+		--mount source=penny,target=/penny --name penny rene00/penny:latest
 
 clean: 
 	find . -name '*.pyc' -exec rm -f {} +
