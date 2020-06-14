@@ -1,5 +1,5 @@
 import pytest
-from flask import g, session, json
+from flask import json
 from datetime import datetime
 from .conftest import (
     create_entity,

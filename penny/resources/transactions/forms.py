@@ -1,6 +1,6 @@
 from penny import models
 from flask import g
-from flask_wtf import Form
+from flask_wtf import FlaskForm
 from werkzeug.datastructures import MultiDict
 from wtforms import (TextAreaField, FileField, SelectField, DateField,
                      DecimalField, validators)
@@ -14,10 +14,14 @@ def get_account_label(obj):
     return '{0.entity.name} - {0.name}'.format(obj)
 
 
-class FormTransaction(Form):
-    account = QuerySelectField('account', get_label=get_account_label,
-                               allow_blank=True, validators=[],
-                               get_pk=lambda a: a.id)
+class FormTransaction(FlaskForm):
+    account = QuerySelectField(
+        'account',
+        get_label=get_account_label,
+        allow_blank=True,
+        validators=[],
+        get_pk=lambda a: a.id
+    )
     bankaccount = QuerySelectField(
         'bankaccount',
         get_label=get_account_label,
@@ -49,7 +53,7 @@ class FormTransaction(Form):
             self.amount.data = transaction._amount
 
 
-class FormTransactionAdd(Form):
+class FormTransactionAdd(FlaskForm):
     date = DateField(u'Date', default=datetime.now(),
                      validators=[validators.DataRequired()])
     debit = DecimalField(u'Debit', default=0, validators=[])
@@ -92,7 +96,7 @@ class FormTransactionAdd(Form):
             return bankaccount
 
 
-class FormTransactionSplit(Form):
+class FormTransactionSplit(FlaskForm):
     split_amount = TextAreaField(u'Amount', default='',
                                  validators=[validators.DataRequired()])
     split_memo = TextAreaField(u'Memo', default='',
@@ -126,5 +130,5 @@ class FormTransactionSplit(Form):
             return None
 
 
-class FormTransactionUpload(Form):
+class FormTransactionUpload(FlaskForm):
     upload = FileField(u'Filename', validators=[validators.DataRequired()])
