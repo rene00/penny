@@ -19,7 +19,7 @@ migrate = Migrate()
 user_datastore = SQLAlchemyUserDatastore(db, models.User, models.Role)
 
 
-def create_app(test_config=None):
+def create_app(test_config=None, skip_migrations=False):
     app = Flask(__name__)
 
     app.config.update(
@@ -61,10 +61,11 @@ def create_app(test_config=None):
     db.init_app(app)
     migrate.init_app(app, db)
 
-    with app.app_context():
-        config = migrate.get_config(None)
-        command.upgrade(config, 'head', sql=False, tag=None)
-        import_all_types()
+    if not skip_migrations:
+        with app.app_context():
+            config = migrate.get_config(None)
+            command.upgrade(config, 'head', sql=False, tag=None)
+            import_all_types()
 
     login_manager = LoginManager()
     login_manager.init_app(app)
