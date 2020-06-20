@@ -205,6 +205,10 @@ def accounttype(accounttype, start_date, end_date):
         at = models.db.session.query(models.AccountType) \
             .filter(models.AccountType.name == 'Liabilities',
                     models.AccountType.parent == None).one()    # noqa[E711]
+    elif accounttype.lower() == 'assets':
+        at = models.db.session.query(models.AccountType) \
+            .filter(models.AccountType.name == 'Assets',
+                    models.AccountType.parent == None).one()    # noqa[E711]
     else:
         raise Exception("Unknown accounttype")
 
