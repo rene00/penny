@@ -142,6 +142,12 @@ class ReportsSavingsRate:
                 previous_month.strftime('%Y-%m'), None
             )
             month_data.previous = previous_month_data
+
+            # FIXME: not really tracking assets properly today. Instead of
+            # displaying the assets for this month as a negative, turn it
+            # into a positive number.
+            month_data.assets = abs(month_data.assets)
+
             data[month] = month_data
 
         return data
