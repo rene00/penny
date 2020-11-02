@@ -14,6 +14,7 @@
                             <tr>
                                 <th data-field="month">Month</th>
                                 <th data-field="revenue">Revenue</th>
+                                <th data-field="assets">Assets</th>
                                 <th data-field="expenses">Expenses</th>
                                 <th data-field="liabilities">Liabilities</th>
                                 <th data-field="outgoing">Outgoing</th>
@@ -30,6 +31,7 @@
                             <tr>
                                 <td>{{ date }}</td>
                                 <td><a href="{{ url_for('transactions.accounttype', accounttype='revenue', start_date=start_month, end_date=end_month) }}">{{ data.revenue|convert_to_float }}</a></td>
+                                <td><a href="{{ url_for('transactions.accounttype', accounttype='assets', start_date=start_month, end_date=end_month) }}">{{ data.assets|convert_to_float }}</a></td>
                                 <td><a href="{{ url_for('transactions.accounttype', accounttype='expenses', start_date=start_month, end_date=end_month) }}">{{ data.expenses|convert_to_float }}</a></td>
                                 <td><a href="{{ url_for('transactions.accounttype', accounttype='liabilities', start_date=start_month, end_date=end_month) }}">-{{ data.liabilities|convert_to_float }}</a></td>
                                 <td>{{ data.outgoing|convert_to_float }}</td>

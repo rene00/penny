@@ -14,6 +14,7 @@ class Month:
         revenue=0,
         expenses=0,
         liabilities=0,
+        assets=0,
         **kwargs
     ):
         self.month = month
@@ -21,6 +22,7 @@ class Month:
         self.revenue = revenue
         self.expenses = expenses
         self.liabilities = liabilities
+        self.assets = assets
         self.previous = kwargs.get('previous', None)
 
     @property
@@ -76,6 +78,10 @@ class ReportsSavingsRate:
             .filter(models.AccountType.name == 'Liabilities',
                     models.AccountType.parent == None).one()    # noqa[E711]
 
+        assets_account = models.db.session.query(models.AccountType) \
+            .filter(models.AccountType.name == 'Assets',
+                    models.AccountType.parent == None).one()    # noqa[E711]
+
         transactions = models.db.session.query(
                 models.Transaction,
                 func.date_format(models.Transaction.date, '%Y').label("year"),
@@ -115,6 +121,8 @@ class ReportsSavingsRate:
                 month.expenses += amount
             elif account.accounttype.parent == liabilities_account:
                 month.liabilities += amount
+            elif account.accounttype.parent == assets_account:
+                month.assets += amount
             else:
                 raise Exception(
                     "transaction not revenue, expense or liability"
@@ -134,6 +142,12 @@ class ReportsSavingsRate:
                 previous_month.strftime('%Y-%m'), None
             )
             month_data.previous = previous_month_data
+
+            # FIXME: not really tracking assets properly today. Instead of
+            # displaying the assets for this month as a negative, turn it
+            # into a positive number.
+            month_data.assets = abs(month_data.assets)
+
             data[month] = month_data
 
         return data
