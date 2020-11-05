@@ -120,9 +120,9 @@
             <div id="collapseAccountsMatches" class="collapse" aria-labelledby="headingAccountsMatches" data-parent="#accordionSidebar">
               <div class="bg-white py-2 collapse-inner rounded">
                 {% if not session.new_user %}
-                <a class="collapse-item" href="{{ url_for('accounts._accounts') }}">View</a>
+                <a class="collapse-item" href="{{ url_for('accountmatches._accountmatches') }}">View</a>
                 {% endif %}
-                <a class="collapse-item" href="{{ url_for('accounts.add') }}">Add</a>
+                <a class="collapse-item" href="{{ url_for('accountmatches.add') }}">Add</a>
               </div>
             </div>
           </li>
