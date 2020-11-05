@@ -1,56 +1,46 @@
-        {% extends "navbar.html" %}
-        {% block content %}
-        <div id="page-wrapper">
-            <div class="row">
-                <div class="col-lg-12">
-                    <h1 class="page-header">Monthly Savings Rate for the past 3 years</h1>
-                </div><!-- /.col-lg-12 -->
-
-            <!-- datepicker form -->
-            <div class="col-lg-12">
-                <div class="table-responsive">
-                    <table data-toggle="table" data-pagination="true" data-page-size="50">
-                        <thead>
-                            <tr>
-                                <th data-field="month">Month</th>
-                                <th data-field="revenue">Revenue</th>
-                                <th data-field="assets">Assets</th>
-                                <th data-field="expenses">Expenses</th>
-                                <th data-field="liabilities">Liabilities</th>
-                                <th data-field="outgoing">Outgoing</th>
-                                <th data-field="savings">Savings</th>
-                                <th data-field="savings_change">Savings Change</th>
-                                <th data-field="ratio">Ratio</th>
-                                <th data-field="ratio_change">Ratio Change</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        {% for date, data in report.items()|sort(reverse=true) %}
-                            {% set start_month = date|replace("-", "") + "01" %}
-                            {% set end_month = date|replace("-", "") + data.daycount|string %}
-                            <tr>
-                                <td>{{ date }}</td>
-                                <td><a href="{{ url_for('transactions.accounttype', accounttype='revenue', start_date=start_month, end_date=end_month) }}">{{ data.revenue|convert_to_float }}</a></td>
-                                <td><a href="{{ url_for('transactions.accounttype', accounttype='assets', start_date=start_month, end_date=end_month) }}">{{ data.assets|convert_to_float }}</a></td>
-                                <td><a href="{{ url_for('transactions.accounttype', accounttype='expenses', start_date=start_month, end_date=end_month) }}">{{ data.expenses|convert_to_float }}</a></td>
-                                <td><a href="{{ url_for('transactions.accounttype', accounttype='liabilities', start_date=start_month, end_date=end_month) }}">-{{ data.liabilities|convert_to_float }}</a></td>
-                                <td>{{ data.outgoing|convert_to_float }}</td>
-                                <td>{{ data.savings|convert_to_float }}</td>
-                                <td>{{ data.savings_change|convert_to_float }}</td>
-                                <td>{{ data.ratio }}%</td>
-                                <td>{{ data.ratio_change }}%</td>
-                            </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-                <!-- /.table-responsive -->
+{% extends "navbar.html" %}
+{% block content %}
+<div class="container-fluid flex-grow-1">
+    <h1 class="page-header">Monthly Savings Rate for the past 3 years</h1>
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" data-toggle="table" data-pagination="true" data-page-size="50">
+                    <thead>
+                        <tr>
+                            <th data-field="month">Month</th>
+                            <th data-field="revenue">Revenue</th>
+                            <th data-field="assets">Assets</th>
+                            <th data-field="expenses">Expenses</th>
+                            <th data-field="liabilities">Liabilities</th>
+                            <th data-field="outgoing">Outgoing</th>
+                            <th data-field="savings">Savings</th>
+                            <th data-field="savings_change">Savings Change</th>
+                            <th data-field="ratio">Ratio</th>
+                            <th data-field="ratio_change">Ratio Change</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for date, data in report.items()|sort(reverse=true) %}
+                        {% set start_month = date|replace("-", "") + "01" %}
+                        {% set end_month = date|replace("-", "") + data.daycount|string %}
+                        <tr>
+                            <td>{{ date }}</td>
+                            <td><a href="{{ url_for('transactions.accounttype', accounttype='revenue', start_date=start_month, end_date=end_month) }}">{{ data.revenue|convert_to_float }}</a></td>
+                            <td><a href="{{ url_for('transactions.accounttype', accounttype='assets', start_date=start_month, end_date=end_month) }}">{{ data.assets|convert_to_float }}</a></td>
+                            <td><a href="{{ url_for('transactions.accounttype', accounttype='expenses', start_date=start_month, end_date=end_month) }}">{{ data.expenses|convert_to_float }}</a></td>
+                            <td><a href="{{ url_for('transactions.accounttype', accounttype='liabilities', start_date=start_month, end_date=end_month) }}">-{{ data.liabilities|convert_to_float }}</a></td>
+                            <td>{{ data.outgoing|convert_to_float }}</td>
+                            <td>{{ data.savings|convert_to_float }}</td>
+                            <td>{{ data.savings_change|convert_to_float }}</td>
+                            <td>{{ data.ratio }}%</td>
+                            <td>{{ data.ratio_change }}%</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
             </div>
-            <!-- /.col-lg-12 -->
         </div>
-        <!-- /.row -->
     </div>
-    <!-- /#page-wrapper -->
 </div>
-<!-- /#wrapper -->
 {% endblock %}
