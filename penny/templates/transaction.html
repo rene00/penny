@@ -1,10 +1,10 @@
-        {% extends "navbar.html" %}
-        {% block content %}
-        <div class="container-fluid flex-grow-1">
-          <h1 class="h3 mb-2 text-gray-800">Transaction</h1>
-          <div class="card shadow mb-4">
-            <div class="card-body">
-              <div class="table-responsive">
+{% extends "navbar.html" %}
+{% block content %}
+<div class="container-fluid flex-grow-1">
+    <h1 class="h3 mb-2 text-gray-800">Transaction</h1>
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <div class="table-responsive">
                 <form action="{{ url_for('transactions.transaction', id=transaction.id) }}" method="POST" enctype="multipart/form-data">
                 {{ form.hidden_tag()}}
                 {{ form.csrf_token }}
@@ -222,8 +222,8 @@
                     </div>
                     </form>
                 </div>
-              </div>
             </div>
-          </div>
         </div>
-        {% endblock %}
+    </div>
+</div>
+{% endblock %}

@@ -1,23 +1,23 @@
-        {% extends "navbar.html" %}
-        {% block content %}
-        <div class="container-fluid">
-          <h1 class="h3 mb-2 text-gray-800">Transactions</h1>
-          <div class="card shadow mb-4">
-            <div class="card-body">
-              <div class="table-responsive">
+{% extends "navbar.html" %}
+{% block content %}
+<div class="container-fluid">
+    <h1 class="h3 mb-2 text-gray-800">Transactions</h1>
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <div class="table-responsive">
                 <table class="table table-bordered" width="100%" cellspacing="0" id="table" data-toggle="table" data-url="{{ data_url }}" data-cache='false' data-search="search" data-pagination="true" data-page-list="[25, 100, 250]" data-page-size="25" data-side-pagination="server" data-sort-order="desc">
                     <thead>
-                      <tr>
-                          <th data-field='date'>Date</th>
-                          <th data-field='credit'>Credit</th>
-                          <th data-field='debit'>Debit</th>
-                          <th data-field='memo_as_html'>Memo</th>
-                          <th data-field='account_as_html'>Account</th>
-                      </tr>
+                        <tr>
+                            <th data-field='date'>Date</th>
+                            <th data-field='credit'>Credit</th>
+                            <th data-field='debit'>Debit</th>
+                            <th data-field='memo_as_html'>Memo</th>
+                            <th data-field='account_as_html'>Account</th>
+                        </tr>
                     </thead>
                 </table>
-              </div>
             </div>
-          </div>
         </div>
-        {% endblock %}
+    </div>
+</div>
+{% endblock %}
