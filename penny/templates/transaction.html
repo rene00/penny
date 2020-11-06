@@ -1,252 +1,229 @@
-        {% extends "navbar.html" %}
-        {% block content %}
-        <div id="page-wrapper">
-            <div class="row">
-                <div class="col-lg-12">
-                    <h2 class="page-header">Transaction</h1>
-                </div>
-                <!-- /.col-lg-12 -->
-            </div>
-                <div class="col-lg-12">
-                    <form action="{{ url_for('transactions.transaction', id=transaction.id) }}" method="POST" enctype="multipart/form-data">
-                    {{ form.hidden_tag()}}
-                    {{ form.csrf_token }}
-                    {% include 'includes/display_flash_message.html' %}
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <tbody>
-                                <tr>
-                                    <td>Date</td>
-                                    <td>{{ transaction.date }}</td>
-                                </tr>
-                                <tr>
-                                    <td>Amount</td>
-                                    <td>
-                                    {% if form.amount.errors -%}
-                                        <div class="form-group has-error">
-                                            <label class="control-label" for="inputError">{{ form.amount.errors[0] }}</label>
-                                    {% endif -%}
-                                    {{ form.amount(class_="form-control") }}
-                                    {% if form.amount.errors -%}
-                                        </div>
-                                    {% endif -%}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Memo</td>
-                                    <td>{{ transaction.memo }}</td>
-                                </tr>
-                                {% if transaction.fitid %}
-                                <tr>
-                                    <td>FITID</td>
-                                    <td>{{ transaction.fitid }}</td>
-                                </tr>
-                                {% endif %}
-                                <tr>
-                                    <td>Account</td>
-                                    <td>
-                                        <select id="account" name="account" class="form-control">
-                                        {% if form.account %}
-                                        {% for field in form.account %}
-                                            {% set key = field.data %}
-                                            {% set value = field.label %}
-                                            <option value="{{ key }}"{% if form.account.default|int == key|int %} selected="selected"{% endif %}>{{ value }}</option>
-                                        {% endfor %}
-                                        {% endif %}
-                                        </select>
-                                    </td>
-                                </tr>
-                            {%- if transaction.bankaccount -%}
-                                {%- if transaction.bankaccount.bank -%}
-                                <tr>
-                                    <td>Bank Account Bank</td>
-                                    <td>{{ transaction.bankaccount.bank }}</a></td>
-                                </tr>
-                                {%- endif -%}
-                                <tr>
-                                    <td>Bank Account Number</td>
-                                    <td><a href="{{ url_for('bankaccounts.bankaccount', id=transaction.bankaccount.id) }}">{{ transaction.bankaccount.number }}</a></td>
-                                </tr>
-                                {%- if transaction.bankaccount.type -%}
-                                <tr>
-                                    <td>Bank Account Type</td>
-                                    <td>{{ transaction.bankaccount.type.description }}</td>
-                                </tr>
-                                {%- endif -%}
-                                {%- if transaction.bankaccount.description -%}
-                                <tr>
-                                    <td>Bank Account Description</td>
-                                    <td>{{ transaction.bankaccount.description }}</td>
-                                </tr>
-                                {%- endif -%}
-                            {%- endif -%}
-                                {%- if transaction.paypalid -%}
-                                <tr>
-                                    <td>PayPal Transaction ID</td>
-                                    <td>{{ transaction.paypalid }}</td>
-                                </tr>
-                                {%- endif -%}
-                                <tr>
-                                    <td>Attachments</td>
-                                    <td>
-                                        {{ form.attachment }}
-                                        {% for attachment in attachments %}
-                                        <p><a href="{{ url_for('transactions.attachment', id=attachment.id) }}">{{ attachment.filename }}</a></p>
-                                        {% endfor %}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Notes</td>
-                                    <td>
-                                        {{ form.note(cols="80", rows="2") }}
-                                        {% for note in notes %}
-                                        <p>{{ note.date_added }}: {{ note.note }}</p>
-                                        {% endfor %}
-                                    </td>
-                                </tr>
-                                {%- if form_split -%}
-                                <tr>
-                                    <td>Split Amount</td>
-                                    <td>
-                                        {% if form_split.split_amount.errors -%}
-                                        <div class="form-group has-error">
-                                            <label class="control-label" for="inputError">{{ form_split.split_amount.errors[0] }}</label>
-                                        {% endif -%}
-                                        {{ form_split.split_amount(rows="1", class="form-control") }}
-                                        {% if form_split.split_amount.errors -%}
-                                        </div>
-                                        {% endif -%}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Split Memo</td>
-                                    <td>
-                                        {% if form_split.split_memo.errors -%}
-                                        <div class="form-group has-error">
-                                            <label class="control-label" for="inputError">{{ form_split.split_memo.errors[0] }}</label>
-                                        {% endif -%}
-                                        {{ form_split.split_memo(rows="1", class="form-control") }}
-                                        {% if form_split.split_memo.errors -%}
-                                        </div>
-                                        {% endif -%}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Split Account</td>
-                                    <td>
-                                        {% if form_split.split_account.errors -%}
-                                        <div class="form-group has-error">
-                                            <label class="control-label" for="inputError">{{ form_split.split_account.errors[0] }}</label>
-                                        {% endif -%}
-                                        <select id="split_account" name="split_account" class="form-control">
-                                        {% for field in form_split.split_account %}
-                                            {% set key = field.data %}
-                                            {% set value = field.label %}
-                                                <option value="{{ key }}">{{ value }}</option>
-                                        {% endfor %}
-                                        </select>
-                                        {% if form_split.split_account.errors -%}
-                                        </div>
-                                        {% endif -%}
-                                    </td>
-                                </tr>
-                                {% endif %}
-                                {% if transaction.children %}
-                                {% for child in transaction.children %}
-                                    {% set column_text = "Transaction Split" %}
-                                    <tr>
-                                        <td>{{ column_text }} {{ loop.index }} Debit</td>
-                                        <td>{{ child._debit }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>{{ column_text }} {{ loop.index }} Credit</td>
-                                        <td>{{ child._credit }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>{{ column_text }} {{ loop.index }} Memo</td>
-                                        <td>{{ child.memo }}</td>
-                                    </tr>
-                                    <tr>
-                                    <td>{{ column_text }} {{ loop.index }} Account
-                                {% for field in form.account %}
-                                    {% set key = field.data %}
-                                    {% set value = field.label %}
-                                    {% if child.account %}
-                                        {% set child_account = child.account.id|int %}
-                                    {% endif %}
-                                    {% if key == account %}
-                                        <p>{{ key }}</p>
-                                    {% endif %}
-                                {% endfor %}
-                                    </td>
-                                    <td>
-                                        <select id="child_account_{{ child.id }}" name="child_account_{{ child.id }}" class="form-control">
-                                        {% for field in form.account %}
-                                            {% set key = field.data %}
-                                            {% set value = field.label %}
-                                            {% set id = child.id|int %}
-                                            {% if child_accounts[id] %}
-                                                {% set child_account_id = child_accounts[id] %}
-                                            {% else %}
-                                                {% set child_account_id = 0 %}
-                                            {% endif %}
-                                            {% if key == '__None' %}
-                                            {% set key = '' %}
-                                            {% endif %}
-                                            <option value="{{ key }}"
-                                                {%- if child_account_id|int == key|int %} selected="selected"{% endif -%}>{{ value }}
-                                            </option>
-                                            {% endfor %}
-                                        </select>
-                                    </td>
-                                    </tr>
-                                {% endfor %}
-                                {% endif %}
-                            </tbody>
-                        </table>
-                        <div class="input-group btn-block" style="padding-top:10px;">
-                            {% if transaction.is_deleted == 1 %}
-                            <div class="pull-left" style="padding-right:5px;">
-                                <input type="submit" class="btn btn-danger" name="undelete" value="Undelete">
-                            </div>
-                            {% else %}
-                            <div class="pull-left" style="padding-right:5px;">
-                                <input type="submit" class="btn btn-danger" name="delete" value="Delete">
-                            </div>
-                            {% endif %}
-                            <!-- /.pull-left -->
-                            <div class="pull-left" style="padding-right:5px;">
-                                {% if form_split %}
-                                <input type="submit" class="btn btn-primary" name="remove_split" value="Remove Split">
-                                {% else %}
-                                <input type="submit" class="btn btn-primary" name="split" value="Split">
-                                {% endif %}
-                            </div>
-                            <!-- /.pull-left -->
-                            <div class="pull-left">
-                                <input type="submit" class="btn btn-primary" name="update" value="Update">
-                            </div>
-                            <!-- /.pull-left -->
-                        </div>
-                        <!-- /.pull-right -->
+{% extends "navbar.html" %}
+{% block content %}
+<div class="container-fluid flex-grow-1">
+    <h1 class="h3 mb-2 text-gray-800">Transaction</h1>
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <div class="table-responsive">
+                <form action="{{ url_for('transactions.transaction', id=transaction.id) }}" method="POST" enctype="multipart/form-data">
+                {{ form.hidden_tag()}}
+                {{ form.csrf_token }}
+                {% include 'includes/display_flash_message.html' %}
+                <table class="table table-bordered" width="100%" cellspacing="0" id="table">
+                  <tbody>
+                      <tr>
+                          <td>Date</td>
+                          <td>{{ transaction.date }}</td>
+                      </tr>
+                      <tr>
+                          <td>Amount</td>
+                          <td>
+                          {% if form.amount.errors -%}
+                              <div class="form-group has-error">
+                                  <label class="control-label" for="inputError">{{ form.amount.errors[0] }}</label>
+                          {% endif -%}
+                          {{ form.amount(class_="form-control") }}
+                          {% if form.amount.errors -%}
+                              </div>
+                          {% endif -%}
+                          </td>
+                      </tr>
+                      <tr>
+                          <td>Memo</td>
+                          <td>{{ transaction.memo }}</td>
+                      </tr>
+                      {% if transaction.fitid %}
+                      <tr>
+                          <td>FITID</td>
+                          <td>{{ transaction.fitid }}</td>
+                      </tr>
+                      {% endif %}
+                      <tr>
+                          <td>Account</td>
+                          <td>
+                              <select id="account" name="account" class="form-control">
+                              {% if form.account %}
+                              {% for field in form.account %}
+                                  {% set key = field.data %}
+                                  {% set value = field.label %}
+                                  <option value="{{ key }}"{% if form.account.default|int == key|int %} selected="selected"{% endif %}>{{ value }}</option>
+                              {% endfor %}
+                              {% endif %}
+                              </select>
+                          </td>
+                      </tr>
+                  {%- if transaction.bankaccount -%}
+                      {%- if transaction.bankaccount.bank -%}
+                      <tr>
+                          <td>Bank Account Bank</td>
+                          <td>{{ transaction.bankaccount.bank }}</a></td>
+                      </tr>
+                      {%- endif -%}
+                      <tr>
+                          <td>Bank Account Number</td>
+                          <td><a href="{{ url_for('bankaccounts.bankaccount', id=transaction.bankaccount.id) }}">{{ transaction.bankaccount.number }}</a></td>
+                      </tr>
+                      {%- if transaction.bankaccount.type -%}
+                      <tr>
+                          <td>Bank Account Type</td>
+                          <td>{{ transaction.bankaccount.type.description }}</td>
+                      </tr>
+                      {%- endif -%}
+                      {%- if transaction.bankaccount.description -%}
+                      <tr>
+                          <td>Bank Account Description</td>
+                          <td>{{ transaction.bankaccount.description }}</td>
+                      </tr>
+                      {%- endif -%}
+                  {%- endif -%}
+                      {%- if transaction.paypalid -%}
+                      <tr>
+                          <td>PayPal Transaction ID</td>
+                          <td>{{ transaction.paypalid }}</td>
+                      </tr>
+                      {%- endif -%}
+                      <tr>
+                          <td>Attachments</td>
+                          <td>
+                              {{ form.attachment }}
+                              {% for attachment in attachments %}
+                              <p><a href="{{ url_for('transactions.attachment', id=attachment.id) }}">{{ attachment.filename }}</a></p>
+                              {% endfor %}
+                          </td>
+                      </tr>
+                      <tr>
+                          <td>Notes</td>
+                          <td>
+                              {{ form.note(cols="80", rows="2") }}
+                              {% for note in notes %}
+                              <p>{{ note.date_added }}: {{ note.note }}</p>
+                              {% endfor %}
+                          </td>
+                      </tr>
+                      {%- if form_split -%}
+                      <tr>
+                          <td>Split Amount</td>
+                          <td>
+                              {% if form_split.split_amount.errors -%}
+                              <div class="form-group has-error">
+                                  <label class="control-label" for="inputError">{{ form_split.split_amount.errors[0] }}</label>
+                              {% endif -%}
+                              {{ form_split.split_amount(rows="1", class="form-control") }}
+                              {% if form_split.split_amount.errors -%}
+                              </div>
+                              {% endif -%}
+                          </td>
+                      </tr>
+                      <tr>
+                          <td>Split Memo</td>
+                          <td>
+                              {% if form_split.split_memo.errors -%}
+                              <div class="form-group has-error">
+                                  <label class="control-label" for="inputError">{{ form_split.split_memo.errors[0] }}</label>
+                              {% endif -%}
+                              {{ form_split.split_memo(rows="1", class="form-control") }}
+                              {% if form_split.split_memo.errors -%}
+                              </div>
+                              {% endif -%}
+                          </td>
+                      </tr>
+                      <tr>
+                          <td>Split Account</td>
+                          <td>
+                              {% if form_split.split_account.errors -%}
+                              <div class="form-group has-error">
+                                  <label class="control-label" for="inputError">{{ form_split.split_account.errors[0] }}</label>
+                              {% endif -%}
+                              <select id="split_account" name="split_account" class="form-control">
+                              {% for field in form_split.split_account %}
+                                  {% set key = field.data %}
+                                  {% set value = field.label %}
+                                      <option value="{{ key }}">{{ value }}</option>
+                              {% endfor %}
+                              </select>
+                              {% if form_split.split_account.errors -%}
+                              </div>
+                              {% endif -%}
+                          </td>
+                      </tr>
+                      {% endif %}
+                      {% if transaction.children %}
+                      {% for child in transaction.children %}
+                          {% set column_text = "Transaction Split" %}
+                          <tr>
+                              <td>{{ column_text }} {{ loop.index }} Debit</td>
+                              <td>{{ child._debit }}</td>
+                          </tr>
+                          <tr>
+                              <td>{{ column_text }} {{ loop.index }} Credit</td>
+                              <td>{{ child._credit }}</td>
+                          </tr>
+                          <tr>
+                              <td>{{ column_text }} {{ loop.index }} Memo</td>
+                              <td>{{ child.memo }}</td>
+                          </tr>
+                          <tr>
+                          <td>{{ column_text }} {{ loop.index }} Account
+                      {% for field in form.account %}
+                          {% set key = field.data %}
+                          {% set value = field.label %}
+                          {% if child.account %}
+                              {% set child_account = child.account.id|int %}
+                          {% endif %}
+                          {% if key == account %}
+                              <p>{{ key }}</p>
+                          {% endif %}
+                      {% endfor %}
+                          </td>
+                          <td>
+                              <select id="child_account_{{ child.id }}" name="child_account_{{ child.id }}" class="form-control">
+                              {% for field in form.account %}
+                                  {% set key = field.data %}
+                                  {% set value = field.label %}
+                                  {% set id = child.id|int %}
+                                  {% if child_accounts[id] %}
+                                      {% set child_account_id = child_accounts[id] %}
+                                  {% else %}
+                                      {% set child_account_id = 0 %}
+                                  {% endif %}
+                                  {% if key == '__None' %}
+                                  {% set key = '' %}
+                                  {% endif %}
+                                  <option value="{{ key }}"
+                                      {%- if child_account_id|int == key|int %} selected="selected"{% endif -%}>{{ value }}
+                                  </option>
+                                  {% endfor %}
+                              </select>
+                          </td>
+                          </tr>
+                      {% endfor %}
+                      {% endif %}
+                  </tbody>
+                </table>
+                <div class="input-group btn-block" style="padding-top:10px;">
+                    {% if transaction.is_deleted == 1 %}
+                    <div class="pull-left" style="padding-right:5px;">
+                        <input type="submit" class="btn btn-danger" name="undelete" value="Undelete">
                     </div>
-                    <!-- /.table-responsive -->
+                    {% else %}
+                    <div class="pull-left" style="padding-right:5px;">
+                        <input type="submit" class="btn btn-danger" name="delete" value="Delete">
+                    </div>
+                    {% endif %}
+                    <div class="pull-left" style="padding-right:5px;">
+                        {% if form_split %}
+                        <input type="submit" class="btn btn-primary" name="remove_split" value="Remove Split">
+                        {% else %}
+                        <input type="submit" class="btn btn-primary" name="split" value="Split">
+                        {% endif %}
+                    </div>
+                    <div class="pull-left">
+                        <input type="submit" class="btn btn-primary" name="update" value="Update">
+                    </div>
                     </form>
                 </div>
-                <!-- /.col-lg-12 -->
             </div>
-            <!-- /.row -->
         </div>
-        <!-- /#page-wrapper -->
     </div>
-    <!-- /#wrapper -->
-                  <!-- /.table-responsive -->
-                </div>
-                <!-- /.col-lg-12 -->
-            </div>
-            <!-- /.row -->
-        </div>
-        <!-- /#page-wrapper -->
-    </div>
-    <!-- /#wrapper -->
-        {% endblock %}
+</div>
+{% endblock %}
