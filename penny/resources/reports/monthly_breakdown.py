@@ -29,8 +29,19 @@ class ReportsMonthlyBreakdown:
         report = {'transactions': {}}
         data = {}
 
+        first_transaction = models.db.session.query(models.Transaction).filter(models.Transaction.is_deleted == False, models.Transaction.is_archived == False, models.Transaction.account_id == self.account.id, models.Transaction.user_id == g.user.id).order_by(models.Transaction.date).first()
+
+        if first_transaction is None:
+            return report
+
+        delta = datetime.datetime.now() - first_transaction.date
+        days = delta.days
+        # Only go back 5 years for now on this report. Maybe this report could accept start and end date parameters.
+        if days > 1825:
+            days = 1825
+
         end_date = datetime.datetime.now()
-        start_date = end_date - datetime.timedelta(days=1095)
+        start_date = end_date - datetime.timedelta(days=days)
         start_date = start_date.replace(day=1)
 
         transactions = models.db.session.query(
@@ -51,17 +62,12 @@ class ReportsMonthlyBreakdown:
             .order_by(models.Transaction.date)
 
         for transaction in transactions.all():
-            amount = util.convert_to_float(
-                int(transaction.credit + transaction.debit)
-            )
-            month = Month(
-                year=transaction.year, month=transaction.month, amount=amount
-            )
+            month = Month(year=transaction.year, month=transaction.month, amount=int(transaction.credit + transaction.debit))
             data[month.date] = month
 
         for d in rrule(freq=MONTHLY, dtstart=start_date, until=end_date):
             month = Month(
-                year=d.strftime("%Y"), month=d.strftime("%m"), amount="$0.00"
+                year=d.strftime("%Y"), month=d.strftime("%m"), amount=0
             )
             exists = data.get(month.date)
             if exists:
