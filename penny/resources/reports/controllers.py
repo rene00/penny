@@ -6,7 +6,7 @@ from penny.resources.reports import (
 )
 from penny.common import forms
 from datetime import datetime as dt
-from flask import Blueprint, g, render_template, url_for
+from flask import Blueprint, g, render_template, url_for, json
 from flask_security import login_required
 from sqlalchemy.orm.exc import NoResultFound
 from flask_wtf import Form
@@ -102,9 +102,15 @@ def account_monthly_breakdown(account_id):
         account = form.get_account()
         report = ReportsMonthlyBreakdown(account).generate()
 
+    labels = []
+    data = []
+    for k, v in report['transactions'].items():
+        labels.append(k)
+        data.append(float(abs(v.amount) / float(100)))
+
     return render_template(
         'reports/monthly-breakdown.html', report=report, form=form,
-        account=account
+        account=account, labels=json.dumps(labels), data=json.dumps(data),
     )
 
 
