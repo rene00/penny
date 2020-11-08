@@ -64,4 +64,4 @@ target/
 files/
 
 # Penny
-app/penny.db
+*.db
