@@ -65,3 +65,4 @@ files/
 
 # Penny
 *.db
+tmp
