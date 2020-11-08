@@ -66,6 +66,7 @@
     </div>
 </div>
 
+{% if account %}
 <script src="/static/vendor/chart.js/Chart.min.js"></script>
 
 <script>
@@ -183,4 +184,5 @@ var barChart = new Chart(ctx, {
   }
 });
 </script>
+{% endif %}
 {% endblock %}
