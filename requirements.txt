@@ -64,4 +64,4 @@ Werkzeug==1.0.1
 WTForms==2.2.1
 WTForms-SQLAlchemy==0.1
 xvfbwrapper==0.2.9
-flask-security-too==3.4.2
+flask-security-too==3.4.5
