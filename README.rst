@@ -10,7 +10,7 @@ Install & Run
 
 The quickest and easiest way to run Penny is to use docker::
 
-    $ docker run rene00/penny
+    $ docker run -p 127.0.0.1:5000:5000 rene00/penny
 
 Visit http://localhost:5000 in your browser.
 
