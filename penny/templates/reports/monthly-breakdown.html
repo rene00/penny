@@ -47,6 +47,8 @@
                         <tr>
                             <th data-field="month">Month</th>
                             <th data-field="amount">Amount</th>
+                            <th data-field="change">Change</th>
+                            <th data-field="average">Average</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -56,6 +58,8 @@
                         <tr>
                             <td>{{ date }}</td>
                             <td><a href="{{ url_for('transactions.account', id=account.id, start_date=start_month, end_date=end_month) }}">{{ month.amount|convert_to_float }}</a></td>
+                            <td>{{ month.change|convert_to_float }}</td>
+                            <td>{{ month.avg|convert_to_float }}</td>
                         </tr>
                     {% endfor %}
                     </tbody>
