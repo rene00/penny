@@ -35,13 +35,13 @@ class Month:
 
     @property
     def savings(self):
-        return self.revenue - self.outgoing
+        return self.revenue - (self.outgoing + self.assets)
 
     @property
     def ratio(self):
         _ratio = 0
         try:
-            _ratio = round(self.savings / self.revenue * 100, 2)
+            _ratio = round((self.savings + self.assets) / self.revenue * 100, 2)
         except ZeroDivisionError:
             pass
         return _ratio
