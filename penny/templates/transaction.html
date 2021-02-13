@@ -42,7 +42,7 @@
                           <td>Account</td>
                           <td>
                               <select id="account" name="account" class="form-control">
-                              {% if form.account %}
+                              {% if form.account.data is not none %}
                               {% for field in form.account %}
                                   {% set key = field.data %}
                                   {% set value = field.label %}
