@@ -4,7 +4,7 @@ from flask_login import LoginManager, current_user
 from flask_security import Security, SQLAlchemyUserDatastore
 from flask_migrate import Migrate
 from alembic import command
-from penny import models, resources
+from penny import models, resources, util
 from penny.models import db
 from penny.lib.flask_security.register import ExtendedRegisterForm
 from penny.common.init_data import import_all_types
