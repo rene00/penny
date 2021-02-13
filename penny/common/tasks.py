@@ -1,9 +1,6 @@
 from penny.models import session, User, TransactionUpload, BankAccount
 from penny.common import filetypes
-from penny.common.import_transactions import (
-    ImportTransactions,
-    ImportTransactionsError
-)
+from penny.common.import_transactions import ImportTransactions, ImportTransactionsError
 from penny.common.accountmatchrun import AccountMatchRun
 from flask_rq import job
 from sqlalchemy.orm.exc import NoResultFound
@@ -17,8 +14,9 @@ def import_transactions(id, user_id):
         filetype = None
 
         try:
-            transactionupload = session.query(TransactionUpload). \
-                filter_by(id=id, user_id=user_id).one()
+            transactionupload = (
+                session.query(TransactionUpload).filter_by(id=id, user_id=user_id).one()
+            )
         except NoResultFound:
             raise
 
@@ -27,27 +25,30 @@ def import_transactions(id, user_id):
         except NoResultFound:
             raise
         else:
-            _app.logger.info("Attempting to import transactions; user={0}".
-                             format(user.id))
+            _app.logger.info(
+                "Attempting to import transactions; user={0}".format(user.id)
+            )
 
         try:
             if filetypes.is_ofx(transactionupload.filepath):
-                filetype = 'ofx'
+                filetype = "ofx"
         except filetypes.FileTypesError:
             raise
         else:
-            _app.logger.info("File type for import; filetype={0}".
-                             format(filetype))
+            _app.logger.info("File type for import; filetype={0}".format(filetype))
 
         bankaccount_number = filetypes.get_bankaccount_number_from_ofx(
-            transactionupload.filepath)
+            transactionupload.filepath
+        )
 
         try:
-            bankaccount = session.query(BankAccount) \
-                .filter_by(number=bankaccount_number, user=user).one()
+            bankaccount = (
+                session.query(BankAccount)
+                .filter_by(number=bankaccount_number, user=user)
+                .one()
+            )
         except NoResultFound:
-            bankaccount = BankAccount(user_id=user_id,
-                                      number=bankaccount_number)
+            bankaccount = BankAccount(user_id=user_id, number=bankaccount_number)
             session.add(bankaccount)
             session.commit()
 
@@ -57,13 +58,11 @@ def import_transactions(id, user_id):
         #    transactions = fh.read()
 
         # Instantiate the ImportTransactions object ready to import.
-        import_transactions = ImportTransactions(
-            transactionupload, bankaccount, user
-        )
+        import_transactions = ImportTransactions(transactionupload, bankaccount, user)
 
         # Import the transactions.
         imported_transactions = None
-        if filetype == 'ofx':
+        if filetype == "ofx":
             try:
                 imported_transactions = import_transactions.process_ofx()
             except ImportTransactionsError:

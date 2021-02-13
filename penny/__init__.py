@@ -12,7 +12,7 @@ import os
 from pathlib import Path
 import locale
 
-PENNY_CONF_FILE = Path('/etc/penny/penny.conf.py')
+PENNY_CONF_FILE = Path("/etc/penny/penny.conf.py")
 
 migrate = Migrate()
 
@@ -25,36 +25,33 @@ def create_app(test_config=None, skip_migrations=False):
     app.config.update(
         CSRF_ENABLED=True,
         WTF_CSRF_ENABLED=True,
-        SECRET_KEY='s3cr3tk3y',
-        SQLALCHEMY_DATABASE_URI='sqlite:///{0}'.format(
-            os.path.join(
-                os.path.abspath(os.path.dirname(__file__)),
-                'penny.db'
-            )
+        SECRET_KEY="s3cr3tk3y",
+        SQLALCHEMY_DATABASE_URI="sqlite:///{0}".format(
+            os.path.join(os.path.abspath(os.path.dirname(__file__)), "penny.db")
         ),
         SQLALCHEMY_TRACK_MODIFICATIONS=False,
         SECURITY_CONFIRMABLE=False,
-        SECURITY_LOGIN_USER_TEMPLATE='user/login.html',
-        SECURITY_PASSWORD_HASH='bcrypt',
-        SECURITY_PASSWORD_SALT='s4lt',
-        SECURITY_POST_CONFIRM_VIEW='post_confirm_view',
+        SECURITY_LOGIN_USER_TEMPLATE="user/login.html",
+        SECURITY_PASSWORD_HASH="bcrypt",
+        SECURITY_PASSWORD_SALT="s4lt",
+        SECURITY_POST_CONFIRM_VIEW="post_confirm_view",
         SECURITY_REGISTERABLE=True,
-        SECURITY_REGISTER_USER_TEMPLATE='user/register.html',
+        SECURITY_REGISTER_USER_TEMPLATE="user/register.html",
         SECURITY_SEND_PASSWORD_CHANGE_EMAIL=False,
         SECURITY_SEND_PASSWORD_RESET_NOTICE_EMAIL=False,
         SECURITY_SEND_REGISTER_EMAIL=False,
-        TRANSACTION_ATTACHMENTS_UPLOAD_FOLDER='files/attachments',
-        TRANSACTION_UPLOADS_UPLOAD_FOLDER='files/uploads',
-        RQ_DEFAULT_URL='redis://localhost:6379/0',
-        DEBUG=True
+        TRANSACTION_ATTACHMENTS_UPLOAD_FOLDER="files/attachments",
+        TRANSACTION_UPLOADS_UPLOAD_FOLDER="files/uploads",
+        RQ_DEFAULT_URL="redis://localhost:6379/0",
+        DEBUG=True,
     )
 
     if test_config is None:
         if PENNY_CONF_FILE.is_file():
             app.config.from_pyfile(PENNY_CONF_FILE)
 
-        if os.environ.get('CONFIG_FILE'):
-            app.config.from_envvar('CONFIG_FILE')
+        if os.environ.get("CONFIG_FILE"):
+            app.config.from_envvar("CONFIG_FILE")
     else:
         app.config.from_mapping(test_config)
 
@@ -64,25 +61,27 @@ def create_app(test_config=None, skip_migrations=False):
     if not skip_migrations:
         with app.app_context():
             config = migrate.get_config(None)
-            command.upgrade(config, 'head', sql=False, tag=None)
+            command.upgrade(config, "head", sql=False, tag=None)
             import_all_types()
 
     login_manager = LoginManager()
     login_manager.init_app(app)
-    login_manager.login_message_category = 'debug'
+    login_manager.login_message_category = "debug"
 
     security = Security(
-        app, user_datastore, register_form=ExtendedRegisterForm,
-        confirm_register_form=ExtendedRegisterForm
+        app,
+        user_datastore,
+        register_form=ExtendedRegisterForm,
+        confirm_register_form=ExtendedRegisterForm,
     )
 
-    @app.template_filter('convert_to_float')
+    @app.template_filter("convert_to_float")
     def convert_to_float(cents):
         return util.convert_to_float(cents)
 
-    @app.template_filter('convert_to_float_positive')
+    @app.template_filter("convert_to_float_positive")
     def convert_to_float_positive(cents):
-        locale.setlocale(locale.LC_ALL, 'en_AU.UTF-8')
+        locale.setlocale(locale.LC_ALL, "en_AU.UTF-8")
         return locale.currency(abs(float(cents / float(100))), grouping=True)
 
     @login_manager.user_loader
@@ -97,34 +96,43 @@ def create_app(test_config=None, skip_migrations=False):
             return None
 
         # Ensure user is logged in at all times.
-        allowed_urls = ['robots.txt', 'security.login', 'static',
-                        'security.register', 'index']
+        allowed_urls = [
+            "robots.txt",
+            "security.login",
+            "static",
+            "security.register",
+            "index",
+        ]
 
-        if request.endpoint not in allowed_urls and \
-                not current_user.is_authenticated:
-            app.logger.info("Anonymous user attempted to access secured "
-                            "route: {0}".format(request.endpoint))
-            return redirect(url_for('user_login.login'))
+        if request.endpoint not in allowed_urls and not current_user.is_authenticated:
+            app.logger.info(
+                "Anonymous user attempted to access secured "
+                "route: {0}".format(request.endpoint)
+            )
+            return redirect(url_for("user_login.login"))
 
         # Check if user is enabled for alpha. If they are not enabled, log
         # them out and redirect them to login.
         if not g.user.alpha_enabled and request.endpoint not in allowed_urls:
-            app.logger.info("User not enabled for alpha: id={0},{1}".
-                            format(g.user.id, request.endpoint))
+            app.logger.info(
+                "User not enabled for alpha: id={0},{1}".format(
+                    g.user.id, request.endpoint
+                )
+            )
             logout_user()
-            return redirect(url_for('user_login.login'))
+            return redirect(url_for("user_login.login"))
 
-    @app.route('/', methods=['GET'])
+    @app.route("/", methods=["GET"])
     def index():
         if not current_user.is_authenticated:
-            return redirect(url_for('user_login.login'))
-        return redirect(url_for('bankaccounts._bankaccounts'))
+            return redirect(url_for("user_login.login"))
+        return redirect(url_for("bankaccounts._bankaccounts"))
 
-    @app.route('/robots.txt')
+    @app.route("/robots.txt")
     def static_from_root():
         return send_from_directory(app.static_folder, request.path[1:])
 
-    @app.route('/post_confirm_view')
+    @app.route("/post_confirm_view")
     def post_confirm_view():
         """Log user out once they confirm.
 
@@ -133,7 +141,7 @@ def create_app(test_config=None, skip_migrations=False):
         """
         if g.user:
             logout_user()
-        return redirect(url_for('user_login.login'))
+        return redirect(url_for("user_login.login"))
 
     app.register_blueprint(resources.accounts)
     app.register_blueprint(resources.accountmatches)

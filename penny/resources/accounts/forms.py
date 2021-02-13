@@ -6,22 +6,15 @@ from uuid import uuid4
 
 class FormAccount(FlaskForm):
     name = StringField(
-        u'Account Name',
-        default='',
-        validators=[validators.DataRequired()]
+        u"Account Name", default="", validators=[validators.DataRequired()]
     )
-    desc = StringField(
-        u'Account Description',
-        default='',
-        validators=[]
-    )
+    desc = StringField(u"Account Description", default="", validators=[])
     accounttype = SelectField(
-        u'Account Type',
-        validators=[validators.DataRequired()],
-        coerce=int
+        u"Account Type", validators=[validators.DataRequired()], coerce=int
     )
-    entity = SelectField(u'Account Entity Owner',
-                         validators=[validators.DataRequired()], coerce=int)
+    entity = SelectField(
+        u"Account Entity Owner", validators=[validators.DataRequired()], coerce=int
+    )
 
     def reset(self):
         blankdata = MultiDict([])

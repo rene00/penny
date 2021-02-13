@@ -8,9 +8,20 @@ class CreateTransactionError(StandardError):
     pass
 
 
-class CreateTransaction():
-    def __init__(self, date, memo, bankaccount, user, account=None, fitid=None,
-                 debit=0, credit=0, paypalid=None, parent=None):
+class CreateTransaction:
+    def __init__(
+        self,
+        date,
+        memo,
+        bankaccount,
+        user,
+        account=None,
+        fitid=None,
+        debit=0,
+        credit=0,
+        paypalid=None,
+        parent=None,
+    ):
         self.date = date
         self.debit = debit
         self.credit = credit
@@ -25,41 +36,58 @@ class CreateTransaction():
         # Check if bankaccount is a DB object and if so pass in the id
         # attribute to get_tx_hash(). If bankaccount is not a DB object,
         # dont pass it through to get_tx_hash() as it defaults to False.
-        if hasattr(self.bankaccount, 'id'):
-            self.tx_hash = get_tx_hash(self.date, self.debit, self.credit,
-                                       self.memo, self.fitid, self.paypalid,
-                                       self.bankaccount.id)
+        if hasattr(self.bankaccount, "id"):
+            self.tx_hash = get_tx_hash(
+                self.date,
+                self.debit,
+                self.credit,
+                self.memo,
+                self.fitid,
+                self.paypalid,
+                self.bankaccount.id,
+            )
         else:
-            self.tx_hash = get_tx_hash(self.date, self.debit, self.credit,
-                                       self.memo, self.fitid, self.paypalid)
+            self.tx_hash = get_tx_hash(
+                self.date, self.debit, self.credit, self.memo, self.fitid, self.paypalid
+            )
 
     def create(self):
         # confirm bankaccount is owned by the user.
         if self.bankaccount:
             if self.bankaccount.user != self.user:
                 raise CreateTransaction(
-                    'user does not own bankaccount; user={}, bankaccount={}'
-                    .format(self.user.id, self.bankaccount.id))
+                    "user does not own bankaccount; user={}, bankaccount={}".format(
+                        self.user.id, self.bankaccount.id
+                    )
+                )
 
         # account is optional though if submitted check that the account
         # exists and it is owned by the user.
         if self.account and self.account.user != self.user:
             raise CreateTransactionError(
-                'user does not own account or account doest not exist; '
-                'user={}, account={}'.format(self.user.id, self.account.id))
+                "user does not own account or account doest not exist; "
+                "user={}, account={}".format(self.user.id, self.account.id)
+            )
 
         self.transaction = None
         try:
             self.transaction = db.Transaction.get(
-                db.Transaction.hash == self.tx_hash,
-                db.Transaction.user == self.user)
+                db.Transaction.hash == self.tx_hash, db.Transaction.user == self.user
+            )
         except db.Transaction.DoesNotExist:
             self.transaction = db.Transaction(
-                date=self.date, debit=self.debit,
-                credit=self.credit, memo=self.memo,
-                bankaccount=self.bankaccount, account=self.account,
-                hash=self.tx_hash, fitid=self.fitid,
-                paypalid=self.paypalid, user=self.user, parent=self.parent)
+                date=self.date,
+                debit=self.debit,
+                credit=self.credit,
+                memo=self.memo,
+                bankaccount=self.bankaccount,
+                account=self.account,
+                hash=self.tx_hash,
+                fitid=self.fitid,
+                paypalid=self.paypalid,
+                user=self.user,
+                parent=self.parent,
+            )
             self.transaction.save()
         else:
             # A transaction which shares the same hash exists. If the
@@ -77,11 +105,9 @@ class CreateTransaction():
                 # I'm not convinced this is being reached and logged.
                 # XXX: investigate if this is being logged.
                 current_app.logger.info(
-                    'duplicate transaction found on import; '
-                    'transaction={transaction}, user={user}'
-                    .format(
-                        transaction.self.transaction.id,
-                        user=self.user.id
+                    "duplicate transaction found on import; "
+                    "transaction={transaction}, user={user}".format(
+                        transaction.self.transaction.id, user=self.user.id
                     )
                 )
         finally:

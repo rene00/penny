@@ -4,21 +4,13 @@ from wtforms import StringField, TextField, SelectField, validators
 
 
 class FormAccountMatch(Form):
-    name = TextField(
-        u'Name',
-        default='',
-        validators=[validators.DataRequired()]
-    )
-    desc = TextField(u'Description', default='', validators=[])
+    name = TextField(u"Name", default="", validators=[validators.DataRequired()])
+    desc = TextField(u"Description", default="", validators=[])
     account = SelectField(
-        u'Account',
-        validators=[validators.DataRequired()],
-        coerce=int
+        u"Account", validators=[validators.DataRequired()], coerce=int
     )
     bankaccount = SelectField(
-        u'Account Entity Owner',
-        validators=[validators.DataRequired()],
-        coerce=int
+        u"Account Entity Owner", validators=[validators.DataRequired()], coerce=int
     )
 
     def reset(self):
@@ -34,7 +26,7 @@ class FormAccountMatch(Form):
 
 
 class FormAccountMatchFilter(Form):
-    regex = StringField(u'Filter', validators=[validators.DataRequired()])
+    regex = StringField(u"Filter", validators=[validators.DataRequired()])
 
     def reset(self):
         blankdata = MultiDict([])

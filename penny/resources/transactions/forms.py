@@ -2,8 +2,14 @@ from penny import models
 from flask import g
 from flask_wtf import FlaskForm
 from werkzeug.datastructures import MultiDict
-from wtforms import (TextAreaField, FileField, SelectField, DateField,
-                     DecimalField, validators)
+from wtforms import (
+    TextAreaField,
+    FileField,
+    SelectField,
+    DateField,
+    DecimalField,
+    validators,
+)
 from datetime import datetime
 from penny.common.currency import to_cents
 from sqlalchemy.orm.exc import NoResultFound
@@ -11,27 +17,27 @@ from wtforms_sqlalchemy.fields import QuerySelectField
 
 
 def get_account_label(obj):
-    return '{0.entity.name} - {0.name}'.format(obj)
+    return "{0.entity.name} - {0.name}".format(obj)
 
 
 class FormTransaction(FlaskForm):
     account = QuerySelectField(
-        'account',
+        "account",
         get_label=get_account_label,
         allow_blank=True,
         validators=[],
-        get_pk=lambda a: a.id
+        get_pk=lambda a: a.id,
     )
     bankaccount = QuerySelectField(
-        'bankaccount',
+        "bankaccount",
         get_label=get_account_label,
         allow_blank=True,
         validators=[],
-        get_pk=lambda b: b.id
+        get_pk=lambda b: b.id,
     )
-    attachment = FileField(u'Filename', validators=[])
-    note = TextAreaField(u'Note', default='', validators=[])
-    amount = DecimalField(u'Amount', validators=[])
+    attachment = FileField(u"Filename", validators=[])
+    note = TextAreaField(u"Note", default="", validators=[])
+    amount = DecimalField(u"Amount", validators=[])
 
     def reset(self):
         blankdata = MultiDict([])
@@ -39,7 +45,7 @@ class FormTransaction(FlaskForm):
 
     def set_defaults(self, transaction):
         """Set default values for resources of the form based off
-           transaction."""
+        transaction."""
 
         if transaction.account:
             self.account.default = transaction.account.id
@@ -54,14 +60,14 @@ class FormTransaction(FlaskForm):
 
 
 class FormTransactionAdd(FlaskForm):
-    date = DateField(u'Date', default=datetime.now(),
-                     validators=[validators.DataRequired()])
-    debit = DecimalField(u'Debit', default=0, validators=[])
-    credit = DecimalField(u'Credit', default=0, validators=[])
-    memo = TextAreaField(u'Memo', default='',
-                         validators=[validators.DataRequired()])
-    account = SelectField(u'Account', validators=[], coerce=int)
-    bankaccount = SelectField(u'Bank Account', validators=[], coerce=int)
+    date = DateField(
+        u"Date", default=datetime.now(), validators=[validators.DataRequired()]
+    )
+    debit = DecimalField(u"Debit", default=0, validators=[])
+    credit = DecimalField(u"Credit", default=0, validators=[])
+    memo = TextAreaField(u"Memo", default="", validators=[validators.DataRequired()])
+    account = SelectField(u"Account", validators=[], coerce=int)
+    bankaccount = SelectField(u"Bank Account", validators=[], coerce=int)
 
     def get_credit(self):
         """Return credit."""
@@ -78,8 +84,11 @@ class FormTransactionAdd(FlaskForm):
     def get_account(self):
         """Return the account."""
         try:
-            account = models.db.session.query(models.Account) \
-                .filter_by(id=self.account.data, user=g.user).one()
+            account = (
+                models.db.session.query(models.Account)
+                .filter_by(id=self.account.data, user=g.user)
+                .one()
+            )
         except NoResultFound:
             account = None
         finally:
@@ -88,8 +97,11 @@ class FormTransactionAdd(FlaskForm):
     def get_bankaccount(self):
         """Return the bankaccount."""
         try:
-            bankaccount = models.db.session.query(models.BankAccount) \
-                .filter_by(id=self.bankaccount.data, user=g.user).one()
+            bankaccount = (
+                models.db.session.query(models.BankAccount)
+                .filter_by(id=self.bankaccount.data, user=g.user)
+                .one()
+            )
         except NoResultFound:
             bankaccount = None
         finally:
@@ -97,14 +109,20 @@ class FormTransactionAdd(FlaskForm):
 
 
 class FormTransactionSplit(FlaskForm):
-    split_amount = TextAreaField(u'Amount', default='',
-                                 validators=[validators.DataRequired()])
-    split_memo = TextAreaField(u'Memo', default='',
-                               validators=[validators.DataRequired()])
+    split_amount = TextAreaField(
+        u"Amount", default="", validators=[validators.DataRequired()]
+    )
+    split_memo = TextAreaField(
+        u"Memo", default="", validators=[validators.DataRequired()]
+    )
 
-    split_account = QuerySelectField('account', get_label=get_account_label,
-                                     allow_blank=True, validators=[],
-                                     get_pk=lambda a: a.id)
+    split_account = QuerySelectField(
+        "account",
+        get_label=get_account_label,
+        allow_blank=True,
+        validators=[],
+        get_pk=lambda a: a.id,
+    )
 
     def reset(self):
         # XXX: use reset_csrf() here. See
@@ -124,11 +142,11 @@ class FormTransactionSplit(FlaskForm):
         return (credit, debit)
 
     def get_account(self):
-        if hasattr(self.account, 'data') and self.account.data != 0:
+        if hasattr(self.account, "data") and self.account.data != 0:
             return self.account.data
         else:
             return None
 
 
 class FormTransactionUpload(FlaskForm):
-    upload = FileField(u'Filename', validators=[validators.DataRequired()])
+    upload = FileField(u"Filename", validators=[validators.DataRequired()])
