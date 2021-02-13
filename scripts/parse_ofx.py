@@ -8,8 +8,7 @@ from StringIO import StringIO
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        '--ofx-file', dest='ofx_file', required=True, help='OFX file')
+    parser.add_argument("--ofx-file", dest="ofx_file", required=True, help="OFX file")
     return parser.parse_args()
 
 
@@ -19,7 +18,7 @@ def main():
     with open(args.ofx_file) as fh:
         t = fh.read()
 
-    soup = BeautifulSoup(t, 'html.parser')
+    soup = BeautifulSoup(t, "html.parser")
 
     try:
         ofx = OfxParser.parse(StringIO(soup))
@@ -29,5 +28,6 @@ def main():
         for transaction in ofx.account.statement.transactions:
             print(transaction.__dict__)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     sys.exit(main())

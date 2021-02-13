@@ -12,7 +12,7 @@ class ImportTransactionsError(Exception):
     pass
 
 
-class ImportTransactions():
+class ImportTransactions:
     def __init__(self, transactionupload, bankaccount, user):
         self.transactionupload = transactionupload
         self.bankaccount = bankaccount
@@ -27,12 +27,12 @@ class ImportTransactions():
         transactions = []
 
         try:
-            with open(_ofx[1], mode='rb') as fh:
+            with open(_ofx[1], mode="rb") as fh:
                 ofx = OfxParser.parse(fh, fail_fast=False)
         except OfxParserException:
             raise
         except UnicodeDecodeError:
-            raise ImportTransactionsError('failed to import file.')
+            raise ImportTransactionsError("failed to import file.")
         finally:
             os.unlink(_ofx[1])
 
@@ -40,20 +40,25 @@ class ImportTransactions():
         # from the ofx file are the ofc routing and account numbers
         # joined.
         if ofx.account.routing_number and ofx.account.number:
-            account_number = '{}{}'.format(ofx.account.routing_number,
-                                           ofx.account.number)
-            if str(account_number).lower() != \
-                    str(self.bankaccount.number).lower():
+            account_number = "{}{}".format(
+                ofx.account.routing_number, ofx.account.number
+            )
+            if str(account_number).lower() != str(self.bankaccount.number).lower():
                 raise ImportTransactionsError(
-                    'bankaccount numbers dont match; '
-                    'ofx={}, bankaccount={}'.format(account_number,
-                                                    self.bankaccount.number)
+                    "bankaccount numbers dont match; "
+                    "ofx={}, bankaccount={}".format(
+                        account_number, self.bankaccount.number
+                    )
                 )
 
         for tx in ofx.account.statement.transactions:
-            transaction = models.Transaction(date=tx.date, memo=tx.memo,
-                                             bankaccount=self.bankaccount,
-                                             fitid=None, user=self.user)
+            transaction = models.Transaction(
+                date=tx.date,
+                memo=tx.memo,
+                bankaccount=self.bankaccount,
+                fitid=None,
+                user=self.user,
+            )
 
             # Strip double whitespace from transaction memo.
             transaction.memo = re.sub(r"\s\s+", " ", transaction.memo)
@@ -70,8 +75,7 @@ class ImportTransactions():
             amount = currency.to_cents(tx.amount)
 
             # Set credit and debit for the transaction.
-            (transaction.credit, transaction.debit) = \
-                currency.get_credit_debit(amount)
+            (transaction.credit, transaction.debit) = currency.get_credit_debit(amount)
 
             # Set the transaction hash.
             transaction_hash = util.generate_transaction_hash(
@@ -80,14 +84,13 @@ class ImportTransactions():
                 credit=transaction.credit,
                 memo=transaction.memo,
                 fitid=transaction.fitid,
-                bankaccount_id=transaction.bankaccount.id
+                bankaccount_id=transaction.bankaccount.id,
             )
             transaction.transaction_hash = transaction_hash
 
             models.db.session.add(transaction)
 
-            log.info("About to commit transaction: transaction={0}"
-                     .format(transaction))
+            log.info("About to commit transaction: transaction={0}".format(transaction))
 
             try:
                 models.db.session.commit()

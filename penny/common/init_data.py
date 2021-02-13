@@ -9,22 +9,20 @@ from sqlalchemy.orm.exc import NoResultFound
 def import_accounttypes(db):
     """Import default accounttypes."""
     accounttypes = {
-        'Liabilities': ('Current Liability', 'Liability',
-                        'Non-current Liability'),
-        'Assets': ('Current Asset', 'Fixed Asset', 'Non-current Asset',
-                   'Prepayment'),
-        'Revenue': ('Other Income', 'Revenue', 'Sale'),
-        'Transfer': ('Bank Transfer',),
-        'Expenses': ('Depreciation', 'Direct Costs', 'Expense',
-                     'Overhead'),
-        'Equity': ('Equity', 'Stocks')
+        "Liabilities": ("Current Liability", "Liability", "Non-current Liability"),
+        "Assets": ("Current Asset", "Fixed Asset", "Non-current Asset", "Prepayment"),
+        "Revenue": ("Other Income", "Revenue", "Sale"),
+        "Transfer": ("Bank Transfer",),
+        "Expenses": ("Depreciation", "Direct Costs", "Expense", "Overhead"),
+        "Equity": ("Equity", "Stocks"),
     }
 
     for parent, children in accounttypes.items():
         try:
             _parent = (
-                db.session.query(models.AccountType).
-                filter_by(name=parent, parent_id=None).one()
+                db.session.query(models.AccountType)
+                .filter_by(name=parent, parent_id=None)
+                .one()
             )
         except NoResultFound:
             _parent = models.AccountType(name=parent, parent_id=None)
@@ -33,8 +31,9 @@ def import_accounttypes(db):
         for child in children:
             try:
                 _child = (
-                    db.session.query(models.AccountType).
-                    filter_by(name=child, parent=_parent).one()
+                    db.session.query(models.AccountType)
+                    .filter_by(name=child, parent=_parent)
+                    .one()
                 )
             except NoResultFound:
                 _child = models.AccountType(name=child, parent=_parent)
@@ -50,16 +49,15 @@ def import_accounttypes(db):
 def import_bankaccounttypes(db):
     """Import bankaccounttypes."""
     bankaccounttypes = {
-        'Savings': 'Savings',
-        'Credit Loan': 'Loan',
-        'Credit Card': 'Credit Card',
-        'Cash': 'Cash'
+        "Savings": "Savings",
+        "Credit Loan": "Loan",
+        "Credit Card": "Credit Card",
+        "Cash": "Cash",
     }
 
     for name, desc in bankaccounttypes.items():
         try:
-            (db.session.query(models.BankAccountType).
-                filter_by(name=name).one())
+            (db.session.query(models.BankAccountType).filter_by(name=name).one())
         except NoResultFound:
             bankaccounttype = models.BankAccountType(name=name, desc=desc)
             db.session.add(bankaccounttype)
@@ -71,12 +69,11 @@ def import_bankaccounttypes(db):
 
 
 def import_entitytypes(db):
-    entitytypes = ('Company', 'Person', 'Sole Trader')
+    entitytypes = ("Company", "Person", "Sole Trader")
 
     for name in entitytypes:
         try:
-            (db.session.query(models.EntityType).
-             filter_by(name=name).one())
+            (db.session.query(models.EntityType).filter_by(name=name).one())
         except NoResultFound:
             entitytype = models.EntityType(name=name)
             db.session.add(entitytype)

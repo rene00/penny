@@ -7,30 +7,32 @@ from sqlalchemy.sql import func
 from penny.resources.accounts.forms import FormAccount
 
 
-accounts = Blueprint('accounts', __name__)
+accounts = Blueprint("accounts", __name__)
 
 
-@accounts.route('/accounts')
+@accounts.route("/accounts")
 @login_required
 def _accounts():
-    return render_template(
-        'accounts.html', data_url=url_for('data_accounts.accounts')
-    )
+    return render_template("accounts.html", data_url=url_for("data_accounts.accounts"))
 
 
-@accounts.route('/accounts/<int:id>',
-                defaults={'start_date': None, 'end_date': None},
-                methods=['GET', 'POST'])
-@accounts.route('/accounts/<int:id>/<string:start_date>/<string:end_date>',
-                methods=['GET', 'POST'])
+@accounts.route(
+    "/accounts/<int:id>",
+    defaults={"start_date": None, "end_date": None},
+    methods=["GET", "POST"],
+)
+@accounts.route(
+    "/accounts/<int:id>/<string:start_date>/<string:end_date>", methods=["GET", "POST"]
+)
 @login_required
 def account(id, start_date, end_date):
 
     try:
-        account = models.db.session.query(models.Account) \
-            .filter_by(id=id, user=g.user).one()
+        account = (
+            models.db.session.query(models.Account).filter_by(id=id, user=g.user).one()
+        )
     except NoResultFound:
-        return url_for('accounts._accounts')
+        return url_for("accounts._accounts")
 
     form = FormAccount(obj=account)
     form.accounttype.choices = forms.get_accounttype_as_choices()
@@ -52,13 +54,13 @@ def account(id, start_date, end_date):
     form.set_defaults(account)
 
     transactions = models.db.session.query(
-        func.sum(models.Transaction.credit).label('credit'),
-        func.sum(models.Transaction.debit).label('debit'),
+        func.sum(models.Transaction.credit).label("credit"),
+        func.sum(models.Transaction.debit).label("debit"),
     ).filter(
         models.Transaction.is_deleted == False,  # noqa[W0612]
         models.Transaction.is_archived == False,
         models.Transaction.account_id == account.id,
-        models.Transaction.user_id == g.user.id
+        models.Transaction.user_id == g.user.id,
     )
 
     transactions_amount = 0
@@ -71,14 +73,14 @@ def account(id, start_date, end_date):
         transactions_amount += amount
 
     return render_template(
-        'account.html',
+        "account.html",
         form=form,
         account=account,
-        transactions_amount=util.convert_to_float(int(transactions_amount))
+        transactions_amount=util.convert_to_float(int(transactions_amount)),
     )
 
 
-@accounts.route('/accounts/add', methods=['GET', 'POST'])
+@accounts.route("/accounts/add", methods=["GET", "POST"])
 @login_required
 def add():
     form = FormAccount()
@@ -100,6 +102,6 @@ def add():
         models.db.session.add(account)
         models.db.session.commit()
 
-        return redirect(url_for('accounts.account', id=account.id))
+        return redirect(url_for("accounts.account", id=account.id))
 
-    return render_template('account.html', form=form, account=account)
+    return render_template("account.html", form=form, account=account)

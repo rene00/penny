@@ -1,4 +1,3 @@
-
 import re
 from penny import models
 from penny.models import AccountMatch, Transaction
@@ -8,7 +7,7 @@ from sqlalchemy.exc import IntegrityError
 session = models.db.session
 
 
-class AccountMatchRun():
+class AccountMatchRun:
     def __init__(self, user):
         self.user = user
 
@@ -19,13 +18,15 @@ class AccountMatchRun():
         try:
             session.commit()
         except IntegrityError as e:
-            app.logger.error("Failed commit: id={0.id}, error={e}".
-                             format(transaction, e))
+            app.logger.error(
+                "Failed commit: id={0.id}, error={e}".format(transaction, e)
+            )
             return session.rollback()
         else:
-            app.logger.info('Match transaction; transaction={0.id}, '
-                            'accountmatch={1.id}'.format(
-                                transaction, accountmatch))
+            app.logger.info(
+                "Match transaction; transaction={0.id}, "
+                "accountmatch={1.id}".format(transaction, accountmatch)
+            )
             return transaction
 
     def run(self):
@@ -37,21 +38,20 @@ class AccountMatchRun():
             # match regex.
             for amr in am.accountmatchfilterregexes:
                 try:
-                    app.logger.debug('Compiling regex; regex={0}'.
-                                     format(amr.regex))
+                    app.logger.debug("Compiling regex; regex={0}".format(amr.regex))
                     regex = re.compile(amr.regex)
                 except TypeError:
-                    app.logger.error('Failed to parse regex; '
-                                     'id={amr.id}'.format(amr))
+                    app.logger.error(
+                        "Failed to parse regex; " "id={amr.id}".format(amr)
+                    )
                     continue
                 else:
-                    for transaction in session.query(Transaction). \
-                            filter_by(user=self.user, account=None,
-                                      bankaccount=am.bankaccount):
+                    for transaction in session.query(Transaction).filter_by(
+                        user=self.user, account=None, bankaccount=am.bankaccount
+                    ):
                         app.logger.debug(
-                            'Searching transaction memo for a match; '
-                            'memo=({0}), regex={0}'.
-                            format(transaction.memo, amr.regex)
+                            "Searching transaction memo for a match; "
+                            "memo=({0}), regex={0}".format(transaction.memo, amr.regex)
                         )
                         if regex.search(transaction.memo):
                             self._match_transaction(am, transaction)

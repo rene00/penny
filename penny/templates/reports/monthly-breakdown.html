@@ -1,13 +1,11 @@
 {% extends "navbar.html" %}
 {% block content %}
-<div class="container-fluid flex-grow-1">
-    <h1 class="page-header">Monthly Breakdown {% if account.name %}{{ account.name }}{% endif %}</h1>
-
+<div class="container-fluid">
+    <h1 class="h3 mb-2 text-gray-800">Account Monthly Breakdown</h1>
     <div class="row">
-
         <div class="card shadow mb-4">
             <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">Account</h6>
+                {% if account.name %}<h6 class="m-0 font-weight-bold text-primary">{{ account.name }}</h6>{% endif %}
             </div>
             <div class="card-body">
                 <form action={{ url_for('reports.account_monthly_breakdown') }} method="POST">
@@ -39,17 +37,18 @@
                 </table>
                 </form>
 
-
+                {% if report.transactions|length >= 1 %}
                 <div class="chart-bar">
                     <canvas id="barChart"></canvas>
                 </div>
-
 
                 <table class="table table-bordered" data-toggle="table" data-pagination="true" data-page-size="50" width="100%" cellspacing="0">
                     <thead>
                         <tr>
                             <th data-field="month">Month</th>
                             <th data-field="amount">Amount</th>
+                            <th data-field="change">Change</th>
+                            <th data-field="average">Average</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -59,15 +58,19 @@
                         <tr>
                             <td>{{ date }}</td>
                             <td><a href="{{ url_for('transactions.account', id=account.id, start_date=start_month, end_date=end_month) }}">{{ month.amount|convert_to_float }}</a></td>
+                            <td>{{ month.change|convert_to_float }}</td>
+                            <td>{{ month.avg|convert_to_float }}</td>
                         </tr>
                     {% endfor %}
                     </tbody>
                 </table>
+                {% endif %}
             </div>
         </div>
     </div>
 </div>
 
+{% if account %}
 <script src="/static/vendor/chart.js/Chart.min.js"></script>
 
 <script>
@@ -110,7 +113,7 @@ var barChart = new Chart(ctx, {
   data: {
       labels: labels,
     datasets: [{
-      label: "Revenue",
+      label: "{{ account.accounttype.name }}",
       backgroundColor: "#4e73df",
       hoverBackgroundColor: "#2e59d9",
       borderColor: "#4e73df",
@@ -185,4 +188,5 @@ var barChart = new Chart(ctx, {
   }
 });
 </script>
+{% endif %}
 {% endblock %}

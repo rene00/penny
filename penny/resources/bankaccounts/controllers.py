@@ -6,25 +6,29 @@ from sqlalchemy.orm.exc import NoResultFound
 from penny.resources.bankaccounts.forms import FormBankAccount
 
 
-bankaccounts = Blueprint('bankaccounts', __name__)
+bankaccounts = Blueprint("bankaccounts", __name__)
 
 
-@bankaccounts.route('/bankaccounts')
+@bankaccounts.route("/bankaccounts")
 @login_required
 def _bankaccounts():
-    return render_template('bankaccounts.html',
-                           data_url=url_for('data_bankaccounts.bankaccounts'))
+    return render_template(
+        "bankaccounts.html", data_url=url_for("data_bankaccounts.bankaccounts")
+    )
 
 
-@bankaccounts.route('/bankaccounts/<int:id>', methods=['GET', 'POST'])
+@bankaccounts.route("/bankaccounts/<int:id>", methods=["GET", "POST"])
 @login_required
 def bankaccount(id):
 
     try:
-        bankaccount = models.db.session.query(
-            models.BankAccount).filter_by(id=id, user=g.user).one()
+        bankaccount = (
+            models.db.session.query(models.BankAccount)
+            .filter_by(id=id, user=g.user)
+            .one()
+        )
     except NoResultFound:
-        return url_for('bankaccounts._bankaccounts')
+        return url_for("bankaccounts._bankaccounts")
 
     form = FormBankAccount(obj=bankaccount)
     form.bankaccounttype.choices = forms.get_bankaccounttype_as_choices()
@@ -46,11 +50,10 @@ def bankaccount(id):
 
     form.set_defaults(bankaccount)
 
-    return render_template('bankaccount.html', form=form,
-                           bankaccount=bankaccount)
+    return render_template("bankaccount.html", form=form, bankaccount=bankaccount)
 
 
-@bankaccounts.route('/bankaccounts/add', methods=['GET', 'POST'])
+@bankaccounts.route("/bankaccounts/add", methods=["GET", "POST"])
 @login_required
 def add():
     form = FormBankAccount()
@@ -78,6 +81,6 @@ def add():
         models.db.session.add(bankaccount)
         models.db.session.commit()
 
-        return redirect(url_for('bankaccounts.bankaccount', id=bankaccount.id))
+        return redirect(url_for("bankaccounts.bankaccount", id=bankaccount.id))
 
-    return render_template('bankaccount.html', form=form)
+    return render_template("bankaccount.html", form=form)

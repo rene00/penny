@@ -4,12 +4,8 @@ from wtforms import StringField, SelectField, validators
 
 
 class FormEntity(FlaskForm):
-    name = StringField(
-        u'Name',
-        default='',
-        validators=[validators.DataRequired()]
-    )
-    entitytype = (SelectField(u'Type', validators=[], coerce=int))
+    name = StringField(u"Name", default="", validators=[validators.DataRequired()])
+    entitytype = SelectField(u"Type", validators=[], coerce=int)
 
     def reset(self):
         blankdata = MultiDict([])
