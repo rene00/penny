@@ -255,12 +255,9 @@ def transaction(id):
                 # Set the amount.
                 transaction.set_amount(form.amount.data)
 
-        # Set transaction account based off form.
-        account = form.account.data
-        if account:
-            transaction.account = account
-        else:
-            transaction.account = None
+        # Set transaction based off form.
+        transaction.account = form.account.data
+        transaction.bankaccount = form.bankaccount.data
 
         if form.attachment.data:
             absfilepath, relfilepath = get_filepath_for_transaction_attachment(

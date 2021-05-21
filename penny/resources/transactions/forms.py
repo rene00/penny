@@ -20,6 +20,10 @@ def get_account_label(obj):
     return "{0.entity.name} - {0.name}".format(obj)
 
 
+def get_bankaccount_label(obj):
+    return "{0.bank} - {0.number}".format(obj)
+
+
 class FormTransaction(FlaskForm):
     account = QuerySelectField(
         "account",
@@ -30,7 +34,7 @@ class FormTransaction(FlaskForm):
     )
     bankaccount = QuerySelectField(
         "bankaccount",
-        get_label=get_account_label,
+        get_label=get_bankaccount_label,
         allow_blank=True,
         validators=[],
         get_pk=lambda b: b.id,
