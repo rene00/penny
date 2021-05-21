@@ -52,30 +52,19 @@
                               </select>
                           </td>
                       </tr>
-                  {%- if transaction.bankaccount -%}
-                      {%- if transaction.bankaccount.bank -%}
                       <tr>
-                          <td>Bank Account Bank</td>
-                          <td>{{ transaction.bankaccount.bank }}</a></td>
+                          <td>Bank Account</td>
+                          <td>
+                              <select id="bankaccount" name="bankaccount" class="form-control">
+                              {% if form.bankaccount.query|length != 0 %}
+                              {% for field in form.bankaccount %}
+                                  {% set key = field.data %}
+                                  {% set value = field.label %}
+                                  <option value="{{ key }}"{% if form.bankaccount.default|int == key|int %} selected="selected"{% endif %}>{{ value }}</option>
+                              {% endfor %}
+                              {% endif %}
+                          </td>
                       </tr>
-                      {%- endif -%}
-                      <tr>
-                          <td>Bank Account Number</td>
-                          <td><a href="{{ url_for('bankaccounts.bankaccount', id=transaction.bankaccount.id) }}">{{ transaction.bankaccount.number }}</a></td>
-                      </tr>
-                      {%- if transaction.bankaccount.type -%}
-                      <tr>
-                          <td>Bank Account Type</td>
-                          <td>{{ transaction.bankaccount.type.description }}</td>
-                      </tr>
-                      {%- endif -%}
-                      {%- if transaction.bankaccount.description -%}
-                      <tr>
-                          <td>Bank Account Description</td>
-                          <td>{{ transaction.bankaccount.description }}</td>
-                      </tr>
-                      {%- endif -%}
-                  {%- endif -%}
                       {%- if transaction.paypalid -%}
                       <tr>
                           <td>PayPal Transaction ID</td>
