@@ -269,11 +269,11 @@ def transaction(id):
             attachment_hash = get_hash_of_file(absfilepath)
             try:
                 models.db.session.query(models.TransactionAttachment).filter_by(
-                    transaction=transaction, attachment_hash=attachment_hash
+                    tx=transaction, attachment_hash=attachment_hash
                 ).one()
             except NoResultFound:
                 attachment = models.TransactionAttachment(
-                    transaction=transaction,
+                    tx=transaction,
                     filename=form.attachment.data.filename,
                     filepath=relfilepath,
                     attachment_hash=attachment_hash,
@@ -283,12 +283,10 @@ def transaction(id):
         if form.note.data:
             try:
                 models.db.session.query(models.TransactionNote).filter_by(
-                    transaction=transaction, note=form.note.data
+                    tx=transaction, note=form.note.data
                 ).one()
             except NoResultFound:
-                note = models.TransactionNote(
-                    transaction=transaction, note=form.note.data
-                )
+                note = models.TransactionNote(tx=transaction, note=form.note.data)
                 models.db.session.add(note)
 
         models.db.session.add(transaction)
@@ -304,14 +302,12 @@ def transaction(id):
     form.set_data(transaction)
 
     notes = (
-        models.db.session.query(models.TransactionNote)
-        .filter_by(transaction=transaction)
-        .all()
+        models.db.session.query(models.TransactionNote).filter_by(tx=transaction).all()
     )
 
     attachments = (
         models.db.session.query(models.TransactionAttachment)
-        .filter_by(transaction=transaction)
+        .filter_by(tx=transaction)
         .all()
     )
 

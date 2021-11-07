@@ -267,7 +267,7 @@ class TransactionSchema(Schema):
 
 
 class Transaction(db.Model):
-    __tablename__ = "transaction"
+    __tablename__ = "tx"
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
@@ -278,7 +278,7 @@ class Transaction(db.Model):
     bankaccount_id = db.Column(
         db.Integer, db.ForeignKey("bankaccount.id"), nullable=True
     )
-    parent_id = db.Column(db.Integer, db.ForeignKey("transaction.id"))
+    parent_id = db.Column(db.Integer, db.ForeignKey("tx.id"))
     children = db.relationship("Transaction")
 
     account_id = db.Column(db.Integer, db.ForeignKey("account.id"))
@@ -289,8 +289,8 @@ class Transaction(db.Model):
     is_archived = db.Column(db.Boolean, default=False)
     date_added = db.Column(db.DateTime, default=utcnow)
 
-    notes = db.relationship("TransactionNote", backref="transaction")
-    attachments = db.relationship("TransactionAttachment", backref="transaction")
+    notes = db.relationship("TransactionNote", backref="tx")
+    attachments = db.relationship("TransactionAttachment", backref="tx")
 
     def __str__(self):
         return """
@@ -355,7 +355,7 @@ class TransactionNote(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     note = db.Column(db.String(1024), nullable=True)
     date_added = db.Column(db.DateTime, default=utcnow)
-    transaction_id = db.Column(db.Integer, db.ForeignKey("transaction.id"))
+    transaction_id = db.Column(db.Integer, db.ForeignKey("tx.id"))
 
 
 class TransactionAttachment(db.Model):
@@ -367,7 +367,7 @@ class TransactionAttachment(db.Model):
     filename = db.Column(db.String(1024), nullable=False)
     filepath = db.Column(db.String(1024), nullable=False)
     attachment_hash = db.Column(db.String(1024), nullable=False)
-    transaction_id = db.Column(db.Integer, db.ForeignKey("transaction.id"))
+    transaction_id = db.Column(db.Integer, db.ForeignKey("tx.id"))
     date_added = db.Column(db.DateTime, default=utcnow)
 
 
