@@ -75,25 +75,9 @@ xvfbwrapper = "0.2.9"
 Flask-Security-Too = "3.4.2"
 
 [tool.poetry.dev-dependencies]
-tox = "^3.24.5"
 pytest = "^7.1.1"
 coverage = "5.3"
 pycodestyle = "2.6.0"
-
-[tool.tox]
-legacy_tox_ini = """
-[tox]
-envlist = py39
-
-[testenv]
-setenv =
-    CONFIG_FILE=conf.py
-deps =
-commands =
-    {envbindir}/coverage erase
-    {envbindir}/pycodestyle --ignore=E121,E123,E126,E226,E24,E704,W503,E711,E712,E501 penny setup.py
-    {envbindir}/pytest .
-"""
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
