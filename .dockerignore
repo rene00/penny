@@ -100,7 +100,8 @@ README.rst
 Makefile
 Dockerfile
 tests
-tox.ini
 README.rst
 app/conf.py
 files
+penny/penny.db
+app/penny.db

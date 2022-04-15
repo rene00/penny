@@ -9,7 +9,7 @@ FLASK_APP = penny
 build: 
 	pip3 install --no-cache-dir -r requirements.txt
 
-docker_build:
+docker_build: clean
 	docker build . -t rene00/penny:latest
 
 docker_run:
@@ -42,3 +42,9 @@ run_queue:
 		--url redis://localhost:6379/0 \
 		--verbose \
 		--path=.
+
+test: 
+	poetry run coverage erase
+	poetry run pycodestyle --ignore=E121,E123,E126,E226,E24,E704,W503,E711,E712,E501 penny
+	poetry run pytest .
+
