@@ -9,7 +9,7 @@ FLASK_APP = penny
 build: 
 	pip3 install --no-cache-dir -r requirements.txt
 
-docker_build:
+docker_build: clean
 	docker build . -t rene00/penny:latest
 
 docker_run:
