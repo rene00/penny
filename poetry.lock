@@ -328,27 +328,27 @@ Flask = "*"
 
 [[package]]
 name = "flask-security-too"
-version = "3.4.2"
+version = "4.1.0"
 description = "Simple security for Flask apps."
 category = "main"
 optional = false
-python-versions = ">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*"
+python-versions = ">=3.6"
 
 [package.dependencies]
-email-validator = ">=1.0.5"
-Flask = ">=1.0.2"
-Flask-BabelEx = ">=0.9.3"
+blinker = ">=1.4"
+email-validator = ">=1.1.1"
+Flask = ">=1.1.1"
 Flask-Login = ">=0.4.1"
-Flask-Mail = ">=0.9.1"
 Flask-Principal = ">=0.4.0"
-Flask-WTF = ">=0.14.2"
+Flask-WTF = ">=0.14.3"
 itsdangerous = ">=1.1.0"
-passlib = ">=1.7.1"
+passlib = ">=1.7.2"
 
 [package.extras]
-all = ["Pallets-Sphinx-Themes (>=1.2.0)", "Sphinx (>=1.8.5)", "sphinx-issues (>=1.2.0)", "Flask-Mongoengine (>=0.9.5)", "peewee (>=3.11.2)", "Flask-SQLAlchemy (>=2.3)", "argon2-cffi (>=19.1.0)", "bcrypt (>=3.1.5)", "cachetools (>=3.1.0)", "check-manifest (>=0.25)", "coverage (>=4.5.4)", "cryptography (>=2.3.1)", "isort (>=4.2.2)", "mock (>=1.3.0)", "mongoengine (>=0.15.3)", "mongomock (>=3.14.0)", "msgcheck (>=2.9)", "pony (>=0.7.11)", "phonenumberslite (>=8.11.1)", "psycopg2 (>=2.8.4)", "pydocstyle (>=1.0.0)", "pymysql (>=0.9.3)", "pyqrcode (>=1.2)", "pytest-black (>=0.3.8)", "pytest-cache (>=1.0)", "pytest-cov (>=2.5.1)", "pytest-flake8 (>=1.0.4)", "pytest-mongo (>=1.2.1)", "pytest (>=3.5.1)", "sqlalchemy (>=1.2.6)", "sqlalchemy-utils (>=0.33.0)", "werkzeug (>=0.15.5)", "zxcvbn (>=4.4.28,<4.5.0)"]
-docs = ["Pallets-Sphinx-Themes (>=1.2.0)", "Sphinx (>=1.8.5)", "sphinx-issues (>=1.2.0)"]
-tests = ["Flask-Mongoengine (>=0.9.5)", "peewee (>=3.11.2)", "Flask-SQLAlchemy (>=2.3)", "argon2-cffi (>=19.1.0)", "bcrypt (>=3.1.5)", "cachetools (>=3.1.0)", "check-manifest (>=0.25)", "coverage (>=4.5.4)", "cryptography (>=2.3.1)", "isort (>=4.2.2)", "mock (>=1.3.0)", "mongoengine (>=0.15.3)", "mongomock (>=3.14.0)", "msgcheck (>=2.9)", "pony (>=0.7.11)", "phonenumberslite (>=8.11.1)", "psycopg2 (>=2.8.4)", "pydocstyle (>=1.0.0)", "pymysql (>=0.9.3)", "pyqrcode (>=1.2)", "pytest-black (>=0.3.8)", "pytest-cache (>=1.0)", "pytest-cov (>=2.5.1)", "pytest-flake8 (>=1.0.4)", "pytest-mongo (>=1.2.1)", "pytest (>=3.5.1)", "sqlalchemy (>=1.2.6)", "sqlalchemy-utils (>=0.33.0)", "werkzeug (>=0.15.5)", "zxcvbn (>=4.4.28,<4.5.0)"]
+babel = ["babel (>=2.7.0)", "flask-babel (>=2.0.0)"]
+common = ["bcrypt (>=3.1.5)", "flask-mail (>=0.9.1)"]
+fsqla = ["flask-sqlalchemy (>=2.4.4)", "sqlalchemy (>=1.3.6)", "sqlalchemy-utils (>=0.34.1)"]
+mfa = ["cryptography (>=3.0.0)", "pyqrcode (>=1.2)", "phonenumberslite (>=8.11.1)"]
 
 [[package]]
 name = "flask-sqlalchemy"
@@ -989,7 +989,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "f9aa9bde23bbd8ecb2be03fa745f443d2a3a2af82135efe7b3a4fc9bf6337264"
+content-hash = "6ae79b30ecbbe00796eedb7f8974b5f851b591b5006c9930d121fa60890e2171"
 
 [metadata.files]
 alembic = [
@@ -1193,8 +1193,8 @@ flask-script = [
     {file = "Flask-Script-2.0.6.tar.gz", hash = "sha256:6425963d91054cfcc185807141c7314a9c5ad46325911bd24dcb489bd0161c65"},
 ]
 flask-security-too = [
-    {file = "Flask-Security-Too-3.4.2.tar.gz", hash = "sha256:a258e70a7a4e842978ca7b5a3a52a7490b5ff78b71a56e98152fec5677dde306"},
-    {file = "Flask_Security_Too-3.4.2-py2.py3-none-any.whl", hash = "sha256:4e04069842d20d2776d92a24d482967240dba015220fae913348f1df455b32e3"},
+    {file = "Flask-Security-Too-4.1.0.tar.gz", hash = "sha256:68decf4435cf3706be4d14a7f2cfb58cb7852138291aaff0d553520d2e023081"},
+    {file = "Flask_Security_Too-4.1.0-py2.py3-none-any.whl", hash = "sha256:5d234aa0d2d717f3b723ffdc73b07763bb5224359138cfa236db4bc9d6965f57"},
 ]
 flask-sqlalchemy = [
     {file = "Flask-SQLAlchemy-2.4.1.tar.gz", hash = "sha256:6974785d913666587949f7c2946f7001e4fa2cb2d19f4e69ead02e4b8f50b33d"},
