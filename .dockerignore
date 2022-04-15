@@ -103,3 +103,5 @@ tests
 README.rst
 app/conf.py
 files
+penny/penny.db
+app/penny.db
