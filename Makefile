@@ -34,11 +34,11 @@ run_www:
 	FLASK_DEBUG=$(FLASK_DEBUG) \
 	CONFIG_FILE=$(CONFIG_FILE) \
 	FLASK_APP=$(FLASK_APP) \
-	flask run --host=$(FLASK_HOST) --port=$(FLASK_PORT)
+	poetry run flask run --host=$(FLASK_HOST) --port=$(FLASK_PORT)
 
 run_queue: 
 	CONFIG_FILE=$(CONFIG_FILE) \
-	    rqworker \
+	    poetry run rqworker \
 		--url redis://localhost:6379/0 \
 		--verbose \
 		--path=.
