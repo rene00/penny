@@ -21,9 +21,6 @@ clean:
 	find . -name '*.pyc' -exec rm -f {} +
 	find . -name '*.pyo' -exec rm -f {} +
 
-migrate: 
-	CONFIG_FILE=conf.py python manage.py db upgrade
-
 run: run_www
 
 install-deps:
