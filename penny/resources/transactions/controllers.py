@@ -13,7 +13,7 @@ from flask import (
     request,
     flash,
 )
-from flask_security import login_required
+from flask_security import auth_required
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import NoResultFound
 from penny.resources.transactions.forms import (
@@ -103,7 +103,7 @@ def _save_new_split_transaction(request, transaction):
 
 
 @transactions.route("/")
-@login_required
+@auth_required()
 def _transactions():
     return render_template(
         "transactions.html", data_url=url_for("data_transactions.transactions")
@@ -118,7 +118,7 @@ def _transactions():
 @transactions.route(
     "/bankaccount/<int:id>/<int:start_date>/<int:end_date>", methods=["GET", "POST"]
 )
-@login_required
+@auth_required()
 def bankaccount(id, start_date, end_date):
     return render_template(
         "transactions.html",
@@ -174,7 +174,7 @@ def accounttype(accounttype, start_date, end_date):
 
 
 @transactions.route("/<int:id>", methods=["GET", "POST"])  # noqa[C901]
-@login_required
+@auth_required()
 def transaction(id):
 
     try:
@@ -323,7 +323,7 @@ def transaction(id):
 
 
 @transactions.route("/add", methods=["GET", "POST"])
-@login_required
+@auth_required()
 def add():
     form = FormTransactionAdd()
     form.account.choices = forms.get_account_as_choices()
@@ -349,7 +349,7 @@ def add():
 
 
 @transactions.route("/attachment/<int:id>", methods=["GET", "POST"])
-@login_required
+@auth_required()
 def attachment(id):
     """Serve transactionattachment files.
 
@@ -394,7 +394,7 @@ def attachment(id):
 
 @transactions.route("/import", defaults={"id": None}, methods=["GET", "POST"])
 @transactions.route("/import/<int:id>", methods=["GET", "POST"])
-@login_required
+@auth_required()
 def upload(id):
     form = FormTransactionUpload()
 

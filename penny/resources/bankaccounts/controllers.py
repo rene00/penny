@@ -1,7 +1,7 @@
 from penny import models
 from penny.common import forms
 from flask import Blueprint, g, render_template, url_for, redirect
-from flask_security import login_required
+from flask_security import auth_required
 from sqlalchemy.orm.exc import NoResultFound
 from penny.resources.bankaccounts.forms import FormBankAccount
 
@@ -9,16 +9,18 @@ from penny.resources.bankaccounts.forms import FormBankAccount
 bankaccounts = Blueprint("bankaccounts", __name__)
 
 
-@bankaccounts.route("/bankaccounts")
-@login_required
+@bankaccounts.route("/bankaccounts", endpoint="_bankaccounts")
+@auth_required()
 def _bankaccounts():
     return render_template(
         "bankaccounts.html", data_url=url_for("data_bankaccounts.bankaccounts")
     )
 
 
-@bankaccounts.route("/bankaccounts/<int:id>", methods=["GET", "POST"])
-@login_required
+@bankaccounts.route(
+    "/bankaccounts/<int:id>", methods=["GET", "POST"], endpoint="bankaccount"
+)
+@auth_required()
 def bankaccount(id):
 
     try:
@@ -53,8 +55,8 @@ def bankaccount(id):
     return render_template("bankaccount.html", form=form, bankaccount=bankaccount)
 
 
-@bankaccounts.route("/bankaccounts/add", methods=["GET", "POST"])
-@login_required
+@bankaccounts.route("/bankaccounts/add", methods=["GET", "POST"], endpoint="add")
+@auth_required()
 def add():
     form = FormBankAccount()
     form.bankaccounttype.choices = forms.get_bankaccounttype_as_choices()

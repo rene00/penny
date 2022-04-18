@@ -1,6 +1,6 @@
 from penny import models
 from flask import Blueprint, g, jsonify
-from flask_security import login_required
+from flask_security import auth_required
 
 data_bankaccounts = Blueprint(
     "data_bankaccounts", __name__, url_prefix="/data/bankaccounts"
@@ -8,7 +8,7 @@ data_bankaccounts = Blueprint(
 
 
 @data_bankaccounts.route("/")
-@login_required
+@auth_required()
 def bankaccounts():
     """Return data on all bankaccounts."""
     data = {"rows": []}

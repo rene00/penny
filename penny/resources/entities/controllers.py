@@ -1,7 +1,7 @@
 from penny import models
 from penny.common import forms
 from flask import Blueprint, g, render_template, url_for, redirect
-from flask_security import login_required
+from flask_security import auth_required
 from sqlalchemy.orm.exc import NoResultFound
 from penny.resources.entities.forms import FormEntity
 
@@ -9,13 +9,13 @@ entities = Blueprint("entities", __name__)
 
 
 @entities.route("/entities")
-@login_required
+@auth_required()
 def _entities():
     return render_template("entities.html", data_url=url_for("data_entities.entities"))
 
 
 @entities.route("/entities/<int:id>", methods=["GET", "POST"])
-@login_required
+@auth_required()
 def entity(id):
 
     try:
@@ -42,7 +42,7 @@ def entity(id):
 
 
 @entities.route("/entities/add", methods=["GET", "POST"])
-@login_required
+@auth_required()
 def add():
     form = FormEntity()
     form.entitytype.choices = forms.get_entitytype_as_choices()

@@ -1,6 +1,6 @@
 from penny.common import tasks as rqtasks
 from flask import Blueprint, g, flash, render_template, request, current_app as app
-from flask_security import login_required
+from flask_security import auth_required
 from flask_wtf import Form
 from werkzeug.datastructures import MultiDict
 from wtforms import BooleanField
@@ -20,7 +20,7 @@ class FormTasks(Form):
 
 
 @tasks.route("/tasks", methods=["GET", "POST"])
-@login_required
+@auth_required()
 def _tasks():
     form = FormTasks()
 

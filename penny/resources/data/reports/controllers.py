@@ -1,12 +1,12 @@
 from penny import models
 from flask import Blueprint, g, jsonify, url_for
-from flask_security import login_required
+from flask_security import auth_required
 
 data_reports = Blueprint("data_reports", __name__, url_prefix="/data/reports")
 
 
 @data_reports.route("/")
-@login_required
+@auth_required()
 def reports():
     """Return a list of reports"""
 
