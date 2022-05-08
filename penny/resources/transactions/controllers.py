@@ -1,5 +1,6 @@
 from penny import models
-from penny.common import forms, tasks
+from penny.common import forms
+from penny.common.tasks import import_transactions
 from penny.common.currency import to_cents, get_credit_debit
 from flask import (
     Blueprint,
@@ -31,6 +32,8 @@ from werkzeug.utils import secure_filename
 import hashlib
 import datetime
 import re
+from rq import Queue
+from redis import Redis
 
 
 transactions = Blueprint("transactions", __name__, url_prefix="/transactions")
@@ -431,17 +434,8 @@ def upload(id):
             models.db.session.rollback()
             flash("Failed Uploading Transactions.", "error")
 
-        # Perform Upload tasks.
-        app.logger.info(
-            "About to submit import transaction task; "
-            "transactionupload={0}, user={1}".format(transactionupload.id, g.user.id)
-        )
-        tasks.import_transactions.delay(transactionupload.id, g.user.id)
-        app.logger.info(
-            "Import transaction task sent; "
-            "transactionupload={0}, user={1}".format(transactionupload.id, g.user.id)
-        )
-
+        q = Queue(connection=Redis.from_url(app.config["REDIS_URL"]))
+        task = q.enqueue(import_transactions, transactionupload.id, g.user.id)
         flash("Uploaded Transactions.", "success")
 
     return render_template("transaction_import.html", form=form)

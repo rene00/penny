@@ -41,7 +41,7 @@ def transactions():
             )
         )
 
-    data["total"] = total.one()
+    data["total"] = total.one()[0]
 
     for transaction in transactions.offset(offset).limit(limit).all():
         data["rows"].append(transaction.dump())

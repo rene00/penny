@@ -2,6 +2,7 @@ import os
 
 CSRF_ENABLED = True
 SECRET_KEY = "tatokuddMiWradfo"
+SECURITY_PASSWORD_SALT = "cecsebWorPenitdiTin"
 
 SQLALCHEMY_DATABASE_URI = "sqlite:///{0}".format(
     os.path.join(os.path.abspath(os.path.dirname(__file__)), "penny.db")
@@ -12,7 +13,6 @@ SQLALCHEMY_TRACK_MODIFICATIONS = False
 SECURITY_CONFIRMABLE = False
 SECURITY_LOGIN_USER_TEMPLATE = "user/login.html"
 SECURITY_PASSWORD_HASH = "bcrypt"
-SECURITY_PASSWORD_SALT = "cecsebWorPenitdiTin"
 SECURITY_POST_CONFIRM_VIEW = "post_confirm_view"
 SECURITY_REGISTERABLE = True
 SECURITY_REGISTER_USER_TEMPLATE = "user/register.html"
@@ -26,8 +26,7 @@ TRANSACTION_ATTACHMENTS_UPLOAD_FOLDER = "files/attachments"
 # directory where transaction uploads (eg; OFX files) are stored.
 TRANSACTION_UPLOADS_UPLOAD_FOLDER = "files/uploads"
 
-# RQ
-RQ_DEFAULT_URL = "redis://localhost:6379/0"
+REDIS_URL = "redis://localhost:6379/0"
 
 # Debug
-DEBUG = False
+DEBUG = True

@@ -246,8 +246,8 @@ wmi = ["wmi (>=1.5.1,<2.0.0)"]
 
 [[package]]
 name = "email-validator"
-version = "1.1.3"
-description = "A robust email syntax and deliverability validation library for Python 2.x/3.x."
+version = "1.2.0"
+description = "A robust email syntax and deliverability validation library."
 category = "main"
 optional = false
 python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,>=2.7"
@@ -638,6 +638,32 @@ reco = ["python-dateutil", "simplejson"]
 tests = ["pytest", "pytz"]
 
 [[package]]
+name = "mypy"
+version = "0.950"
+description = "Optional static typing for Python"
+category = "dev"
+optional = false
+python-versions = ">=3.6"
+
+[package.dependencies]
+mypy-extensions = ">=0.4.3"
+tomli = {version = ">=1.1.0", markers = "python_version < \"3.11\""}
+typing-extensions = ">=3.10"
+
+[package.extras]
+dmypy = ["psutil (>=4.0)"]
+python2 = ["typed-ast (>=1.4.0,<2)"]
+reports = ["lxml"]
+
+[[package]]
+name = "mypy-extensions"
+version = "0.4.3"
+description = "Experimental type system extensions for programs checked with the mypy typechecker."
+category = "dev"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "ndg-httpsclient"
 version = "0.5.1"
 description = "Provides enhanced HTTPS support for httplib and urllib2 using PyOpenSSL"
@@ -966,6 +992,18 @@ pymysql = ["pymysql (<1)", "pymysql"]
 sqlcipher = ["sqlcipher3-binary"]
 
 [[package]]
+name = "sqlalchemy-stubs"
+version = "0.4"
+description = "SQLAlchemy stubs and mypy plugin"
+category = "dev"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+mypy = ">=0.790"
+typing-extensions = ">=3.7.4"
+
+[[package]]
 name = "sqlalchemy-utils"
 version = "0.38.2"
 description = "Various utility functions for SQLAlchemy."
@@ -995,6 +1033,22 @@ url = ["furl (>=0.4.1)"]
 name = "tomli"
 version = "2.0.1"
 description = "A lil' TOML parser"
+category = "dev"
+optional = false
+python-versions = ">=3.7"
+
+[[package]]
+name = "types-redis"
+version = "4.2.0"
+description = "Typing stubs for redis"
+category = "dev"
+optional = false
+python-versions = "*"
+
+[[package]]
+name = "typing-extensions"
+version = "4.2.0"
+description = "Backported and Experimental Type Hints for Python 3.7+"
 category = "dev"
 optional = false
 python-versions = ">=3.7"
@@ -1128,7 +1182,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "7875f502469519760749b253e60983f7bfde52ae4576c1ba28ce33be3bc81f5c"
+content-hash = "edde41b7fc068424401e4192e93665c812a4f31b988f3a6b67ce19da2865908a"
 
 [metadata.files]
 alembic = [
@@ -1299,8 +1353,8 @@ dnspython = [
     {file = "dnspython-2.2.1.tar.gz", hash = "sha256:0f7569a4a6ff151958b64304071d370daa3243d15941a7beedf0c9fe5105603e"},
 ]
 email-validator = [
-    {file = "email_validator-1.1.3-py2.py3-none-any.whl", hash = "sha256:5675c8ceb7106a37e40e2698a57c056756bf3f272cfa8682a4f87ebd95d8440b"},
-    {file = "email_validator-1.1.3.tar.gz", hash = "sha256:aa237a65f6f4da067119b7df3f13e89c25c051327b2b5b66dc075f33d62480d7"},
+    {file = "email_validator-1.2.0-py2.py3-none-any.whl", hash = "sha256:2323219d19b82f887b64f2a84c6d73f451431bdf87744022c54b1b5bd0bde1bd"},
+    {file = "email_validator-1.2.0.tar.gz", hash = "sha256:565fd3a7aa4516772f55732d50d34d0a18680b5f62995aea8b4a55b62c90c517"},
 ]
 enum34 = [
     {file = "enum34-1.1.6-py2-none-any.whl", hash = "sha256:6bd0f6ad48ec2aa117d3d141940d484deccda84d4fcd884f5c3d93c23ecd8c79"},
@@ -1515,6 +1569,35 @@ marshmallow = [
     {file = "marshmallow-2.19.2-py2.py3-none-any.whl", hash = "sha256:0e497a6447ffaad55578138ca512752de7a48d12f444996ededc3d6bf8a09ca2"},
     {file = "marshmallow-2.19.2.tar.gz", hash = "sha256:e21a4dea20deb167c723e0ffb13f4cf33bcbbeb8a334e92406a3308cedea2826"},
 ]
+mypy = [
+    {file = "mypy-0.950-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:cf9c261958a769a3bd38c3e133801ebcd284ffb734ea12d01457cb09eacf7d7b"},
+    {file = "mypy-0.950-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:b5b5bd0ffb11b4aba2bb6d31b8643902c48f990cc92fda4e21afac658044f0c0"},
+    {file = "mypy-0.950-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:5e7647df0f8fc947388e6251d728189cfadb3b1e558407f93254e35abc026e22"},
+    {file = "mypy-0.950-cp310-cp310-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:eaff8156016487c1af5ffa5304c3e3fd183edcb412f3e9c72db349faf3f6e0eb"},
+    {file = "mypy-0.950-cp310-cp310-win_amd64.whl", hash = "sha256:563514c7dc504698fb66bb1cf897657a173a496406f1866afae73ab5b3cdb334"},
+    {file = "mypy-0.950-cp36-cp36m-macosx_10_9_x86_64.whl", hash = "sha256:dd4d670eee9610bf61c25c940e9ade2d0ed05eb44227275cce88701fee014b1f"},
+    {file = "mypy-0.950-cp36-cp36m-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:ca75ecf2783395ca3016a5e455cb322ba26b6d33b4b413fcdedfc632e67941dc"},
+    {file = "mypy-0.950-cp36-cp36m-win_amd64.whl", hash = "sha256:6003de687c13196e8a1243a5e4bcce617d79b88f83ee6625437e335d89dfebe2"},
+    {file = "mypy-0.950-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:4c653e4846f287051599ed8f4b3c044b80e540e88feec76b11044ddc5612ffed"},
+    {file = "mypy-0.950-cp37-cp37m-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:e19736af56947addedce4674c0971e5dceef1b5ec7d667fe86bcd2b07f8f9075"},
+    {file = "mypy-0.950-cp37-cp37m-win_amd64.whl", hash = "sha256:ef7beb2a3582eb7a9f37beaf38a28acfd801988cde688760aea9e6cc4832b10b"},
+    {file = "mypy-0.950-cp38-cp38-macosx_10_9_universal2.whl", hash = "sha256:0112752a6ff07230f9ec2f71b0d3d4e088a910fdce454fdb6553e83ed0eced7d"},
+    {file = "mypy-0.950-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:ee0a36edd332ed2c5208565ae6e3a7afc0eabb53f5327e281f2ef03a6bc7687a"},
+    {file = "mypy-0.950-cp38-cp38-macosx_11_0_arm64.whl", hash = "sha256:77423570c04aca807508a492037abbd72b12a1fb25a385847d191cd50b2c9605"},
+    {file = "mypy-0.950-cp38-cp38-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:5ce6a09042b6da16d773d2110e44f169683d8cc8687e79ec6d1181a72cb028d2"},
+    {file = "mypy-0.950-cp38-cp38-win_amd64.whl", hash = "sha256:5b231afd6a6e951381b9ef09a1223b1feabe13625388db48a8690f8daa9b71ff"},
+    {file = "mypy-0.950-cp39-cp39-macosx_10_9_universal2.whl", hash = "sha256:0384d9f3af49837baa92f559d3fa673e6d2652a16550a9ee07fc08c736f5e6f8"},
+    {file = "mypy-0.950-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:1fdeb0a0f64f2a874a4c1f5271f06e40e1e9779bf55f9567f149466fc7a55038"},
+    {file = "mypy-0.950-cp39-cp39-macosx_11_0_arm64.whl", hash = "sha256:61504b9a5ae166ba5ecfed9e93357fd51aa693d3d434b582a925338a2ff57fd2"},
+    {file = "mypy-0.950-cp39-cp39-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:a952b8bc0ae278fc6316e6384f67bb9a396eb30aced6ad034d3a76120ebcc519"},
+    {file = "mypy-0.950-cp39-cp39-win_amd64.whl", hash = "sha256:eaea21d150fb26d7b4856766e7addcf929119dd19fc832b22e71d942835201ef"},
+    {file = "mypy-0.950-py3-none-any.whl", hash = "sha256:a4d9898f46446bfb6405383b57b96737dcfd0a7f25b748e78ef3e8c576bba3cb"},
+    {file = "mypy-0.950.tar.gz", hash = "sha256:1b333cfbca1762ff15808a0ef4f71b5d3eed8528b23ea1c3fb50543c867d68de"},
+]
+mypy-extensions = [
+    {file = "mypy_extensions-0.4.3-py2.py3-none-any.whl", hash = "sha256:090fedd75945a69ae91ce1303b5824f428daf5a028d2f6ab8a299250a846f15d"},
+    {file = "mypy_extensions-0.4.3.tar.gz", hash = "sha256:2d82818f5bb3e369420cb3c4060a7970edba416647068eb4c5343488a6c604a8"},
+]
 ndg-httpsclient = [
     {file = "ndg_httpsclient-0.5.1-py2-none-any.whl", hash = "sha256:d2c7225f6a1c6cf698af4ebc962da70178a99bcde24ee6d1961c4f3338130d57"},
     {file = "ndg_httpsclient-0.5.1-py3-none-any.whl", hash = "sha256:dd174c11d971b6244a891f7be2b32ca9853d3797a72edb34fa5d7b07d8fff7d4"},
@@ -1675,6 +1758,10 @@ sqlalchemy = [
     {file = "SQLAlchemy-1.4.35-cp39-cp39-win_amd64.whl", hash = "sha256:53c7469b86a60fe2babca4f70111357e6e3d5150373bc85eb3b914356983e89a"},
     {file = "SQLAlchemy-1.4.35.tar.gz", hash = "sha256:2ffc813b01dc6473990f5e575f210ca5ac2f5465ace3908b78ffd6d20058aab5"},
 ]
+sqlalchemy-stubs = [
+    {file = "sqlalchemy-stubs-0.4.tar.gz", hash = "sha256:c665d6dd4482ef642f01027fa06c3d5e91befabb219dc71fc2a09e7d7695f7ae"},
+    {file = "sqlalchemy_stubs-0.4-py3-none-any.whl", hash = "sha256:5eec7aa110adf9b957b631799a72fef396b23ff99fe296df726645d01e312aa5"},
+]
 sqlalchemy-utils = [
     {file = "SQLAlchemy-Utils-0.38.2.tar.gz", hash = "sha256:9e01d6d3fb52d3926fcd4ea4a13f3540701b751aced0316bff78264402c2ceb4"},
     {file = "SQLAlchemy_Utils-0.38.2-py3-none-any.whl", hash = "sha256:622235b1598f97300e4d08820ab024f5219c9a6309937a8b908093f487b4ba54"},
@@ -1682,6 +1769,14 @@ sqlalchemy-utils = [
 tomli = [
     {file = "tomli-2.0.1-py3-none-any.whl", hash = "sha256:939de3e7a6161af0c887ef91b7d41a53e7c5a1ca976325f429cb46ea9bc30ecc"},
     {file = "tomli-2.0.1.tar.gz", hash = "sha256:de526c12914f0c550d15924c62d72abc48d6fe7364aa87328337a31007fe8a4f"},
+]
+types-redis = [
+    {file = "types-redis-4.2.0.tar.gz", hash = "sha256:c9b61894c7621b801db44efd63f843ead93cbbcf034186d7343f7f5771e1106a"},
+    {file = "types_redis-4.2.0-py3-none-any.whl", hash = "sha256:24c0effe59b2eef030733fd352fdcee6647a66611001aa25762475c3f26fb5f1"},
+]
+typing-extensions = [
+    {file = "typing_extensions-4.2.0-py3-none-any.whl", hash = "sha256:6657594ee297170d19f67d55c05852a874e7eb634f4f753dbd667855e07c1708"},
+    {file = "typing_extensions-4.2.0.tar.gz", hash = "sha256:f1c24655a0da0d1b67f07e17a5e6b2a105894e6824b92096378bb3668ef02376"},
 ]
 urllib3 = [
     {file = "urllib3-1.25.9-py2.py3-none-any.whl", hash = "sha256:88206b0eb87e6d677d424843ac5209e3fb9d0190d0ee169599165ec25e9d9115"},

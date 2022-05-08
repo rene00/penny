@@ -32,7 +32,7 @@ def accounts():
         total = total.filter(models.Account.name.like("%{0}%".format(search)))
         accounts = accounts.filter(models.Account.name.like("%{0}%".format(search)))
 
-    data["total"] = total.one()
+    data["total"] = total.one()[0]
 
     for account in accounts.offset(offset).limit(limit).all():
         data["rows"].append(account.dump())

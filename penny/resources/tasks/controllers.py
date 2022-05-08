@@ -1,37 +1,31 @@
-from penny.common import tasks as rqtasks
+from penny.common.tasks import run_accountmatchrun
 from flask import Blueprint, g, flash, render_template, request, current_app as app
-from flask_security import auth_required
-from flask_wtf import Form
+from flask_security.decorators import auth_required
+from flask_wtf import FlaskForm
 from werkzeug.datastructures import MultiDict
 from wtforms import BooleanField
+from rq import Queue
+from redis import Redis
 
 
 tasks = Blueprint("tasks", __name__)
 
 
-class FormTasks(Form):
-    accountmatch = BooleanField("Process Account Matches", validators=[])
+class FormTasks(FlaskForm):
+    accountmatch = BooleanField("Process Account Matches")
 
     def reset(self):
-        # XXX: use reset_csrf() here. See
-        # https://gist.github.com/tomekwojcik/953046
-        blankdata = MultiDict([])
-        self.process(blankdata)
+        self.process(MultiDict([]))
 
 
 @tasks.route("/tasks", methods=["GET", "POST"])
 @auth_required()
 def _tasks():
     form = FormTasks()
-
-    if request.method == "POST":
-        app.logger.info(
-            "received task list; accountmatch={accountmatch}, "
-            "user={user}".format(accountmatch=form.accountmatch.data, user=g.user.id)
-        )
-
+    if form.validate_on_submit():
         if form.accountmatch.data:
-            rqtasks.run_accountmatchrun.delay(g.user.id)
+            q = Queue(connection=Redis.from_url(app.config["REDIS_URL"]))
+            task = q.enqueue(run_accountmatchrun, g.user.id)
             flash("Submitted Proccess Account Matches Task.", "success")
             form.reset()
 
