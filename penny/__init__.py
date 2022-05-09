@@ -58,6 +58,7 @@ def create_app(test_config=None, skip_migrations=False):
     db.init_app(app)
     migrate.init_app(app, db)
 
+    skip_migrations = True
     if not skip_migrations:
         with app.app_context():
             config = migrate.get_config(None)
