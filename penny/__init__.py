@@ -40,7 +40,7 @@ def create_app(test_config=None, skip_migrations=False):
     migrate.init_app(app, db)
     security = Security(app, user_datastore)
 
-    if "PENNY_SKIP_IMPORT_ALL_TYPES" not in os.environ:
+    if os.environ.get("PENNY_IMPORT_ALL_TYPES"):
         with app.app_context():
             import_all_types()
 
