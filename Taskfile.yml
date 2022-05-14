@@ -27,8 +27,9 @@ tasks:
   run:www:
     env:
       FLASK_DEBUG: 1
-      CONFIG_FILE: ./conf.py
       FLASK_APP: penny
+      CONFIG_FILE: ./conf.py
+      PENNY_IMPORT_ALL_TYPES: 1
     vars:
       FLASK_HOST: 127.0.0.1
       FLASK_PORT: 5000
