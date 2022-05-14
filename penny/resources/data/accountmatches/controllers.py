@@ -1,6 +1,6 @@
 from penny import models
 from flask import Blueprint, g, jsonify, request
-from flask_security import login_required
+from flask_security import auth_required
 from sqlalchemy import or_
 from sqlalchemy.sql import func
 
@@ -10,7 +10,7 @@ data_accountmatches = Blueprint(
 
 
 @data_accountmatches.route("/")
-@login_required
+@auth_required()
 def accountmatches():
     """Return data on all accountmatches."""
 

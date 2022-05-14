@@ -2,12 +2,10 @@ from penny.models import session, User, TransactionUpload, BankAccount
 from penny.common import filetypes
 from penny.common.import_transactions import ImportTransactions, ImportTransactionsError
 from penny.common.accountmatchrun import AccountMatchRun
-from flask_rq import job
 from sqlalchemy.orm.exc import NoResultFound
 import penny
 
 
-@job
 def import_transactions(id, user_id):
     _app = penny.create_app()
     with _app.app_context():
@@ -48,6 +46,10 @@ def import_transactions(id, user_id):
                 .one()
             )
         except NoResultFound:
+            # FIXME: creating a new bank account now depends on an entity though
+            # the UI has no way to set the entity when importing transactions.
+            # The commit() below will raise an exception given there is no entity
+            # with this BankAccount.
             bankaccount = BankAccount(user_id=user_id, number=bankaccount_number)
             session.add(bankaccount)
             session.commit()
@@ -71,7 +73,6 @@ def import_transactions(id, user_id):
         return imported_transactions
 
 
-@job
 def run_accountmatchrun(user_id):
     _app = penny.create_app()
     with _app.app_context():

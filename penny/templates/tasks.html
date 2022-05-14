@@ -7,6 +7,7 @@
             <div class="table-responsive">
                 {% include 'includes/display_flash_message.html' %}
                 <form action="{{ url_for('tasks._tasks') }}" method="POST">
+                {{ form.csrf_token }}
                 <div class="form-group">
                     <div class="checkbox">
                         {% if form.accountmatch.errors -%}

@@ -7,9 +7,9 @@ from penny.resources.reports import (
 from penny.common import forms
 from datetime import datetime as dt
 from flask import Blueprint, g, render_template, url_for, json
-from flask_security import login_required
+from flask_security.decorators import auth_required
 from sqlalchemy.orm.exc import NoResultFound
-from flask_wtf import Form
+from flask_wtf import FlaskForm
 from wtforms import DateField, SelectField
 import datetime
 
@@ -17,7 +17,7 @@ reports = Blueprint("reports", __name__, url_prefix="/reports")
 
 
 @reports.route("/")
-@login_required
+@auth_required()
 def _reports():
     return render_template("reports.html", data_url=url_for("data_reports.reports"))
 
@@ -26,11 +26,12 @@ DATE_FMT = "%Y%m%d"
 DELTA_DAYS = 365
 
 
-class FormMonthlyBreakdown(Form):
-    account = SelectField(u"Account", validators=[], coerce=int)
+class FormMonthlyBreakdown(FlaskForm):
+    account = SelectField("Account", validators=[], coerce=int)
 
     def get_account(self):
         """Return the account."""
+        account = None
         try:
             account = (
                 models.db.session.query(models.Account)
@@ -38,12 +39,11 @@ class FormMonthlyBreakdown(Form):
                 .one()
             )
         except NoResultFound:
-            account = None
-        finally:
-            return account
+            pass
+        return account
 
 
-class FormBasicDates(Form):
+class FormBasicDates(FlaskForm):
 
     now = datetime.datetime.now()
     delta = datetime.timedelta(days=DELTA_DAYS)
@@ -64,7 +64,7 @@ class FormBasicDates(Form):
 
 
 @reports.route("/savings-rate", methods=["GET"])
-@login_required
+@auth_required()
 def savings_rate():
     report = ReportsSavingsRate()
     return render_template(
@@ -79,7 +79,7 @@ def savings_rate():
     defaults={"account_id": None},
     methods=["GET", "POST"],
 )
-@login_required
+@auth_required()
 def account_monthly_breakdown(account_id):
 
     form = FormMonthlyBreakdown()
@@ -129,7 +129,7 @@ def account_monthly_breakdown(account_id):
     "<string:start_date>/<string:end_date>",
     methods=["GET", "POST"],
 )
-@login_required
+@auth_required()
 def profitloss(report_resource, id, start_date, end_date):
 
     entity = bankaccount = None

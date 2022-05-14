@@ -6,7 +6,7 @@ from penny.resources.accountmatches.util import (
     update_details,
 )
 from flask import Blueprint, g, render_template, url_for, redirect, request
-from flask_security import login_required
+from flask_security import auth_required
 from sqlalchemy.orm.exc import NoResultFound
 from penny.resources.accountmatches.forms import (
     FormAccountMatch,
@@ -18,7 +18,7 @@ accountmatches = Blueprint("accountmatches", __name__)
 
 
 @accountmatches.route("/accountmatches")
-@login_required
+@auth_required()
 def _accountmatches():
     return render_template(
         "accountmatches.html", data_url=url_for("data_accountmatches.accountmatches")
@@ -26,7 +26,7 @@ def _accountmatches():
 
 
 @accountmatches.route("/accountmatches/<int:id>", methods=["GET", "POST"])
-@login_required
+@auth_required()
 def accountmatch(id):
 
     try:
@@ -95,7 +95,7 @@ def accountmatch(id):
 
 
 @accountmatches.route("/accountmatches/add", methods=["GET", "POST"])
-@login_required
+@auth_required()
 def add():
     form = FormAccountMatch()
     form_filter = FormAccountMatchFilter()

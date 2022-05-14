@@ -1,13 +1,13 @@
 from penny import models
 from flask import Blueprint, g, jsonify, request
-from flask_security import login_required
+from flask_security import auth_required
 from sqlalchemy.sql import func
 
 data_accounts = Blueprint("data_accounts", __name__, url_prefix="/data/accounts")
 
 
 @data_accounts.route("/")
-@login_required
+@auth_required()
 def accounts():
     """Return data on all accounts."""
 
@@ -32,7 +32,7 @@ def accounts():
         total = total.filter(models.Account.name.like("%{0}%".format(search)))
         accounts = accounts.filter(models.Account.name.like("%{0}%".format(search)))
 
-    data["total"] = total.one()
+    data["total"] = total.one()[0]
 
     for account in accounts.offset(offset).limit(limit).all():
         data["rows"].append(account.dump())

@@ -1,12 +1,12 @@
 from penny import models
 from flask import Blueprint, g, jsonify
-from flask_security import login_required
+from flask_security import auth_required
 
 data_entities = Blueprint("data_entities", __name__, url_prefix="/data/entities")
 
 
 @data_entities.route("/")
-@login_required
+@auth_required()
 def entities():
     """Return data on all entities."""
     total = 0

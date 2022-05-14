@@ -1,7 +1,7 @@
 from penny.common.currency import to_cents
 from datetime import datetime
 from flask import url_for
-from flask_security import RoleMixin, UserMixin
+from flask_security.core import RoleMixin, UserMixin
 from flask_sqlalchemy import SQLAlchemy
 from marshmallow import Schema, fields
 from sqlalchemy.sql import func
@@ -20,11 +20,12 @@ def utcnow():
     return datetime.utcnow().replace(tzinfo=pytz.utc)
 
 
-roles_users = db.Table(
-    "roles_users",
-    db.Column("user_id", db.Integer(), db.ForeignKey("user.id")),
-    db.Column("role_id", db.Integer(), db.ForeignKey("role.id")),
-)
+class RolesUsers(db.Model):
+    __tablename__ = "roles_users"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column("user_id", db.Integer, db.ForeignKey("user.id"))
+    role_id = db.Column("role_id", db.Integer, db.ForeignKey("role.id"))
 
 
 class Role(db.Model, RoleMixin):
@@ -33,7 +34,6 @@ class Role(db.Model, RoleMixin):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(128), unique=True)
     description = db.Column(db.String(128), nullable=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
 
 
 class User(db.Model, UserMixin):
@@ -42,36 +42,18 @@ class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(128), unique=True)
     password = db.Column(db.String(128), nullable=False)
-    first_name = db.Column(db.String(1024))
-    last_name = db.Column(db.String(1024))
-    date_added = db.Column(db.DateTime, default=utcnow)
     active = db.Column(db.Boolean, default=False)
+    fs_uniquifier = db.Column(db.String(255), unique=True, nullable=False)
+    date_added = db.Column(db.DateTime, default=utcnow)
     confirmed_at = db.Column(db.DateTime)
 
-    # Enabled if user is part of alpha test.
-    alpha_enabled = db.Column(db.Boolean, default=True)
-
+    roles = db.relationship("Role", secondary="roles_users", backref=db.backref("users", lazy="dynamic"))
     entities = db.relationship("Entity", backref="user")
     bankaccounts = db.relationship("BankAccount", backref="user")
-    roles = db.relationship(
-        "Role", secondary=roles_users, backref=db.backref("users", lazy="dynamic")
-    )
     transactions = db.relationship("Transaction", backref="user")
     accounts = db.relationship("Account", backref="user")
     accountmatches = db.relationship("AccountMatch", backref="user")
     transactionuploads = db.relationship("TransactionUpload", backref="user")
-
-    def is_active(self):
-        return True
-
-    def is_authenticated(self):
-        return True
-
-    def is_anonymous(self):
-        return False
-
-    def get_id(self):
-        return self.id
 
 
 class EntityType(db.Model):

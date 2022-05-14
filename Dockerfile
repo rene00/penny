@@ -10,6 +10,8 @@ ENV PYTHONUNBUFFERED 1
 
 ENV PATH /root/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
+ENV CONFIG_FILE=./conf.py
+
 WORKDIR /app
 
 RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y \
@@ -22,10 +24,20 @@ RUN echo 'en_AU.UTF-8 UTF-8' > /etc/locale.gen && /usr/sbin/locale-gen
 
 RUN mkdir -p /app/files/transactions /app/files/uploads
 
-COPY . .
+COPY app ./app
+
+COPY penny ./penny
+
+COPY poetry.lock poetry.toml pyproject.toml ./
 
 RUN poetry install --no-dev
 
-ENTRYPOINT ["poetry", "run", "honcho", "--app-root=/app", "start"]
+COPY migrations ./migrations
+
+COPY Procfile boot.sh ./
+
+RUN chmod a+x boot.sh
+
+ENTRYPOINT ["./boot.sh"]
 
 EXPOSE 5000

@@ -1,6 +1,6 @@
 from penny import models
-from flask import Blueprint, g, jsonify, request
-from flask_security import login_required
+from flask import current_app as app, Blueprint, g, jsonify, request
+from flask_security import auth_required
 from sqlalchemy import or_
 from sqlalchemy.sql import func
 from datetime import datetime
@@ -11,7 +11,7 @@ data_transactions = Blueprint(
 
 
 @data_transactions.route("/")
-@login_required
+@auth_required()
 def transactions():
     """Return data on all transactions."""
 
@@ -41,11 +41,12 @@ def transactions():
             )
         )
 
-    data["total"] = total.one()
+    data["total"] = total.one()[0]
 
     for transaction in transactions.offset(offset).limit(limit).all():
         data["rows"].append(transaction.dump())
 
+    app.logger.info(data)
     return jsonify(data)
 
 
@@ -56,7 +57,7 @@ def transactions():
     "/account/<int:id>", defaults={"start_date": None, "end_date": None}
 )
 @data_transactions.route("/account/<int:id>/<string:start_date>/<string:end_date>")
-@login_required
+@auth_required()
 def account(id, start_date, end_date):
     """Return data on all transactions for an account."""
 
@@ -110,7 +111,7 @@ def account(id, start_date, end_date):
             )
         )
 
-    data["total"] = total.one()
+    data["total"] = total.one()[0]
 
     for transaction in transactions.offset(offset).limit(limit).all():
         data["rows"].append(transaction.dump())
@@ -124,7 +125,7 @@ def account(id, start_date, end_date):
 @data_transactions.route(
     "/bankaccount/<int:id>/" "<string:start_date>/<string:end_date>"
 )
-@login_required
+@auth_required()
 def bankaccount(id, start_date, end_date):
     """Return data on all transactions for an bankaccount."""
 
@@ -174,7 +175,7 @@ def bankaccount(id, start_date, end_date):
             )
         )
 
-    data["total"] = total.one()
+    data["total"] = total.one()[0]
 
     for transaction in transactions.offset(offset).limit(limit).all():
         data["rows"].append(transaction.dump())
@@ -188,7 +189,7 @@ def bankaccount(id, start_date, end_date):
 @data_transactions.route(
     "/accounttype/<string:accounttype>/<string:start_date>/<string:end_date>"
 )
-@login_required
+@auth_required()
 def accounttype(accounttype, start_date, end_date):
     """Return data on all transactions for an account type."""
 

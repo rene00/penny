@@ -46,26 +46,6 @@
                             {{ register_user_form.hidden_tag() }}
                             {{ register_user_form.csrf_token }}
                             <fieldset>
-                            {% if register_user_form.first_name.errors %}
-                                <div class="form-group has-error">
-                                    <label class="control-label" for="inputError">{{ register_user_form.first_name.errors[0] }}</label>
-                                    <input class="form-control" placeholder="First name" name="first_name" type="text" autofocus>
-                                </div>
-                            {% else %}
-                                <div class="form-group">
-                                    <input class="form-control" placeholder="First name" name="first_name" type="text" autofocus>
-                                </div>
-                            {% endif %}
-                            {% if register_user_form.last_name.errors %}
-                                <div class="form-group has-error">
-                                    <label class="control-label" for="inputError">{{ register_user_form.last_name.errors[0] }}</label>
-                                    <input class="form-control" placeholder="Last name" name="last_name" type="text" autofocus>
-                                </div>
-                            {% else %}
-                                <div class="form-group">
-                                    <input class="form-control" placeholder="Last name" name="last_name" type="text" autofocus>
-                                </div>
-                            {% endif %}
                             {% if register_user_form.email.errors %}
                                 <div class="form-group has-error">
                                     <label class="control-label" for="inputError">{{ register_user_form.email.errors[0] }}</label>

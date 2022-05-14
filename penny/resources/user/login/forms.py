@@ -1,11 +1,11 @@
-from flask_wtf import Form
+from flask_wtf import FlaskForm
 from wtforms import TextAreaField, PasswordField, validators
 from werkzeug.security import check_password_hash
 from penny import models
 from sqlalchemy.orm.exc import NoResultFound
 
 
-class LoginForm(Form):
+class LoginForm(FlaskForm):
     email = TextAreaField(u"Email", default="", validators=[validators.DataRequired()])
     password = PasswordField(
         u"Password", default="", validators=[validators.DataRequired()]

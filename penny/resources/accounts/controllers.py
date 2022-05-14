@@ -1,7 +1,7 @@
 from penny import models, util
 from penny.common import forms
 from flask import Blueprint, g, render_template, url_for, redirect
-from flask_security import login_required
+from flask_security import auth_required
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.sql import func
 from penny.resources.accounts.forms import FormAccount
@@ -11,7 +11,7 @@ accounts = Blueprint("accounts", __name__)
 
 
 @accounts.route("/accounts")
-@login_required
+@auth_required()
 def _accounts():
     return render_template("accounts.html", data_url=url_for("data_accounts.accounts"))
 
@@ -24,7 +24,7 @@ def _accounts():
 @accounts.route(
     "/accounts/<int:id>/<string:start_date>/<string:end_date>", methods=["GET", "POST"]
 )
-@login_required
+@auth_required()
 def account(id, start_date, end_date):
 
     try:
@@ -81,7 +81,7 @@ def account(id, start_date, end_date):
 
 
 @accounts.route("/accounts/add", methods=["GET", "POST"])
-@login_required
+@auth_required()
 def add():
     form = FormAccount()
     form.accounttype.choices = forms.get_accounttype_as_choices()
