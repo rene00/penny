@@ -44,15 +44,6 @@ def create_app(test_config=None, skip_migrations=False):
         with app.app_context():
             import_all_types()
 
-    @app.before_first_request
-    def create_user():
-        db.create_all()
-        if not user_datastore.find_user(email="rene@compounddata.com"):
-            user_datastore.create_user(
-                email="rene@compounddata.com", password=hash_password("lkjh0987")
-            )
-        db.session.commit()
-
     @app.before_request
     def load_current_user():
         g.user = current_user
