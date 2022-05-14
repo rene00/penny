@@ -7,9 +7,9 @@ from penny.resources.reports import (
 from penny.common import forms
 from datetime import datetime as dt
 from flask import Blueprint, g, render_template, url_for, json
-from flask_security import auth_required
+from flask_security.decorators import auth_required
 from sqlalchemy.orm.exc import NoResultFound
-from flask_wtf import Form
+from flask_wtf import FlaskForm
 from wtforms import DateField, SelectField
 import datetime
 
@@ -26,11 +26,12 @@ DATE_FMT = "%Y%m%d"
 DELTA_DAYS = 365
 
 
-class FormMonthlyBreakdown(Form):
+class FormMonthlyBreakdown(FlaskForm):
     account = SelectField("Account", validators=[], coerce=int)
 
     def get_account(self):
         """Return the account."""
+        account = None
         try:
             account = (
                 models.db.session.query(models.Account)
@@ -38,12 +39,11 @@ class FormMonthlyBreakdown(Form):
                 .one()
             )
         except NoResultFound:
-            account = None
-        finally:
-            return account
+            pass
+        return account
 
 
-class FormBasicDates(Form):
+class FormBasicDates(FlaskForm):
 
     now = datetime.datetime.now()
     delta = datetime.timedelta(days=DELTA_DAYS)
