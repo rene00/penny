@@ -8,25 +8,25 @@ Penny is personal finance tracking web application.
 Install & Run
 -------------
 
-The quickest and easiest way to run Penny is to use docker::
+The quickest and easiest way to run Penny is to build and run the docker container:
 
-    $ docker run -p 127.0.0.1:5000:5000 rene00/penny
+    $ task docker:build docker:run
 
-Visit http://localhost:5000 in your browser.
+Then visit http://localhost:5000 in your browser.
 
 If you want to build and run Penny from source, first start redis on localhost:6379.
 
 Then build::
 
-    $ make build
+    $ task build
 
 And run the web app::
 
-    $ make run
+    $ task run:www
 
 And finally, in another terminal, run the queue system::
 
-    $ make run_queue
+    $ task run:queue
 
 The queue system is backed by redis and defaults to connecting to redis on localhost:6379.
 
