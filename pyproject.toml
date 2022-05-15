@@ -86,8 +86,15 @@ types-redis = "^4.2.0"
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
-#[tool.pyright]
-#venvPath = ".venv"
+[tool.pyright]
+venvPath = "."
+venv = ".venv"
+
+reportMissingImports = true
+reportMissingTypeStubs = false
+
+pythonVersion = "3.9"
+pythonPlatform = "Linux"
 
 [tool.mypy]
 ignore_missing_imports = true

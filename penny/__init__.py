@@ -1,13 +1,9 @@
-from flask import Flask, g, request, redirect, url_for
+from flask import Flask, g, redirect, url_for
 
 from flask_login import current_user
-from flask_security.models import fsqla_v2 as fsqla
-from flask_security import (
-    Security,
-    SQLAlchemyUserDatastore,
-    auth_required,
-    hash_password,
-)
+from flask_security.core import Security
+from flask_security.datastore import SQLAlchemyUserDatastore
+from flask_security.decorators import auth_required
 from flask_migrate import Migrate
 from penny import models, resources, util
 from penny import models
@@ -61,17 +57,6 @@ def create_app(test_config=None, skip_migrations=False):
     @auth_required()
     def index():
         return redirect(url_for("bankaccounts._bankaccounts"))
-
-    @app.route("/post_confirm_view")
-    def post_confirm_view():
-        """Log user out once they confirm.
-
-        This will force the user to log in with their credentials once
-        they have confirmed.
-        """
-        if g.user:
-            logout_user()
-        return redirect(url_for("user_login.login"))
 
     app.register_blueprint(resources.accounts)
     app.register_blueprint(resources.accountmatches)
