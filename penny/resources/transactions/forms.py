@@ -23,6 +23,9 @@ def get_account_label(obj):
 def get_bankaccount_label(obj):
     return "{0.bank} - {0.number}".format(obj)
 
+def get_tag_label(obj):
+    return "{0.name} - {0.desc}".format(obj)
+
 
 class FormTransaction(FlaskForm):
     account = QuerySelectField(
@@ -39,9 +42,17 @@ class FormTransaction(FlaskForm):
         validators=[],
         get_pk=lambda b: b.id,
     )
+    tags = QuerySelectField(
+        "tags",
+        get_label=get_tag_label,
+        allow_blank=True,
+        validators=[],
+        get_pk=lambda b: b.id,
+    )
     attachment = FileField(u"Filename", validators=[])
     note = TextAreaField(u"Note", default="", validators=[])
     amount = DecimalField(u"Amount", validators=[])
+    id = None
 
     def reset(self):
         blankdata = MultiDict([])
@@ -51,6 +62,7 @@ class FormTransaction(FlaskForm):
         """Set default values for resources of the form based off
         transaction."""
 
+
         if transaction.account:
             self.account.default = transaction.account.id
 
@@ -59,6 +71,7 @@ class FormTransaction(FlaskForm):
 
     def set_data(self, transaction):
         """Set the data attribute for each field based on transaction."""
+        self.id = transaction.id
         if transaction._amount:
             self.amount.data = transaction._amount
 
@@ -110,6 +123,9 @@ class FormTransactionAdd(FlaskForm):
             bankaccount = None
         finally:
             return bankaccount
+
+    def get_tags(self):
+        return models.db.session.query(models.Tag).filter_by(transaction_id=self.transaction.data).all()
 
 
 class FormTransactionSplit(FlaskForm):

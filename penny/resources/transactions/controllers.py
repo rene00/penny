@@ -14,7 +14,7 @@ from flask import (
     request,
     flash,
 )
-from flask_security import auth_required
+from flask_security.decorators import auth_required
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import NoResultFound
 from penny.resources.transactions.forms import (
@@ -156,6 +156,13 @@ def account(id, start_date, end_date):
     )
 
 
+@transactions.route("/tag/<int:id>", methods=["GET"])
+def tag(id):
+    return render_template(
+        "transactions.html", data_url=url_for("data_transactions.tag", id=id)
+    )
+
+
 @transactions.route(
     "/accounttype/<string:accounttype>",
     defaults={"start_date": None, "end_date": None},
@@ -201,6 +208,13 @@ def transaction(id):
         .join(models.Entity, models.Account.entity_id == models.Entity.id)
         .filter_by(user=g.user)
         .order_by(models.Entity.name, models.Account.name)
+        .all()
+    )
+
+    form.tags.query = (
+        models.db.session.query(models.Tag)
+        .filter_by(user_id=g.user.id)
+        .order_by(models.Tag.name)
         .all()
     )
 
@@ -292,8 +306,15 @@ def transaction(id):
                 note = models.TransactionNote(tx=transaction, note=form.note.data)
                 models.db.session.add(note)
 
+        if form.tags.data:
+            transaction.tags.append(form.tags.data)
+
         models.db.session.add(transaction)
-        models.db.session.commit()
+        try:
+            models.db.session.commit()
+        except IntegrityError:
+            flash("Failed updating transaction", "error")
+            models.db.session.rollback()
 
     child_accounts = {}
     for child in transaction.children:
@@ -322,6 +343,7 @@ def transaction(id):
         transaction=transaction,
         notes=notes,
         child_accounts=child_accounts,
+        tags=transaction.tags,
     )
 
 
