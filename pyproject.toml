@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "penny"
-version = "0.0.2"
+version = "0.0.3"
 description = "A personal finance tracking web application"
 authors = ["Rene Cunningham <rene@compounddata.com>"]
 
