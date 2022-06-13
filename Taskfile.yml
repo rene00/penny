@@ -11,6 +11,9 @@ tasks:
     cmds:
       - echo "{{.GREETING}}"
     silent: true
+  db:migrate:
+    cmds:
+      - poetry run flask db migrate
   db:upgrade:
     envs:
       - PENNY_SKIP_IMPORT_ALL_TYPES: 1

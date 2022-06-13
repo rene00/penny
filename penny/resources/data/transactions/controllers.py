@@ -1,6 +1,7 @@
 from penny import models
-from flask import current_app as app, Blueprint, g, jsonify, request
-from flask_security import auth_required
+from flask import current_app as app, Blueprint, g, jsonify, request, make_response, abort
+from flask_security.decorators import auth_required
+from sqlalchemy.exc import NoResultFound
 from sqlalchemy import or_
 from sqlalchemy.sql import func
 from datetime import datetime
@@ -270,6 +271,29 @@ def accounttype(accounttype, start_date, end_date):
 
     for results in results.offset(offset).limit(limit).all():
         transaction = results[0]
+        data["rows"].append(transaction.dump())
+
+    return jsonify(data)
+
+@data_transactions.route("/tag/<int:id>")
+@auth_required()
+def tag(id):
+    """Return data on all transactions for a tag."""
+
+    data = {"rows": []}
+
+    offset = request.args.get("offset", 0)
+    limit = request.args.get("limit", 25)
+
+    try:
+        tag = models.db.session.query(models.Tag).filter(models.Tag.user == g.user, models.Tag.id == id).one()
+    except NoResultFound:
+        return abort(404)
+
+    # NOTE(rene): this will include transactions which have been marged as deleted.
+    data["total"] = len(list(tag.transactions))
+
+    for transaction in tag.transactions.offset(offset).limit(limit).all():
         data["rows"].append(transaction.dump())
 
     return jsonify(data)

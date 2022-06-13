@@ -5,7 +5,6 @@ from flask_security.core import RoleMixin, UserMixin
 from flask_sqlalchemy import SQLAlchemy
 from marshmallow import Schema, fields
 from sqlalchemy.sql import func
-import hashlib
 import locale
 import pytz
 
@@ -18,6 +17,14 @@ locale.setlocale(locale.LC_ALL, "en_AU.UTF-8")
 def utcnow():
     "Return a UTC datetime object with the current time."
     return datetime.utcnow().replace(tzinfo=pytz.utc)
+
+
+tag_transaction = db.Table(
+    "tag_transaction",
+    db.Model.metadata,
+    db.Column("tag_id", db.ForeignKey("tag.id"), primary_key=True),
+    db.Column("transaction_id", db.ForeignKey("tx.id"), primary_key=True),
+)
 
 
 class RolesUsers(db.Model):
@@ -47,13 +54,16 @@ class User(db.Model, UserMixin):
     date_added = db.Column(db.DateTime, default=utcnow)
     confirmed_at = db.Column(db.DateTime)
 
-    roles = db.relationship("Role", secondary="roles_users", backref=db.backref("users", lazy="dynamic"))
+    roles = db.relationship(
+        "Role", secondary="roles_users", backref=db.backref("users", lazy="dynamic")
+    )
     entities = db.relationship("Entity", backref="user")
     bankaccounts = db.relationship("BankAccount", backref="user")
     transactions = db.relationship("Transaction", backref="user")
     accounts = db.relationship("Account", backref="user")
     accountmatches = db.relationship("AccountMatch", backref="user")
     transactionuploads = db.relationship("TransactionUpload", backref="user")
+    tags = db.relationship("Tag", backref="user")
 
 
 class EntityType(db.Model):
@@ -273,6 +283,9 @@ class Transaction(db.Model):
 
     notes = db.relationship("TransactionNote", backref="tx")
     attachments = db.relationship("TransactionAttachment", backref="tx")
+    tags = db.relationship(
+        "Tag", secondary=tag_transaction, back_populates="transactions", lazy="dynamic"
+    )
 
     def __str__(self):
         return """
@@ -465,3 +478,33 @@ class AccountMatchFilterRegex(db.Model):
     regex = db.Column(db.String(128))
     accountmatch_id = db.Column(db.Integer, db.ForeignKey("accountmatch.id"))
     date_added = db.Column(db.DateTime, default=utcnow)
+
+
+class Tag(db.Model):
+    __tablename__ = "tag"
+    __table_args__ = (db.UniqueConstraint("name", "user_id"),)
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(128))
+    desc = db.Column(db.String(128))
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+    date_added = db.Column(db.DateTime, default=utcnow)
+
+    transactions = db.relationship(
+        "Transaction", secondary=tag_transaction, back_populates="tags", lazy="dynamic"
+    )
+
+    def dump(self, **kwargs):
+        return TagSchema(**kwargs).dump(self).data
+
+
+class TagSchema(Schema):
+    name_as_html = fields.Method("get_name_as_html")
+
+    class Meta:
+        fields = ("id", "name", "name_as_html")
+
+    def get_name_as_html(self, obj):
+        return '<a href="{url}">{tag.name}</a>'.format(
+            tag=obj, url=url_for("tags.tag", id=obj.id)
+        )
