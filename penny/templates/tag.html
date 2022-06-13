@@ -44,9 +44,7 @@
                         </tr>
                         <tr>
                             <td>Transactions</td>
-                            <td><a href="{{ url_for('transactions.tag',
-                                            id=tag.id) }}">{{
-                                            transactions_amount }}</a></td>
+                            <td>{% if tag %}<a href="{{ url_for('transactions.tag', id=tag.id) }}">{{ transactions_amount }}</a>{% endif %}</td>
                         </tr>
                     </tbody>
                 </table>
