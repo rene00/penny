@@ -23,6 +23,7 @@ def get_account_label(obj):
 def get_bankaccount_label(obj):
     return "{0.bank} - {0.number}".format(obj)
 
+
 def get_tag_label(obj):
     return "{0.name} - {0.desc}".format(obj)
 
@@ -49,9 +50,9 @@ class FormTransaction(FlaskForm):
         validators=[],
         get_pk=lambda b: b.id,
     )
-    attachment = FileField(u"Filename", validators=[])
-    note = TextAreaField(u"Note", default="", validators=[])
-    amount = DecimalField(u"Amount", validators=[])
+    attachment = FileField("Filename", validators=[])
+    note = TextAreaField("Note", default="", validators=[])
+    amount = DecimalField("Amount", validators=[])
     id = None
 
     def reset(self):
@@ -61,8 +62,6 @@ class FormTransaction(FlaskForm):
     def set_defaults(self, transaction):
         """Set default values for resources of the form based off
         transaction."""
-
-
         if transaction.account:
             self.account.default = transaction.account.id
 
@@ -78,13 +77,13 @@ class FormTransaction(FlaskForm):
 
 class FormTransactionAdd(FlaskForm):
     date = DateField(
-        u"Date", default=datetime.now(), validators=[validators.DataRequired()]
+        "Date", default=datetime.now(), validators=[validators.DataRequired()]
     )
-    debit = DecimalField(u"Debit", default=0, validators=[])
-    credit = DecimalField(u"Credit", default=0, validators=[])
-    memo = TextAreaField(u"Memo", default="", validators=[validators.DataRequired()])
-    account = SelectField(u"Account", validators=[], coerce=int)
-    bankaccount = SelectField(u"Bank Account", validators=[], coerce=int)
+    debit = DecimalField("Debit", default=0, validators=[])
+    credit = DecimalField("Credit", default=0, validators=[])
+    memo = TextAreaField("Memo", default="", validators=[validators.DataRequired()])
+    account = SelectField("Account", validators=[], coerce=int)
+    bankaccount = SelectField("Bank Account", validators=[], coerce=int)
 
     def get_credit(self):
         """Return credit."""
@@ -125,15 +124,19 @@ class FormTransactionAdd(FlaskForm):
             return bankaccount
 
     def get_tags(self):
-        return models.db.session.query(models.Tag).filter_by(transaction_id=self.transaction.data).all()
+        return (
+            models.db.session.query(models.Tag)
+            .filter_by(transaction_id=self.transaction.data)
+            .all()
+        )
 
 
 class FormTransactionSplit(FlaskForm):
     split_amount = TextAreaField(
-        u"Amount", default="", validators=[validators.DataRequired()]
+        "Amount", default="", validators=[validators.DataRequired()]
     )
     split_memo = TextAreaField(
-        u"Memo", default="", validators=[validators.DataRequired()]
+        "Memo", default="", validators=[validators.DataRequired()]
     )
 
     split_account = QuerySelectField(
@@ -169,4 +172,4 @@ class FormTransactionSplit(FlaskForm):
 
 
 class FormTransactionUpload(FlaskForm):
-    upload = FileField(u"Filename", validators=[validators.DataRequired()])
+    upload = FileField("Filename", validators=[validators.DataRequired()])

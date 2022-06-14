@@ -1,5 +1,13 @@
 from penny import models
-from flask import current_app as app, Blueprint, g, jsonify, request, make_response, abort
+from flask import (
+    current_app as app,
+    Blueprint,
+    g,
+    jsonify,
+    request,
+    make_response,
+    abort,
+)
 from flask_security.decorators import auth_required
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy import or_
@@ -275,6 +283,7 @@ def accounttype(accounttype, start_date, end_date):
 
     return jsonify(data)
 
+
 @data_transactions.route("/tag/<int:id>")
 @auth_required()
 def tag(id):
@@ -286,7 +295,11 @@ def tag(id):
     limit = request.args.get("limit", 25)
 
     try:
-        tag = models.db.session.query(models.Tag).filter(models.Tag.user == g.user, models.Tag.id == id).one()
+        tag = (
+            models.db.session.query(models.Tag)
+            .filter(models.Tag.user == g.user, models.Tag.id == id)
+            .one()
+        )
     except NoResultFound:
         return abort(404)
 
