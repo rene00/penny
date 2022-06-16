@@ -43,6 +43,24 @@
                             </td>
                         </tr>
                         <tr>
+                            <td>Matches</td>
+                            <td>
+                                {% if form.regex.errors -%}
+                                <div class="form-group has-error">
+                                    <label class="control-label" for="inputError">{{ form.regex.errors[0] }}</label>
+                                {% endif -%}
+                                <p>{{ form.regex(rows="1", class="form-control") }}</p>
+                                {% if form.regex.errors -%}
+                                    </div>
+                                {% endif -%}
+                                {% for regex in tag.regexes %}
+                                {% set input_id = 'regex_' + regex.id|string %}
+                                {% set input_name = 'regex_' + regex.id|string %}
+                                <p><input class="form-control" id="{{ input_id }}" name="{{ input_name }}" rows="1" type="text" value="{{ regex.regex }}"></p>
+                                {% endfor %}
+                            </td>
+                        </tr>
+                        <tr>
                             <td>Transactions</td>
                             <td>{% if tag %}<a href="{{ url_for('transactions.tag', id=tag.id) }}">{{ transactions_amount }}</a>{% endif %}</td>
                         </tr>

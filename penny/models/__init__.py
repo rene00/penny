@@ -493,6 +493,7 @@ class Tag(db.Model):
     transactions = db.relationship(
         "Transaction", secondary=tag_transaction, back_populates="tags", lazy="dynamic"
     )
+    regexes = db.relationship("TagMatchFilterRegex", back_populates="tag")
 
     def dump(self, **kwargs):
         return TagSchema(**kwargs).dump(self).data
@@ -508,3 +509,14 @@ class TagSchema(Schema):
         return '<a href="{url}">{tag.name}</a>'.format(
             tag=obj, url=url_for("tags.tag", id=obj.id)
         )
+
+
+class TagMatchFilterRegex(db.Model):
+    __tablename__ = "tag_match_filter_regex"
+    __table_args__ = (db.UniqueConstraint("regex", "tag_id"),)
+
+    id = db.Column(db.Integer, primary_key=True)
+    regex = db.Column(db.String(128))
+    tag_id = db.Column(db.Integer, db.ForeignKey("tag.id"))
+    date_added = db.Column(db.DateTime, default=utcnow)
+    tag = db.relationship("Tag", back_populates="regexes")

@@ -66,3 +66,10 @@ tasks:
         poetry run pycodestyle \
           --ignore=E121,E123,E126,E226,E24,E704,W503,E711,E712,E501 penny
       - poetry run pytest .
+  seed:init:
+    env:
+      FLASK_DEBUG: 1
+      FLASK_APP: penny
+      CONFIG_FILE: ./conf.py
+    cmds:
+      - poetry run flask seed init
