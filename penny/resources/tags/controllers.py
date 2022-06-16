@@ -1,6 +1,6 @@
 from penny import models, util
 from penny.resources.tags.forms import FormTag
-from flask import Blueprint, render_template, url_for, g, redirect, flash
+from flask import Blueprint, render_template, url_for, g, redirect, flash, request
 from flask_security.decorators import auth_required
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.exc import IntegrityError
@@ -18,7 +18,7 @@ def _tags():
 
 @tags.route(
     "/tags/<int:id>",
-    methods=["GET"],
+    methods=["GET", "POST"],
 )
 @auth_required()
 def tag(id):
@@ -36,6 +36,26 @@ def tag(id):
     if form.validate_on_submit():
         tag.name = form.name.data
         tag.desc = form.desc.data
+
+        regex: models.TagMatchFilterRegex
+
+        if form.regex.data:
+            regex = (
+                models.TagMatchFilterRegex.query.filter_by(
+                    regex=form.regex.data, tag=tag
+                ).first()
+            )
+            if regex is None:
+                regex = models.TagMatchFilterRegex(regex=form.regex.data, tag=tag)
+                models.db.session.add(regex)
+                models.db.session.commit()
+
+        for i in models.db.session.query(models.TagMatchFilterRegex).filter(models.TagMatchFilterRegex.tag==tag, models.TagMatchFilterRegex.regex != form.regex.data).all():
+            if not request.form.get(f"regex_{i.id}"):
+                models.db.session.delete(i)
+                models.db.session.commit()
+
+        form.regex.data = ""
 
         models.db.session.add(tag)
         models.db.session.commit()
