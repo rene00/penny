@@ -73,3 +73,10 @@ tasks:
       CONFIG_FILE: ./conf.py
     cmds:
       - poetry run flask seed init
+  task:tag_match:
+    env:
+      FLASK_DEBUG: 1
+      FLASK_APP: penny
+      CONFIG_FILE: ./conf.py
+    cmds:
+      - poetry run flask task tag_match
