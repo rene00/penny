@@ -1,9 +1,38 @@
 from penny import models
 from flask.cli import AppGroup
+from sqlalchemy.exc import IntegrityError
 import random
+import re
 
 
 seed_cli = AppGroup("seed")
+task_cli = AppGroup("task")
+
+
+def run_tag_match(user: models.User, tag: models.Tag) -> None:
+    for i in tag.regexes:
+        regex = re.compile(i.regex)
+        for ii in models.Transaction.query.filter(
+            models.Transaction.user_id == user.id,
+            models.Transaction.is_deleted == False,
+            models.Transaction.is_archived == False,
+            ~models.Transaction.tags.any(models.Tag.id.in_([tag.id])),
+        ).all():
+            if regex.search(ii.memo):
+                ii.tags.append(tag)
+                models.db.session.add(ii)
+                try:
+                    models.db.session.commit()
+                except IntegrityError:
+                    models.db.session.rollback()
+
+
+@task_cli.command("tag_match")
+def task_tag_match() -> None:
+    user: models.User = models.User.query.filter_by(id=1).one()
+    tag: models.Tag = models.Tag.query.filter_by(id=1).one()
+    run_tag_match(user, tag)
+    return None
 
 
 @seed_cli.command("init")
@@ -78,7 +107,23 @@ def seed_init() -> None:
             memo="test memo 1",
             bankaccount_id=random.choice(bankaccounts).id,
             account_id=random.choice(accounts).id,
-        )
+        ),
+        models.Transaction(
+            user_id=user.id,
+            debit=-150,
+            credit=0,
+            memo="test memo 2",
+            bankaccount_id=random.choice(bankaccounts).id,
+            account_id=random.choice(accounts).id,
+        ),
+        models.Transaction(
+            user_id=user.id,
+            debit=-150,
+            credit=0,
+            memo="test memo 3",
+            bankaccount_id=random.choice(bankaccounts).id,
+            account_id=random.choice(accounts).id,
+        ),
     ]
 
     for i in transactions:
