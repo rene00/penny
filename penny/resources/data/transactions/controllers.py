@@ -291,6 +291,7 @@ def tag(id):
 
     data = {"rows": []}
 
+    search = request.args.get("search")
     offset = request.args.get("offset", 0)
     limit = request.args.get("limit", 25)
 
@@ -303,10 +304,27 @@ def tag(id):
     except NoResultFound:
         return abort(404)
 
-    # NOTE(rene): this will include transactions which have been marged as deleted.
-    data["total"] = len(list(tag.transactions))
+    results = tag.transactions.filter(models.Transaction.is_deleted == 0).order_by(
+        models.Transaction.date.desc()
+    )
 
-    for transaction in tag.transactions.offset(offset).limit(limit).all():
+    if search:
+        results = results.filter(
+            or_(
+                models.Transaction.memo.like("%{0}%".format(search)),
+                models.Transaction.credit.like(  # pyright: ignore[reportGeneralTypeIssues]
+                    "{0}%".format(search)
+                ),
+                models.Transaction.debit.like(  # pyright: ignore[reportGeneralTypeIssues]
+                    "-{0}%".format(search)
+                ),
+            )
+        )
+
+    data["total"] = len(  # pyright: ignore[reportGeneralTypeIssues]
+        list(tag.transactions)
+    )
+    for transaction in results.offset(offset).limit(limit).all():
         data["rows"].append(transaction.dump())
 
     return jsonify(data)

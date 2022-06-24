@@ -6,7 +6,7 @@
         <div class="card-body">
             <div class="table-responsive">
                 {% include 'includes/display_flash_message.html' %}
-                <form action="{{ url_for('tasks._tasks') }}" method="POST">
+                <form action="{{ url_for('tasks.tasks_') }}" method="POST">
                 {{ form.csrf_token }}
                 <div class="form-group">
                     <div class="checkbox">
@@ -22,7 +22,19 @@
                         <!-- /.form-group has-error -->
                         {% endif -%}
                     </div>
-                    <!-- /.checkbox -->
+                    <div class="checkbox">
+                        {% if form.tag_match.errors -%}
+                        <div class="form-group has-error">
+                            <label class="control-label" for="inputError">{{ form.tag_match.errors[0] }}</label>
+                        {% endif -%}
+                        <label>
+                        {{ form.tag_match() }} Process Tag Matches
+                        </label>
+                        {% if form.tag_match.errors -%}
+                        </div>
+                        <!-- /.form-group has-error -->
+                        {% endif -%}
+                    </div>
                 </div>
                 <!-- /.form-group -->
                 <input type="submit" class="btn btn-primary" name="submit" value="Submit">

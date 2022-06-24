@@ -1,38 +1,18 @@
-from penny import models
+from penny import models, tasks
 from flask.cli import AppGroup
-from sqlalchemy.exc import IntegrityError
 import random
-import re
 
 
 seed_cli = AppGroup("seed")
 task_cli = AppGroup("task")
 
 
-def run_tag_match(user: models.User, tag: models.Tag) -> None:
-    for i in tag.regexes:
-        regex = re.compile(i.regex)
-        for ii in models.Transaction.query.filter(
-            models.Transaction.user_id == user.id,
-            models.Transaction.is_deleted == False,
-            models.Transaction.is_archived == False,
-            ~models.Transaction.tags.any(models.Tag.id.in_([tag.id])),
-        ).all():
-            if regex.search(ii.memo):
-                ii.tags.append(tag)
-                models.db.session.add(ii)
-                try:
-                    models.db.session.commit()
-                except IntegrityError:
-                    models.db.session.rollback()
 
 
 @task_cli.command("tag_match")
 def task_tag_match() -> None:
     user: models.User = models.User.query.filter_by(id=1).one()
-    tag: models.Tag = models.Tag.query.filter_by(id=1).one()
-    run_tag_match(user, tag)
-    return None
+    return tasks.tag_match(user)
 
 
 @seed_cli.command("init")
