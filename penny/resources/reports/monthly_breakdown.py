@@ -80,23 +80,42 @@ class ReportsMonthlyBreakdown:
         start_date = end_date - datetime.timedelta(days=self._totalDays)
         start_date = start_date.replace(day=1)
 
-        q = (
-            models.db.session.query(
-                func.strftime("%Y", models.Transaction.date).label("year"),
-                func.strftime("%m", models.Transaction.date).label("month"),
-                func.sum(models.Transaction.credit).label("credit"),
-                func.sum(models.Transaction.debit).label("debit"),
+        if models.db.session.bind.engine.name == "sqlite":
+            q = (
+                models.db.session.query(
+                    func.strftime("%Y", models.Transaction.date).label("year"),
+                    func.strftime("%m", models.Transaction.date).label("month"),
+                    func.sum(models.Transaction.credit).label("credit"),
+                    func.sum(models.Transaction.debit).label("debit"),
+                )
+                .filter(
+                    models.Transaction.is_deleted == False,  # noqa[W0612]
+                    models.Transaction.is_archived == False,
+                    models.Transaction.user_id == self.account_or_tag.user.id,
+                    models.Transaction.date >= start_date,
+                    models.Transaction.date <= end_date,
+                )
+                .group_by(func.strftime("%Y-%m-01", models.Transaction.date))
+                .order_by(models.Transaction.date)
             )
-            .filter(
-                models.Transaction.is_deleted == False,  # noqa[W0612]
-                models.Transaction.is_archived == False,
-                models.Transaction.user_id == self.account_or_tag.user.id,
-                models.Transaction.date >= start_date,
-                models.Transaction.date <= end_date,
+        else:
+            q = (
+                models.db.session.query(
+                    func.date_format(models.Transaction.date, "%Y").label("year"),
+                    func.date_format(models.Transaction.date, "%m").label("month"),
+                    func.sum(models.Transaction.credit).label("credit"),
+                    func.sum(models.Transaction.debit).label("debit"),
+                )
+                .filter(
+                    models.Transaction.is_deleted == False,  # noqa[W0612]
+                    models.Transaction.is_archived == False,
+                    models.Transaction.user_id == self.account_or_tag.user.id,
+                    models.Transaction.date >= start_date,
+                    models.Transaction.date <= end_date,
+                )
+                .group_by(func.date_format(models.Transaction.date, "%Y-%m-01"))
+                .order_by(models.Transaction.date)
             )
-            .group_by(func.strftime("%Y-%m-01", models.Transaction.date))
-            .order_by(models.Transaction.date)
-        )
 
         if isinstance(self.account_or_tag, models.Account):
             q = q.filter(models.Transaction.account_id == self.account_or_tag.id)
