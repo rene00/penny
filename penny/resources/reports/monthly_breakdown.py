@@ -1,9 +1,9 @@
-from flask import current_app as app, g  # noqa[W0611]
 from sqlalchemy.sql import func
-from penny import models, util  # noqa[E402]
+from penny import models
 import calendar
 import datetime
 from dateutil.rrule import rrule, MONTHLY
+from typing import List, TypeVar
 
 
 class Month:
@@ -31,24 +31,34 @@ class Month:
         return self.avg - self.previousAvg
 
 
+AccountOrTag = TypeVar("AccountOrTag", models.Account, models.Tag)
+
+
 class ReportsMonthlyBreakdown:
-    def __init__(self, account):
-        self.account = account
-        self._allAmounts = []
+    def __init__(self, account_or_tag: AccountOrTag):
+        self.account_or_tag: AccountOrTag = account_or_tag
+        self._allAmounts: List[int] = []
 
     @property
     def _firstTransaction(self):
-        return (
+        q = (
             models.db.session.query(models.Transaction)
             .filter(
                 models.Transaction.is_deleted == False,
                 models.Transaction.is_archived == False,
-                models.Transaction.account_id == self.account.id,
-                models.Transaction.user_id == g.user.id,
+                models.Transaction.user_id == self.account_or_tag.user.id,
             )
             .order_by(models.Transaction.date)
-            .first()
         )
+
+        if isinstance(self.account_or_tag, models.Account):
+            q = q.filter(models.Transaction.account_id == self.account_or_tag.id)
+        else:
+            q = q.filter(
+                models.Transaction.tags.any(models.Tag.id == self.account_or_tag.id)
+            )
+
+        return q.first()
 
     @property
     def _totalDays(self):
@@ -70,26 +80,32 @@ class ReportsMonthlyBreakdown:
         start_date = end_date - datetime.timedelta(days=self._totalDays)
         start_date = start_date.replace(day=1)
 
-        transactions = (
+        q = (
             models.db.session.query(
-                func.date_format(models.Transaction.date, "%Y").label("year"),
-                func.date_format(models.Transaction.date, "%m").label("month"),
+                func.strftime("%Y", models.Transaction.date).label("year"),
+                func.strftime("%m", models.Transaction.date).label("month"),
                 func.sum(models.Transaction.credit).label("credit"),
                 func.sum(models.Transaction.debit).label("debit"),
             )
             .filter(
                 models.Transaction.is_deleted == False,  # noqa[W0612]
                 models.Transaction.is_archived == False,
-                models.Transaction.account_id == self.account.id,
-                models.Transaction.user_id == g.user.id,
+                models.Transaction.user_id == self.account_or_tag.user.id,
                 models.Transaction.date >= start_date,
                 models.Transaction.date <= end_date,
             )
-            .group_by(func.date_format(models.Transaction.date, "%Y-%m-01"))
+            .group_by(func.strftime("%Y-%m-01", models.Transaction.date))
             .order_by(models.Transaction.date)
         )
 
-        for transaction in transactions.all():
+        if isinstance(self.account_or_tag, models.Account):
+            q = q.filter(models.Transaction.account_id == self.account_or_tag.id)
+        else:
+            q = q.filter(
+                models.Transaction.tags.any(models.Tag.id == self.account_or_tag.id)
+            )
+
+        for transaction in q.all():
             month = Month(
                 year=transaction.year,
                 month=transaction.month,
