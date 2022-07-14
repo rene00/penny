@@ -12,22 +12,24 @@ def reports():
 
     data = {"rows": []}
 
-    # Add account monthly breakdown report
-    data["rows"].append(
-        {
-            "report_url": '<a href="{0}">Account Monthly Breakdown<a>'.format(
-                url_for("reports.account_monthly_breakdown")
-            )
-        }
-    )
-
-    # Add savings rate report
-    data["rows"].append(
-        {
-            "report_url": '<a href="{0}">Monthly Savings Rate for the past 3 years<a>'.format(
-                url_for("reports.savings_rate")
-            )
-        }
+    data["rows"].extend(
+        [
+            {
+                "report_url": '<a href="{0}">Account Monthly Breakdown<a>'.format(
+                    url_for("reports.account_monthly_breakdown")
+                )
+            },
+            {
+                "report_url": '<a href="{0}">Tag Monthly Breakdown<a>'.format(
+                    url_for("reports.tag_monthly_breakdown")
+                )
+            },
+            {
+                "report_url": '<a href="{0}">Monthly Savings Rate for the past 3 years<a>'.format(
+                    url_for("reports.savings_rate")
+                )
+            }
+        ]
     )
 
     # Add entity reports
