@@ -284,9 +284,12 @@ def accounttype(accounttype, start_date, end_date):
     return jsonify(data)
 
 
-@data_transactions.route("/tag/<int:id>")
+@data_transactions.route(
+    "/tag/<int:id>", defaults={"start_date": None, "end_date": None}
+)
+@data_transactions.route("/tag/<int:id>/<string:start_date>/<string:end_date>")
 @auth_required()
-def tag(id):
+def tag(id, **kwargs):
     """Return data on all transactions for a tag."""
 
     data = {"rows": []}
@@ -308,6 +311,18 @@ def tag(id):
         models.Transaction.date.desc()
     )
 
+    if kwargs.get("start_date") and kwargs.get("end_date"):
+        try:
+            start_date: datetime = datetime.strptime(kwargs.get("start_date"), "%Y%m%d")
+            end_date: datetime = datetime.strptime(kwargs.get("end_date"), "%Y%m%d")
+        except ValueError:
+            return abort(400)
+        else:
+            results = results.filter(
+                models.Transaction.date >= start_date,
+                models.Transaction.date <= end_date,
+            )
+
     if search:
         results = results.filter(
             or_(
@@ -321,9 +336,7 @@ def tag(id):
             )
         )
 
-    data["total"] = len(  # pyright: ignore[reportGeneralTypeIssues]
-        list(tag.transactions)
-    )
+    data["total"] = len(list(results))  # pyright: ignore[reportGeneralTypeIssues]
     for transaction in results.offset(offset).limit(limit).all():
         data["rows"].append(transaction.dump())
 
