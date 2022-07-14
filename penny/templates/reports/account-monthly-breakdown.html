@@ -5,7 +5,7 @@
     <div class="row">
         <div class="card shadow w-100">
             <div class="card-header py-3">
-                {% if account.name %}<h6 class="m-0 font-weight-bold text-primary">{{ account.name }}</h6>{% endif %}
+                {% if account %}<h6 class="m-0 font-weight-bold text-primary">{{ account.name }}</h6>{% endif %}
             </div>
             <div class="card-body">
                 <form action={{ url_for('reports.account_monthly_breakdown') }} method="POST">
