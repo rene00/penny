@@ -9,7 +9,7 @@ from penny import models, resources, util
 from penny import models
 from penny.models import db
 from penny.common.init_data import import_all_types
-from .cli import seed_cli, task_cli
+from .cli import seed_cli, task_cli, report_cli
 import os
 from pathlib import Path
 import locale
@@ -35,6 +35,7 @@ def create_app(test_config=None, skip_migrations=False):
 
     app.cli.add_command(seed_cli)
     app.cli.add_command(task_cli)
+    app.cli.add_command(report_cli)
 
     db.init_app(app)
     migrate.init_app(app, db)

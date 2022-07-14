@@ -80,3 +80,21 @@ tasks:
       CONFIG_FILE: ./conf.py
     cmds:
       - poetry run flask task tag_match
+  report:account_monthly_breakdown:
+    env:
+      FLASK_DEBUG: 1
+      FLASK_APP: penny
+      CONFIG_FILE: ./conf.py
+      USER_ID: 1
+      ACCOUNT_ID: 95
+    cmds:
+      - poetry run flask report account_monthly_breakdown $USER_ID $ACCOUNT_ID
+  report:tag_monthly_breakdown:
+    env:
+      FLASK_DEBUG: 1
+      FLASK_APP: penny
+      CONFIG_FILE: ./conf.py
+      USER_ID: 1
+      TAG_ID: 4
+    cmds:
+      - poetry run flask report tag_monthly_breakdown $USER_ID $TAG_ID
