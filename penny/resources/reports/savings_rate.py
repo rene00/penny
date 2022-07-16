@@ -92,23 +92,42 @@ class ReportsSavingsRate:
             .one()
         )  # noqa[E711]
 
-        transactions = (
-            models.db.session.query(
-                models.Transaction,
-                func.date_format(models.Transaction.date, "%Y").label("year"),
-                func.date_format(models.Transaction.date, "%m").label("month"),
+        if models.db.session.bind.engine.name == "sqlite":
+            transactions = (
+                models.db.session.query(
+                    models.Transaction,
+                    func.strftime("%Y", models.Transaction.date).label("year"),
+                    func.strftime("%m", models.Transaction.date).label("month"),
+                )
+                .join(models.Account, models.Transaction.account_id == models.Account.id)
+                .filter(
+                    models.Transaction.is_deleted == False,  # noqa[W0612]
+                    models.Transaction.is_archived == False,
+                    models.Transaction.date >= self.start_date,
+                    models.Transaction.date <= self.end_date,
+                    models.Transaction.account_id != False,
+                    models.Transaction.user == g.user,
+                )
+                .order_by(models.Transaction.date)
             )
-            .join(models.Account, models.Transaction.account_id == models.Account.id)
-            .filter(
-                models.Transaction.is_deleted == False,  # noqa[W0612]
-                models.Transaction.is_archived == False,
-                models.Transaction.date >= self.start_date,
-                models.Transaction.date <= self.end_date,
-                models.Transaction.account_id != False,
-                models.Transaction.user == g.user,
+        else:
+            transactions = (
+                models.db.session.query(
+                    models.Transaction,
+                    func.date_format(models.Transaction.date, "%Y").label("year"),
+                    func.date_format(models.Transaction.date, "%m").label("month"),
+                )
+                .join(models.Account, models.Transaction.account_id == models.Account.id)
+                .filter(
+                    models.Transaction.is_deleted == False,  # noqa[W0612]
+                    models.Transaction.is_archived == False,
+                    models.Transaction.date >= self.start_date,
+                    models.Transaction.date <= self.end_date,
+                    models.Transaction.account_id != False,
+                    models.Transaction.user == g.user,
+                )
+                .order_by(models.Transaction.date)
             )
-            .order_by(models.Transaction.date)
-        )
 
         data = {}
 
