@@ -64,6 +64,18 @@
                             <td>Transactions</td>
                             <td>{% if tag %}<a href="{{ url_for('transactions.tag', id=tag.id) }}">{{ transactions_amount }}</a>{% endif %}</td>
                         </tr>
+                        <tr>
+                            <td>Reports</td>
+                            <td>
+                              {% if tag %}<ul>
+                                <li><a href="{{
+                                    url_for('reports.tag_monthly_breakdown',
+                                    tag_id=tag.id) }}">Tag Monthly
+                                    Breakdown</a></li>
+                              </ul>
+                              {% endif %}
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
                 {% if request.path == "/tags/add" %}

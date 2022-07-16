@@ -1038,6 +1038,14 @@ optional = false
 python-versions = ">=3.7"
 
 [[package]]
+name = "types-python-dateutil"
+version = "2.8.18"
+description = "Typing stubs for python-dateutil"
+category = "dev"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "types-redis"
 version = "4.2.2"
 description = "Typing stubs for redis"
@@ -1182,7 +1190,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "beb2de81291546fa120dc3db28b5b1f36437a4d9d89592f3cf2629e23cb2b3cf"
+content-hash = "e49c5a53f4e3efdab6f4a790f4e600004b26773ccf1c7acfb118a1fd61810f1d"
 
 [metadata.files]
 alembic = [
@@ -1769,6 +1777,10 @@ sqlalchemy-utils = [
 tomli = [
     {file = "tomli-2.0.1-py3-none-any.whl", hash = "sha256:939de3e7a6161af0c887ef91b7d41a53e7c5a1ca976325f429cb46ea9bc30ecc"},
     {file = "tomli-2.0.1.tar.gz", hash = "sha256:de526c12914f0c550d15924c62d72abc48d6fe7364aa87328337a31007fe8a4f"},
+]
+types-python-dateutil = [
+    {file = "types-python-dateutil-2.8.18.tar.gz", hash = "sha256:8695c7d7a5b1aef4002f3ab4e1247e23b1d41cd7cc1286d4594c2d8c5593c991"},
+    {file = "types_python_dateutil-2.8.18-py3-none-any.whl", hash = "sha256:fd5ed97262b76ae684695ea38ace8dd7c1bc9491aba7eb4edf6654b7ecabc870"},
 ]
 types-redis = [
     {file = "types-redis-4.2.2.tar.gz", hash = "sha256:616e5331e957832321c14a4bd206b41f967657cf360f62419b21588880af3933"},

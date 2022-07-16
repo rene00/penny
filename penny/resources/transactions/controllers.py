@@ -156,10 +156,14 @@ def account(id, start_date, end_date):
     )
 
 
-@transactions.route("/tag/<int:id>", methods=["GET"])
-def tag(id):
+@transactions.route(
+    "/tag/<int:id>", defaults={"start_date": None, "end_date": None}, methods=["GET"]
+)
+@transactions.route("/tag/<int:id>/<int:start_date>/<int:end_date>", methods=["GET"])
+def tag(id, **kwargs):
     return render_template(
-        "transactions.html", data_url=url_for("data_transactions.tag", id=id)
+        "transactions.html",
+        data_url=url_for("data_transactions.tag", id=id, **kwargs),
     )
 
 

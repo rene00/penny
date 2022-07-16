@@ -40,17 +40,22 @@ def tag(id):
         regex: models.TagMatchFilterRegex
 
         if form.regex.data:
-            regex = (
-                models.TagMatchFilterRegex.query.filter_by(
-                    regex=form.regex.data, tag=tag
-                ).first()
-            )
+            regex = models.TagMatchFilterRegex.query.filter_by(
+                regex=form.regex.data, tag=tag
+            ).first()
             if regex is None:
                 regex = models.TagMatchFilterRegex(regex=form.regex.data, tag=tag)
                 models.db.session.add(regex)
                 models.db.session.commit()
 
-        for i in models.db.session.query(models.TagMatchFilterRegex).filter(models.TagMatchFilterRegex.tag==tag, models.TagMatchFilterRegex.regex != form.regex.data).all():
+        for i in (
+            models.db.session.query(models.TagMatchFilterRegex)
+            .filter(
+                models.TagMatchFilterRegex.tag == tag,
+                models.TagMatchFilterRegex.regex != form.regex.data,
+            )
+            .all()
+        ):
             if not request.form.get(f"regex_{i.id}"):
                 models.db.session.delete(i)
                 models.db.session.commit()

@@ -80,3 +80,10 @@ def get_account_as_choices():
     ):
         choices.extend([(account.id, "{0.entity.name} - {0.name}".format(account))])
     return choices
+
+
+def get_tag_as_choices():
+    choices = [(0, "")]
+    for tag in models.Tag.query.filter_by(user_id=g.user.id).order_by(models.Tag.name).all():
+        choices.append((tag.id, f"{tag.name}"))
+    return choices

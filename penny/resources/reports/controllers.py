@@ -11,6 +11,7 @@ from flask_security.decorators import auth_required
 from sqlalchemy.orm.exc import NoResultFound
 from flask_wtf import FlaskForm
 from wtforms import DateField, SelectField
+from typing import Optional
 import datetime
 
 reports = Blueprint("reports", __name__, url_prefix="/reports")
@@ -41,6 +42,13 @@ class FormMonthlyBreakdown(FlaskForm):
         except NoResultFound:
             pass
         return account
+
+
+class FormTagMonthlyBreakdown(FlaskForm):
+    tag = SelectField("Tag", validators=[], coerce=int)
+
+    def get_tag(self):
+        return models.Tag.query.filter_by(id=self.tag.data, user=g.user).one_or_none()
 
 
 class FormBasicDates(FlaskForm):
@@ -80,28 +88,29 @@ def savings_rate():
     methods=["GET", "POST"],
 )
 @auth_required()
-def account_monthly_breakdown(account_id):
+def account_monthly_breakdown(account_id: int) -> str:
 
     form = FormMonthlyBreakdown()
     form.account.choices = forms.get_account_as_choices()
 
-    report = {"transactions": {}}
-    account = None
+    report: dict = {"transactions": {}}
+    account: Optional[models.Account] = None
 
     if account_id:
-        try:
-            account = (
-                models.db.session.query(models.Account)
-                .filter_by(id=account_id, user=g.user)
-                .one()
-            )
-        except NoResultFound:
+        account = (
+            models.db.session.query(models.Account)
+            .filter_by(id=account_id, user=g.user)
+            .one_or_none()
+        )
+        if account:
+            report = ReportsMonthlyBreakdown(account).generate()
+        else:
             return url_for("reports.account_monthly_breakdown")
-        report = ReportsMonthlyBreakdown(account).generate()
 
     if form.validate_on_submit():
         account = form.get_account()
-        report = ReportsMonthlyBreakdown(account).generate()
+        if account:
+            report = ReportsMonthlyBreakdown(account).generate()
 
     labels = []
     data = []
@@ -109,14 +118,61 @@ def account_monthly_breakdown(account_id):
         labels.append(k)
         data.append(float(abs(v.amount) / float(100)))
 
-    return render_template(
-        "reports/monthly-breakdown.html",
-        report=report,
-        form=form,
-        account=account,
-        labels=json.dumps(labels),
-        data=json.dumps(data),
-    )
+    kwargs = {
+        "report": report,
+        "form": form,
+        "labels": json.dumps(labels),
+        "data": json.dumps(data),
+    }
+    if account:
+        kwargs["account"] = account
+
+    return render_template("reports/account-monthly-breakdown.html", **kwargs)
+
+
+@reports.route("/tag-monthly-breakdown/<int:tag_id>", methods=["GET", "POST"])
+@reports.route(
+    "/tag-monthly-breakdown/",
+    defaults={"tag_id": None},
+    methods=["GET", "POST"],
+)
+@auth_required()
+def tag_monthly_breakdown(tag_id: int) -> str:
+
+    form = FormTagMonthlyBreakdown()
+    form.tag.choices = forms.get_tag_as_choices()
+
+    report: dict = {"transactions": {}}
+    tag: Optional[models.Tag] = None
+
+    if tag_id:
+        tag = models.Tag.query.filter_by(id=tag_id, user=g.user).one_or_none()
+        if tag:
+            report = ReportsMonthlyBreakdown(tag).generate()
+        else:
+            return url_for("reports.tag_monthly_breakdown")
+
+    if form.validate_on_submit():
+        tag = form.get_tag()
+        if tag:
+            report = ReportsMonthlyBreakdown(tag).generate()
+
+    labels: list = []
+    data: list = []
+    for k, v in report["transactions"].items():
+        labels.append(k)
+        data.append(float(abs(v.amount) / float(100)))
+
+    kwargs = {
+        "report": report,
+        "form": form,
+        "labels": json.dumps(labels),
+        "data": json.dumps(data),
+    }
+    if tag:
+        kwargs["tag"] = tag
+
+    return render_template("reports/tag-monthly-breakdown.html", **kwargs)
 
 
 @reports.route(
