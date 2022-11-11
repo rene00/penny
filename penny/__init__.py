@@ -21,7 +21,7 @@ migrate = Migrate()
 user_datastore = SQLAlchemyUserDatastore(db, models.User, models.Role)
 
 
-def create_app(test_config=None, skip_migrations=False):
+def create_app(test_config=None):
     app = Flask(__name__)
 
     if test_config is None:

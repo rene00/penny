@@ -1,8 +1,10 @@
 import pytest
 from penny import create_app, user_datastore
 from penny.models import db
+from flask_migrate import upgrade
 import os
 import tempfile
+import logging
 
 
 @pytest.fixture
@@ -12,13 +14,18 @@ def app():
 
     app = create_app(
         dict(
-            CSRF_ENABLED=False,
-            WTF_CSRF_ENABLED=False,
             SQLALCHEMY_DATABASE_URI='sqlite:///{0}'.format(db_path),
+            SECRET_KEY="tatokuddMiWradfo",
+            SECURITY_PASSWORD_SALT="cecsebWorPenitdiTin",
+            DEBUG=True,
+            TESTING=True,
+            CSRF_ENABLED=False,
         )
     )
 
+
     with app.app_context():
+        upgrade()
         user_datastore.create_user(email="test@example.org", password="secret")
         db.session.commit()
 
