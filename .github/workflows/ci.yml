@@ -22,9 +22,9 @@ jobs:
           fetch-depth: 0
 
       -
-        name: Get tag
+        name: Set tag
         id: repository
-        run: echo "::set-output name=tag::$(git describe --tags HEAD)"
+        run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
 
       -
         name: Set up QEMU
