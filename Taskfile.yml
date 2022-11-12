@@ -45,7 +45,7 @@ tasks:
       - poetry run flask run --host={{ .FLASK_HOST }} --port={{ .FLASK_PORT }}
   docker:build:
     cmds:
-      - docker buildx build . -t {{.DOCKER_REGISTRY}}/{{.DOCKER_IMAGE_NAME}}:{{.DOCKER_TAG}}
+      - docker build . -t {{.DOCKER_REGISTRY}}/{{.DOCKER_IMAGE_NAME}}:{{.DOCKER_TAG}}
   docker:push:
     cmds:
       - docker push {{.DOCKER_REGISTRY}}/{{.DOCKER_IMAGE_NAME}}:{{.DOCKER_TAG}}
