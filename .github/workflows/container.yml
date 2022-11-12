@@ -45,4 +45,6 @@ jobs:
       -
         name: Build and push
         run: |
+          ls -la
+          find .
           task docker:build docker:push
