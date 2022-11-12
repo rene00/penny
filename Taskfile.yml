@@ -1,5 +1,4 @@
 ---
-
 version: '3'
 
 env:
@@ -13,10 +12,6 @@ vars:
   DOCKER_IMAGE_NAME: rene00/penny
 
 tasks:
-  default:
-    cmds:
-      - echo "{{.GREETING}}"
-    silent: true
   db:migrate:
     cmds:
       - poetry run flask db migrate
