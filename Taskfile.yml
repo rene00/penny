@@ -6,6 +6,12 @@ env:
   CONFIG_FILE: ./conf.py
   FLASK_APP: penny
 
+vars:
+  DOCKER_TAG:
+    sh: git log -n1 --format=%h
+  DOCKER_REGISTRY: ghcr.io
+  DOCKER_IMAGE_NAME: rene00/penny
+
 tasks:
   default:
     cmds:
@@ -43,15 +49,13 @@ tasks:
       - mkdir -p files/transactions files/uploads
       - poetry run flask run --host={{ .FLASK_HOST }} --port={{ .FLASK_PORT }}
   docker:build:
-    vars:
-      VERSION:
-        sh: poetry version --short
     cmds:
-      - docker build . -t rene00/penny:{{ .VERSION }}
+      - docker buildx build . -t {{.DOCKER_REGISTRY}}/{{.DOCKER_IMAGE_NAME}}:{{.DOCKER_TAG}}
+  docker:push:
+    cmds:
+      - docker push {{.DOCKER_REGISTRY}}/{{.DOCKER_IMAGE_NAME}}:{{.DOCKER_TAG}}
   docker:run:
     vars:
-      VERSION:
-        sh: poetry version --short
       HOST_PORT: 5000
     cmds:
       - |
@@ -59,7 +63,7 @@ tasks:
           --publish {{ .HOST_PORT }}:5000 \
           -e CONFIG_FILE=/app/penny/conf.py \
           --mount source=penny,target=/penny \
-          --name penny rene00/penny:{{ .VERSION }}
+          --name penny {{.DOCKER_REGISTRY}}/{{.DOCKER_IMAGE_NAME}}:{{.DOCKER_TAG}}
   test:
     cmds:
       - |
