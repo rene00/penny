@@ -21,11 +21,6 @@ jobs:
           fetch-depth: 0
 
       -
-        name: Set tag
-        id: repository
-        run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
-
-      -
         name: Set up QEMU
         uses: docker/setup-qemu-action@v2
 
@@ -40,9 +35,15 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
+      -
+        name: Install task
+        run: |
+          mkdir -p ~/.local/bin
+          sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b ~/.local/bin
+          echo "${HOME}/.local/bin" >> $GITHUB_PATH
+
       -
         name: Build and push
-        uses: docker/build-push-action@v3
-        with:
-          push: true
-          tags: ghcr.io/${{ github.repository }}:${{ steps.repository.outputs.tag }}
+        run: |
+          task docker:build DOCKER_BUILD_ARGS="--push"
