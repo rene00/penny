@@ -24,9 +24,7 @@ RUN echo 'en_AU.UTF-8 UTF-8' > /etc/locale.gen && /usr/sbin/locale-gen
 
 RUN mkdir -p /app/files/transactions /app/files/uploads
 
-COPY penny .
-
-COPY poetry.lock poetry.toml pyproject.toml ./
+COPY . .
 
 RUN poetry install --no-dev
 
