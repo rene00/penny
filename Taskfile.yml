@@ -20,6 +20,23 @@ tasks:
       - PENNY_SKIP_IMPORT_ALL_TYPES: 1
     cmds:
       - poetry run flask db upgrade
+  desktop:run:
+    deps: [desktop:build]
+    env:
+      PENNY_MIGRATE_V1: "true"
+      CONFIG_FILE: "/etc/penny/penny.conf.py"
+    cmds:
+      - dist/penny
+  desktop:debug:
+    deps: [desktop:build]
+    env:
+      PENNY_MIGRATE_V1: "true"
+      CONFIG_FILE: "/etc/penny/penny.conf.py"
+    cmds:
+      - dlv debug cmd/penny/main.go
+  desktop:build:
+    cmds:
+      - go build -o dist/penny ./cmd/penny
   build:
     cmds:
       - poetry install --no-dev
