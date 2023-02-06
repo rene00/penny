@@ -11,6 +11,7 @@ import (
 	"penny/internal/model"
 	"regexp"
 	"strings"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 
@@ -20,6 +21,23 @@ import (
 // Config is the config struct for v1. It provides access to the flask config file.
 type Config struct {
 	SQLAlchemyDatabaseURI string
+}
+
+type Transaction struct {
+	ID                int                `json:"id"`
+	UserID            int                `json:"user_id"`
+	Date              time.Time          `json:"date"`
+	Debit             float64            `json:"debit"`
+	Credit            float64            `json:"credit"`
+	Memo              string             `json:"memo"`
+	BankAccountID     int                `json:"bankaccount_id"`
+	AccountID         int                `json:"account_id"`
+	SplitTransactions []SplitTransaction `json:"split_transactions"`
+}
+
+type SplitTransaction struct {
+	Transaction
+	ParentID int `json:"parent_id"`
 }
 
 // NewConfig accepts a v1 config file and returns a Config.
@@ -64,19 +82,19 @@ func trimQuotes(s string) string {
 	return s
 }
 
-// transformSQLAlchemyDatabaseURI takes the SQLALCHEMY_DATABASE_URI string and
+// TransformSQLAlchemyDatabaseURI takes the SQLALCHEMY_DATABASE_URI string and
 // formats to a DSN that works with go-sql-driver.
-func transformSQLAlchemyDatabaseURI(s string) (string, error) {
+func TransformSQLAlchemyDatabaseURI(s string) (string, error) {
 	re := regexp.MustCompile(`^{0,}mysql\+pymysql:\/\/(.*)\:(.*)\@(.*):(\d+)\/(.*)$`)
 	m := re.FindStringSubmatch(trimQuotes(s))
 	if len(m) != 6 {
 		return "", fmt.Errorf("failed to parse URI")
 	}
-	return fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", m[1], m[2], m[3], m[4], m[5]), nil
+	return fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true", m[1], m[2], m[3], m[4], m[5]), nil
 }
 
-// validate checks the v1 DB to see if it can be migrated.
-func validate(ctx context.Context, v1db *sql.DB) error {
+// Validate checks the v1 DB to see if it can be migrated.
+func Validate(ctx context.Context, v1db *sql.DB) error {
 	if err := v1db.Ping(); err != nil {
 		return err
 	}
@@ -325,7 +343,7 @@ func Migrate(ctx context.Context, db *gorm.DB, configFile string) error {
 		return err
 	}
 
-	uri, err := transformSQLAlchemyDatabaseURI(config.SQLAlchemyDatabaseURI)
+	uri, err := TransformSQLAlchemyDatabaseURI(config.SQLAlchemyDatabaseURI)
 	if err != nil {
 		return err
 	}
@@ -336,7 +354,7 @@ func Migrate(ctx context.Context, db *gorm.DB, configFile string) error {
 	}
 	defer v1db.Close()
 
-	if err := validate(ctx, v1db); err != nil {
+	if err := Validate(ctx, v1db); err != nil {
 		return err
 	}
 

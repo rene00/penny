@@ -37,6 +37,15 @@ tasks:
   desktop:build:
     cmds:
       - go build -o dist/penny ./cmd/penny
+  reconcile:build:
+    cmds:
+      - go build -o dist/reconcile ./cmd/reconcile
+  reconcile:run:
+    env:
+      CONFIG_FILE: "/etc/penny/penny.conf.py"
+    deps: [reconcile:build]
+    cmds:
+      - ./dist/reconcile --parent-transaction-id 573042 --reconcile-file ~/.config/penny/reconcile.json
   build:
     cmds:
       - poetry install --no-dev
