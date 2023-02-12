@@ -66,3 +66,8 @@ files/
 # Penny
 *.db
 tmp
+
+# wails
+frontend/node_modules
+frontend/dist
+frontend/wailsjs
