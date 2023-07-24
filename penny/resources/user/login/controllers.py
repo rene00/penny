@@ -1,5 +1,3 @@
-# see trac@51 before editing.
-
 from penny.resources.user.login.forms import LoginForm
 from flask_login import current_user, login_user
 from flask import Blueprint, g, redirect, render_template, url_for, session

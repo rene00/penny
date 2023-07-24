@@ -1,7 +1,7 @@
 from penny import models
 from penny.common import forms
 from flask import Blueprint, g, render_template, url_for, redirect
-from flask_security import auth_required
+from flask_security.decorators import auth_required
 from sqlalchemy.orm.exc import NoResultFound
 from penny.resources.entities.forms import FormEntity
 

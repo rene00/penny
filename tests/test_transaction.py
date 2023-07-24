@@ -27,7 +27,7 @@ def test_transaction(client, auth):
         assert 200 == response.status_code
 
         tx = data['rows'][0]
-        total = data['total'][0]
+        total = data['total']
         assert tx['memo'] == "test-transaction-memo"
         assert tx['memo_as_html'] == '<a href="/transactions/1">test-transaction-memo</a>'
         assert tx['id'] == 1
