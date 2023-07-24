@@ -371,7 +371,7 @@ Flask = "*"
 
 [[package]]
 name = "flask-security-too"
-version = "4.1.4"
+version = "4.1.6"
 description = "Simple security for Flask apps."
 category = "main"
 optional = false
@@ -382,7 +382,7 @@ bcrypt = {version = ">=3.1.5", optional = true, markers = "extra == \"common\""}
 bleach = {version = ">=3.3.1", optional = true, markers = "extra == \"common\""}
 blinker = ">=1.4"
 email-validator = ">=1.1.1"
-Flask = ">=1.1.1"
+Flask = ">=1.1.1,<2.3"
 Flask-Login = ">=0.4.1"
 flask-mail = {version = ">=0.9.1", optional = true, markers = "extra == \"common\""}
 Flask-Principal = ">=0.4.0"
@@ -1398,10 +1398,7 @@ flask-rq = [
 flask-script = [
     {file = "Flask-Script-2.0.6.tar.gz", hash = "sha256:6425963d91054cfcc185807141c7314a9c5ad46325911bd24dcb489bd0161c65"},
 ]
-flask-security-too = [
-    {file = "Flask-Security-Too-4.1.4.tar.gz", hash = "sha256:8fa332d420fe198d889c794dd085cf70da9fabecad7680c3df2fb9b36a375912"},
-    {file = "Flask_Security_Too-4.1.4-py2.py3-none-any.whl", hash = "sha256:22c29d076d8bac93454c78ab4f5c52eb0695c45d937787efcee8d04a72748052"},
-]
+flask-security-too = []
 flask-sqlalchemy = [
     {file = "Flask-SQLAlchemy-2.5.1.tar.gz", hash = "sha256:2bda44b43e7cacb15d4e05ff3cc1f8bc97936cc464623424102bfc2c35e95912"},
     {file = "Flask_SQLAlchemy-2.5.1-py2.py3-none-any.whl", hash = "sha256:f12c3d4cc5cc7fdcc148b9527ea05671718c3ea45d50c7e732cceb33f574b390"},
