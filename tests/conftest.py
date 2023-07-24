@@ -2,9 +2,11 @@ import pytest
 from penny import create_app, user_datastore
 from penny.models import db
 from flask_migrate import upgrade
-import os
+from flask import Flask
+from flask_security.utils import hash_password
 import tempfile
-import logging
+from penny.common.init_data import import_all_types
+import os
 
 
 @pytest.fixture
@@ -12,14 +14,18 @@ def app():
 
     db_fd, db_path = tempfile.mkstemp()
 
-    app = create_app(
+    app: Flask = create_app(
         dict(
             SQLALCHEMY_DATABASE_URI='sqlite:///{0}'.format(db_path),
+            SQLALCHEMY_TRACK_MODIFICATIONS=False,
             SECRET_KEY="tatokuddMiWradfo",
             SECURITY_PASSWORD_SALT="cecsebWorPenitdiTin",
             DEBUG=True,
             TESTING=True,
             CSRF_ENABLED=False,
+            WTF_CSRF_ENABLED=False,
+            SECURITY_PASSWORD_HASH="plaintext",
+            SECURITY_EMAIL_VALIDATOR_ARGS={"check_deliverability": False},
         )
     )
 
@@ -28,6 +34,7 @@ def app():
         upgrade()
         user_datastore.create_user(email="test@example.org", password="secret")
         db.session.commit()
+        import_all_types()
 
     yield app
 
@@ -50,9 +57,10 @@ class AuthActions:
         self._client = client
 
     def login(self, username="test@example.org", password="secret"):
+        data: dict[str, str] = {"email": username, "password": password}
         return self._client.post(
             '/login',
-            data={"email": username, "password": password},
+            data=data,
             follow_redirects=True
         )
 
