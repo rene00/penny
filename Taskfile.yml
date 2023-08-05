@@ -20,7 +20,23 @@ tasks:
       - PENNY_SKIP_IMPORT_ALL_TYPES: 1
     cmds:
       - poetry run flask db upgrade
+  build:python3.9:
+    desc: "if lsb codename is bookworm force poetry to use python3.9"
+    vars:
+      LSB_CODENAME:
+        sh: lsb_release -cs 2>/dev/null || echo ""
+    silent: true
+    cmds: 
+      - |
+        if [ "{{.LSB_CODENAME}}" = "bookworm" ]; then
+          if ! command -v python3.9 >/dev/null; then
+            echo "missing python3.9"
+            exit 1
+          fi
+          poetry env use python3.9 >/dev/null
+        fi
   build:
+    deps: [build:python3.9]
     cmds:
       - poetry install --no-dev
   build:dev:

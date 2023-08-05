@@ -30,6 +30,16 @@ And finally, in another terminal, run the queue system::
 
 The queue system is backed by redis and defaults to connecting to redis on localhost:6379.
 
+------------
+Dependencies
+------------
+
+A list of hard dependencies that are needed when building Penny:
+ * python 3.9:
+   - Current build system expects python 3.9. Some of the python packages used
+     by penny are failing to build with the latest version of python (3.11 at
+     time of writing). If debian bookworm is being used, the use of python3.9
+     is enforced when running `task build`.
 
 -----------
 Get Started
