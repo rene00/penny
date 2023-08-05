@@ -2,6 +2,12 @@
 
 Penny is personal finance tracking web application.
 
+## Current Status
+
+**WARNING**: penny is **experimental**.
+
+It's missing alot of features that you would expect in a personal finance tracking application. I continue to work on it during my free time but would recommend using other free and open applications such as gnucash.
+
 ## Install & Run
 
 The quickest and easiest way to run Penny is to build and run the docker container:
