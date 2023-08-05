@@ -60,9 +60,6 @@ class ImportTransactions:
                 user=self.user,
             )
 
-            # Strip double whitespace from transaction memo.
-            transaction.memo = re.sub(r"\s\s+", " ", transaction.memo)
-
             # Strip leading whitespace from transaction memo.
             transaction.memo = re.sub(r"\s$", "", transaction.memo)
 
