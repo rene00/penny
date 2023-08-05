@@ -9,7 +9,7 @@ The quickest and easiest way to run Penny is to build and run the docker contain
 $ task docker:build docker:run
 ```
 
-Then visit http://localhost:5000 in your browser.
+Then visit [http://localhost:5000](http://localhost:5000) in your browser.
 
 If you want to build and run Penny from source, first start redis on localhost:6379.
 
