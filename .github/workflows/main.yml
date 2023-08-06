@@ -14,7 +14,7 @@ jobs:
       - name: Install python version
         uses: gabrielfalcao/pyenv-action@v11
         with:
-          default: 3.9.17
+          default: 3.9
 
       - name: Setup locale
         run:  echo 'en_AU.UTF-8 UTF-8' | sudo tee /etc/locale.gen && sudo /usr/sbin/locale-gen 
