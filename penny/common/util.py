@@ -1,6 +1,8 @@
 import time
 import hashlib
 import datetime
+import re
+from penny import models
 
 
 def now(delta=None):
@@ -20,11 +22,14 @@ def merge_dicts(*dict_args):
     return result
 
 
-def generate_transaction_hash(date, debit, credit, memo, fitid, bankaccount_id):
+def generate_transaction_hash(t: models.Transaction) -> str:
     """Generate a SHA256 hash of the transaction."""
 
+    memo: str = re.sub(r"\s\s+", " ", t.memo)
+    memo = re.sub(r"\s$", "", memo)
+
     _hash = hashlib.sha256()
-    for param in (date, debit, credit, memo, fitid, bankaccount_id):
+    for param in (t.date, t.debit, t.credit, memo, t.fitid, t.bankaccount.id):
         # If param is datetime convert to str.
         if isinstance(param, datetime.datetime):
             param = param.isoformat()
