@@ -502,20 +502,6 @@ blinker = "*"
 Flask = "*"
 
 [[package]]
-name = "flask-rq"
-version = "0.2"
-description = "RQ (Redis Queue) integration for Flask applications"
-optional = false
-python-versions = "*"
-files = [
-    {file = "Flask-RQ-0.2.tar.gz", hash = "sha256:e4630d4195c1fca9eb51bec93c8536883df304cd69db29df609547376fc8d2a1"},
-]
-
-[package.dependencies]
-Flask = "*"
-rq = "*"
-
-[[package]]
 name = "flask-script"
 version = "2.0.6"
 description = "Scripting support for Flask"
@@ -1324,18 +1310,18 @@ use-chardet-on-py3 = ["chardet (>=3.0.2,<5)"]
 
 [[package]]
 name = "rq"
-version = "1.10.1"
+version = "1.15.1"
 description = "RQ is a simple, lightweight, library for creating background jobs, and processing them."
 optional = false
-python-versions = ">=3.5"
+python-versions = ">=3.6"
 files = [
-    {file = "rq-1.10.1-py2.py3-none-any.whl", hash = "sha256:92f4cf38b2364c1697b541e77c0fe62b7e5242fa864324f262be126ee2a07e3a"},
-    {file = "rq-1.10.1.tar.gz", hash = "sha256:62d06b44c3acfa5d1933c5a4ec3fbc2484144a8af60e318d0b8447c5236271e2"},
+    {file = "rq-1.15.1-py2.py3-none-any.whl", hash = "sha256:6e243d8d9c4af4686ded4b01b25ea1ff4bac4fc260b02638fbe9c8c17b004bd1"},
+    {file = "rq-1.15.1.tar.gz", hash = "sha256:1f49f4ac1a084044bb8e95b3f305c0bf17e55618b08c18e0b60c080f12d6f008"},
 ]
 
 [package.dependencies]
 click = ">=5.0.0"
-redis = ">=3.5.0"
+redis = ">=4.0.0"
 
 [[package]]
 name = "secretstorage"
@@ -1824,4 +1810,4 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "6fe5cba0f730a46e38dd0b5f1b09bd1c0b4ae03c3be7c2998a6fddb4627179d7"
+content-hash = "e5c5dc8141fcba6764d54e877f753f8f2733e963e27e8b009afa830a0fbf7a4e"
