@@ -1,11 +1,11 @@
 from flask_wtf import FlaskForm
 from werkzeug.datastructures import MultiDict
-from wtforms import StringField, TextField, SelectField, validators
+from wtforms import StringField, StringField, SelectField, validators
 
 
 class FormAccountMatch(FlaskForm):
-    name = TextField("Name", default="", validators=[validators.DataRequired()])
-    desc = TextField("Description", default="", validators=[])
+    name = StringField("Name", default="", validators=[validators.DataRequired()])
+    desc = StringField("Description", default="", validators=[])
     account = SelectField("Account", validators=[validators.DataRequired()], coerce=int)
     bankaccount = SelectField(
         "Account Entity Owner", validators=[validators.DataRequired()], coerce=int

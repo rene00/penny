@@ -6,28 +6,28 @@ authors = ["Rene Cunningham <rene@compounddata.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.9"
-alembic = "1.3.3"
+alembic = "1.11.2"
 appdirs = "1.4.3"
 asn1crypto = "1.3.0"
 Babel = "2.8.0"
 beautifulsoup4 = "4.9.1"
-blinker = "1.4"
+blinker = "1.6.2"
 certifi = "2020.4.5.2"
 cffi = "1.14.0"
 chardet = "3.0.4"
-click = "8.1.2"
+click = "8.1.6"
 cryptography = "36.0.2"
 enum34 = "1.1.6"
-flask = "2.1.1"
+flask = "2.3.2"
 Flask-BabelEx = "0.9.4"
-Flask-Login = "0.6.1"
+Flask-Login = "0.6.2"
 Flask-Mail = "0.9.1"
 Flask-Migrate = "2.4.0"
 Flask-Principal = "0.4.0"
 Flask-RQ = "0.2"
 Flask-Script = "2.0.6"
-Flask-SQLAlchemy = "2.5.1"
-Flask-WTF = "1.0.1"
+Flask-SQLAlchemy = "3.0.5"
+Flask-WTF = "1.1.1"
 gevent = "20.6.1"
 greenlet = "0.4.16"
 gunicorn = "19.9.0"
@@ -35,7 +35,7 @@ honcho = "1.0.1"
 idna = "2.8"
 ipaddress = "1.0.23"
 itsdangerous = "2.1.2"
-Jinja2 = "3.1.1"
+Jinja2 = "3.1.2"
 keyring = "21.2.0"
 "keyrings.alt" = "3.4.0"
 lxml = "4.5.0"
@@ -65,14 +65,14 @@ selenium = "3.141.0"
 six = "1.14.0"
 soupsieve = "1.9"
 speaklater = "1.3"
-SQLAlchemy = "1.4.35"
+SQLAlchemy = "2.0.19"
 urllib3 = "1.25.9"
 webargs = "6.1.0"
-Werkzeug = "2.0.3"
-WTForms = "2.2.1"
+Werkzeug = "2.3.6"
+WTForms = "3.0.1"
 WTForms-SQLAlchemy = "0.3"
 xvfbwrapper = "0.2.9"
-Flask-Security-Too = {extras = ["fsqla", "common"], version = "^4.1.4"}
+Flask-Security-Too = "5.3.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.1.1"
@@ -99,3 +99,8 @@ pythonPlatform = "Linux"
 
 [tool.mypy]
 ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+]

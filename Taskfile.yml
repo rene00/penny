@@ -21,25 +21,19 @@ tasks:
     cmds:
       - poetry run flask db upgrade
   build:python3.9:
-    desc: "if lsb codename is bookworm force poetry to use python3.9"
+    desc: "check if python 3.9 is installed"
     vars:
-      LSB_CODENAME:
-        sh: lsb_release -cs 2>/dev/null || echo ""
-    silent: true
-    cmds: 
-      - |
-        if [ "{{.LSB_CODENAME}}" = "bookworm" ]; then
-          if ! command -v python3.9 >/dev/null; then
-            echo "missing python3.9"
-            exit 1
-          fi
-          poetry env use python3.9 >/dev/null
-        fi
+      PYTHON_MAJOR_MINOR_VERSION:
+        sh: python -c 'import sys;print(f"{sys.version_info.major}{sys.version_info.minor}")'
+    preconditions:
+      - sh: '[ {{.PYTHON_MAJOR_MINOR_VERSION}} == "39" ]'
+        msg: "python 3.9 must be installed"
   build:
     deps: [build:python3.9]
     cmds:
       - poetry install --no-dev
   build:dev:
+    deps: [build:python3.9]
     cmds:
       - poetry install
   run:queue:
@@ -48,6 +42,7 @@ tasks:
     cmds:
       - poetry run rqworker --url redis://localhost:6379/0 --verbose --path=.
   run:www:
+    desc: "run the penny web app locally"
     env:
       FLASK_DEBUG: 1
       FLASK_APP: penny
@@ -76,6 +71,7 @@ tasks:
     deps: [build:dev]
     cmds:
       - |
+        poetry run coverage erase
         poetry run pycodestyle \
           --ignore=E121,E123,E126,E226,E24,E704,W503,E711,E712,E501 penny
       - poetry run pytest .
