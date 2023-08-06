@@ -9,15 +9,20 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Install Task
+        uses: arduino/setup-task@v1
+        with:
+          version: 3.7.3
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
       - name: Install dependencies
         run: |
           sudo apt-get install -y make build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev \
             libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev xz-utils tk-dev \
             libffi-dev liblzma-dev gcc libxml2-dev libxslt1-dev locales
-
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '3.9'
 
       - name: Install pipx
         run: pip install pipx
@@ -32,4 +37,4 @@ jobs:
         run: echo 'en_AU.UTF-8 UTF-8' | sudo tee /etc/locale.gen && sudo /usr/sbin/locale-gen
 
       - name: Run tests
-        run: make test
+        run: task test
