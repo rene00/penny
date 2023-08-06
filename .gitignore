@@ -66,3 +66,4 @@ files/
 # Penny
 *.db
 tmp
+.python-version
