@@ -1,3 +1,4 @@
+---
 name: CI
 on: [push]
 
@@ -15,9 +16,9 @@ jobs:
             libffi-dev liblzma-dev gcc libxml2-dev libxslt1-dev locales
 
       - uses: actions/setup-python@v4
-				with:
-					python-version: '3.9'
-					cache: 'poetry'
+        with:
+          python-version: '3.9'
+          cache: 'poetry'
 
       - name: Install pipx
         run: pip install pipx
@@ -29,7 +30,7 @@ jobs:
         run: poetry install
 
       - name: Setup locale
-        run:  echo 'en_AU.UTF-8 UTF-8' | sudo tee /etc/locale.gen && sudo /usr/sbin/locale-gen 
+        run: echo 'en_AU.UTF-8 UTF-8' | sudo tee /etc/locale.gen && sudo /usr/sbin/locale-gen
 
       - name: Run tests
         run: make test
