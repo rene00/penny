@@ -19,11 +19,6 @@ jobs:
       - name: Setup locale
         run:  echo 'en_AU.UTF-8 UTF-8' | sudo tee /etc/locale.gen && sudo /usr/sbin/locale-gen 
 
-      - name: Install python
-        run: |
-          pyenv install 3.9.17
-          pyenv global 3.9.17
-
       - name: Install pipx
         run: pip install pipx
 
