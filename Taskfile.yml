@@ -48,6 +48,7 @@ tasks:
     cmds:
       - poetry run rqworker --url redis://localhost:6379/0 --verbose --path=.
   run:www:
+    desc: "run the penny web app locally"
     env:
       FLASK_DEBUG: 1
       FLASK_APP: penny
