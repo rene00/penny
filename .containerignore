@@ -93,15 +93,12 @@ venv/
 */*/*.swp
 */*/*/*.swp
 
-# Docs
-README.rst
-
 # Penny related files
 Makefile
-Dockerfile
 tests
-README.rst
+README.md
 app/conf.py
 files
 penny/penny.db
 app/penny.db
+Taskfile.yml
