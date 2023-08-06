@@ -60,9 +60,6 @@ class ImportTransactions:
                 user=self.user,
             )
 
-            # Strip leading whitespace from transaction memo.
-            transaction.memo = re.sub(r"\s$", "", transaction.memo)
-
             # If the OFX id exists, set is as the fitid for the
             # transaction.
             if tx.id:
@@ -75,15 +72,7 @@ class ImportTransactions:
             (transaction.credit, transaction.debit) = currency.get_credit_debit(amount)
 
             # Set the transaction hash.
-            transaction_hash = util.generate_transaction_hash(
-                date=transaction.date,
-                debit=transaction.debit,
-                credit=transaction.credit,
-                memo=transaction.memo,
-                fitid=transaction.fitid,
-                bankaccount_id=transaction.bankaccount.id,
-            )
-            transaction.transaction_hash = transaction_hash
+            transaction.transaction_hash = util.generate_transaction_hash(transaction)
 
             models.db.session.add(transaction)
 
