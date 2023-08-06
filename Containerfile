@@ -28,8 +28,7 @@ RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y \
     git
 
 RUN set -ex \
-    && git clone --depth=1 https://github.com/pyenv/pyenv.git .pyenv \
-    && pyenv update \
+    && git clone --depth=1 https://github.com/pyenv/pyenv.git /root/.pyenv \
     && pyenv install $PYTHON_VERSION \
     && pyenv global $PYTHON_VERSION \
     && pyenv rehash \
