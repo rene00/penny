@@ -1,8 +1,8 @@
 import os
 
 CSRF_ENABLED = True
-SECRET_KEY = "tatokuddMiWradfo"
-SECURITY_PASSWORD_SALT = "cecsebWorPenitdiTin"
+SECRET_KEY = "KaBlowbezomavFig"
+SECURITY_PASSWORD_SALT = "palgAvhekgheftij"
 
 SQLALCHEMY_DATABASE_URI = "sqlite:///{0}".format(
     os.path.join(os.path.abspath(os.path.dirname(__file__)), "penny.db")
