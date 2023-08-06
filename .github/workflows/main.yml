@@ -14,9 +14,9 @@ jobs:
             libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev xz-utils tk-dev \
             libffi-dev liblzma-dev gcc libxml2-dev libxslt1-dev locales
 
-			- uses: actions/setup-python@v4
+      - uses: actions/setup-python@v4
 				with:
-					python-version: '3.9.17' 
+					python-version: '3.9'
 					cache: 'poetry'
 
       - name: Install pipx
