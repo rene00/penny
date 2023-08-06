@@ -6,24 +6,29 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Install dependencies
         run: sudo apt-get install -y make build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev xz-utils tk-dev libffi-dev liblzma-dev 
 
+      - name: Install python version
+        uses: gabrielfalcao/pyenv-action@v11
+        with:
+          default: 3.9.17
+
       - name: Setup locale
         run:  echo 'en_AU.UTF-8 UTF-8' | sudo tee /etc/locale.gen && sudo /usr/sbin/locale-gen 
-
-      - name: Install pyenv
-        run: curl https://pyenv.run | bash
 
       - name: Install python
         run: |
           pyenv install 3.9.17
           pyenv global 3.9.17
 
+      - name: Install pipx
+        run: pip install pipx
+
       - name: Install poetry
-        run: curl -sSL https://install.python-poetry.org | python3 - --version 1.5.1
+        run: pipx install poentry==1.5.1
 
       - name: Install dependencies
         run: poetry install
