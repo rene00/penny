@@ -23,7 +23,7 @@ jobs:
         run: pip install pipx
 
       - name: Install poetry
-        run: pipx install poentry==1.5.1
+        run: pipx install poetry==1.5.1
 
       - name: Install dependencies
         run: poetry install
