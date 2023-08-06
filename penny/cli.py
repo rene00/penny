@@ -42,7 +42,7 @@ def report_tag_monthly_breakdown(user_id: int, tag_id: int) -> None:
 @task_cli.command("tag_match")
 def task_tag_match() -> None:
     user: models.User = models.User.query.filter_by(id=1).one()
-    return tasks.tag_match(user)
+    return tasks.tag_match(user.id)
 
 
 @seed_cli.command("init")
