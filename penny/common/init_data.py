@@ -1,9 +1,11 @@
 # Functions that are responsible for populating default types within the
 # database.
 from flask import current_app as app
+from flask_sqlalchemy import SQLAlchemy
 from penny import models
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import NoResultFound
+from typing import Tuple
 
 
 def import_accounttypes(db):
@@ -84,8 +86,23 @@ def import_entitytypes(db):
                 app.logger.error("Failed to import entitytypes.")
 
 
-def import_all_types():
-    db = models.db
-    import_accounttypes(db)
-    import_bankaccounttypes(db)
-    import_entitytypes(db)
+def import_tx_meta_name(db) -> None:
+    meta_names: Tuple[str] = ("postcode",)
+    for name in meta_names:
+        try:
+            db.session.query(models.TransactionMetaType).filter_by(name=name).one()
+        except NoResultFound:
+            meta_type: models.TransactionMetaType = models.TransactionMetaType(name=name)
+            db.session.add(meta_type)
+            try:
+                db.session.commit()
+            except IntegrityError:
+                db.session.rollback()
+                app.logger.error("Failed to import transaction meta name.")
+
+
+def import_all_types() -> None:
+    import_accounttypes(models.db)
+    import_bankaccounttypes(models.db)
+    import_entitytypes(models.db)
+    import_tx_meta_name(models.db)

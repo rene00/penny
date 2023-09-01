@@ -1,53 +1,47 @@
-from penny import models, tasks
-from penny.resources.reports import ReportsMonthlyBreakdown
+import penny
+from penny import models
+from penny.models import db
+from penny.extensions import user_datastore
+from penny.common.init_data import import_all_types
+from flask import Flask
 from flask.cli import AppGroup
 import random
 import click
+from typing import Optional
+from flask_security.utils import hash_password
+from sqlalchemy.exc import IntegrityError
+
+seed_cli: AppGroup = AppGroup("seed")
+
+@seed_cli.command("types")
+def seed_types() -> None:
+    """seed the db with types"""
+    app: Flask = penny.create_app()
+    with app.app_context():
+        import_all_types()
 
 
-seed_cli = AppGroup("seed")
-task_cli = AppGroup("task")
-report_cli = AppGroup("report")
+@seed_cli.command("account")
+@click.option("--email", default="test@example.org")
+@click.option("--password", default="secret")
+def seed_account(email: str, password: str) -> None:
+    """seed the db with a test user account and resources"""
+    app: Flask = penny.create_app()
 
+    user: Optional[models.User] = None
 
-@report_cli.command("account_monthly_breakdown")
-@click.argument('user_id')
-@click.argument('account_id')
-def report_account_monthly_breakdown(user_id: int, account_id: int) -> None:
-    user: models.User = models.User.query.filter_by(id=user_id).one()
-    account: models.Account = models.Account.query.filter_by(id=account_id, user=user).one()
-    report = ReportsMonthlyBreakdown(account).generate()
-    for k, v in report["transactions"].items():
-        month = k
-        amount = float(abs(v.amount) / float(100))
-        print(month, amount)
-    return None
+    with app.app_context():
+        import_all_types()
+        user = models.db.session.query(models.User).filter_by(email=email).one_or_none()
+        if user is None:
+            user = user_datastore.create_user(email=email, password=hash_password(password))
+            try:
+                db.session.commit()
+            except IntegrityError:
+                db.session.rollback()
+            user = models.db.session.query(models.User).filter_by(email=email).one_or_none()
 
-
-@report_cli.command("tag_monthly_breakdown")
-@click.argument('user_id')
-@click.argument('tag_id')
-def report_tag_monthly_breakdown(user_id: int, tag_id: int) -> None:
-    user: models.User = models.User.query.filter_by(id=user_id).one()
-    tag: models.Tag = models.Tag.query.filter_by(id=tag_id, user=user).one()
-    report = ReportsMonthlyBreakdown(tag).generate()
-    for k, v in report["transactions"].items():
-        month = k
-        amount = float(abs(v.amount) / float(100))
-        avg = float(abs(v.avg) / float(100))
-        print(f"{month}, {amount}, {avg:.2f}")
-    return None
-
-
-@task_cli.command("tag_match")
-def task_tag_match() -> None:
-    user: models.User = models.User.query.filter_by(id=1).one()
-    return tasks.tag_match(user.id)
-
-
-@seed_cli.command("init")
-def seed_init() -> None:
-    user: models.User = models.db.session.query(models.User).filter_by(id=1).one()
+    assert user is not None
 
     entity_type: models.EntityType = (
         models.db.session.query(models.EntityType).filter_by(name="Person").one()
@@ -114,7 +108,7 @@ def seed_init() -> None:
             user_id=user.id,
             debit=-100,
             credit=0,
-            memo="test memo 1",
+            memo="test memo 1 MELBOURNE VIC",
             bankaccount_id=random.choice(bankaccounts).id,
             account_id=random.choice(accounts).id,
         ),

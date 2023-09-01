@@ -30,3 +30,6 @@ REDIS_URL = "redis://localhost:6379/0"
 
 # Debug
 DEBUG = True
+
+TX_META_ENABLED = True
+TX_META_TXACCT_URL = "http://localhost:5001"

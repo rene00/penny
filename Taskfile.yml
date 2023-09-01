@@ -1,10 +1,9 @@
 ---
 version: '3'
-
+silent: true
 env:
-  CONFIG_FILE: ./conf.py
-  FLASK_APP: penny
-
+  FLASK_SKIP_DOTENV: 1
+dotenv: ['.env']
 vars:
   CONTAINER_TAG:
     sh: git log -n1 --format=%h
@@ -13,6 +12,7 @@ vars:
 
 tasks:
   db:migrate:
+    desc: "run flask db migrate"
     cmds:
       - poetry run flask db migrate
   db:upgrade:
@@ -75,20 +75,21 @@ tasks:
         poetry run pycodestyle \
           --ignore=E121,E123,E126,E226,E24,E704,W503,E711,E712,E501 penny
       - poetry run pytest .
-  seed:init:
-    env:
-      FLASK_DEBUG: 1
-      FLASK_APP: penny
-      CONFIG_FILE: ./conf.py
+  seed:account:
+    desc: "seed the db with a test user account and resources"
     cmds:
-      - poetry run flask seed init
+      - poetry run flask seed account
+  seed:types:
+    desc: "seed the db with types"
+    cmds:
+      - poetry run flask seed types
   task:tag_match:
-    env:
-      FLASK_DEBUG: 1
-      FLASK_APP: penny
-      CONFIG_FILE: ./conf.py
     cmds:
       - poetry run flask task tag_match
+  task:fetch_tx_meta:
+    dotenv: ['{{.HOME}}/.penny.env']
+    cmds:
+      - poetry run flask task fetch-tx-meta {{.CLI_ARGS}}
   report:account_monthly_breakdown:
     env:
       FLASK_DEBUG: 1

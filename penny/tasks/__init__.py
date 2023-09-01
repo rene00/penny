@@ -4,7 +4,6 @@ from sqlalchemy.exc import IntegrityError
 import re
 from typing import Pattern, Any
 
-
 def tag_match(user_id: int) -> None:
     app = penny.create_app()
     with app.app_context():
