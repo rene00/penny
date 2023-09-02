@@ -80,7 +80,7 @@ class ReportsMonthlyBreakdown:
         start_date = end_date - datetime.timedelta(days=self._totalDays)
         start_date = start_date.replace(day=1)
 
-        if models.db.session.bind.engine.name == "sqlite":
+        if models.db.engine.name == "sqlite":
             q = (
                 models.db.session.query(
                     func.strftime("%Y", models.Transaction.date).label("year"),
