@@ -3,6 +3,7 @@
 from flask import current_app as app
 from flask_sqlalchemy import SQLAlchemy
 from penny import models
+from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import NoResultFound
 from typing import Tuple
@@ -86,14 +87,17 @@ def import_entitytypes(db):
                 app.logger.error("Failed to import entitytypes.")
 
 
-def import_tx_meta_name(db) -> None:
-    meta_names: Tuple[str] = ("postcode",)
-    for name in meta_names:
+def import_tx_meta_name(db: SQLAlchemy) -> None:
+    """Import Transaction Meta types"""
+    for name in ("postcode", "state", "sa3_name", "sa4_name"):
         try:
-            db.session.query(models.TransactionMetaType).filter_by(name=name).one()
+            db.session.execute(
+                select(models.TransactionMetaType).where(
+                    models.TransactionMetaType.name == name
+                )
+            ).one()
         except NoResultFound:
-            meta_type: models.TransactionMetaType = models.TransactionMetaType(name=name)
-            db.session.add(meta_type)
+            db.session.add(models.TransactionMetaType(name=name))
             try:
                 db.session.commit()
             except IntegrityError:

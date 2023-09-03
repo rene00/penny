@@ -12,6 +12,7 @@ from penny.common.init_data import import_all_types
 from penny.cli.task import task_cli
 from penny.cli.seed import seed_cli
 from penny.cli.report import report_cli
+from penny.cli.txmeta import txmeta_cli
 import os
 from pathlib import Path
 import locale
@@ -19,6 +20,7 @@ import locale
 PENNY_CONF_FILE = Path("/etc/penny/penny.conf.py")
 
 migrate = Migrate()
+
 
 def create_app(test_config=None):
     app = Flask(__name__)
@@ -35,6 +37,7 @@ def create_app(test_config=None):
     app.cli.add_command(task_cli)
     app.cli.add_command(seed_cli)
     app.cli.add_command(report_cli)
+    app.cli.add_command(txmeta_cli)
 
     db.init_app(app)
     migrate.init_app(app, db)

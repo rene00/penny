@@ -79,13 +79,22 @@ tasks:
     desc: "seed the db with types"
     cmds:
       - poetry run flask seed types
+
   task:tag_match:
     cmds:
       - poetry run flask task tag_match
+
   task:fetch_tx_meta:
     dotenv: ['{{.HOME}}/.penny.env']
     cmds:
       - poetry run flask task fetch-tx-meta {{.CLI_ARGS}}
+
+  txmeta:transaction:
+    desc: "txmeta transaction"
+    dotenv: ['{{.HOME}}/.penny.env']
+    cmds:
+      - poetry run flask txmeta transaction {{.CLI_ARGS}}
+
   report:account_monthly_breakdown:
     env:
       FLASK_DEBUG: 1
