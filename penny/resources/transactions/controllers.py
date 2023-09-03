@@ -1,4 +1,4 @@
-from penny import models
+from penny import models, tasks
 from penny.common import forms
 from penny.common.tasks import import_transactions
 from penny.common.currency import to_cents, get_credit_debit
@@ -187,18 +187,25 @@ def accounttype(accounttype, start_date, end_date):
     )
 
 
-@transactions.route("/<int:id>", methods=["GET", "POST"])  # noqa[C901]
+@transactions.route("/<int:id>", methods=["GET", "POST"])
 @auth_required()
 def transaction(id):
+    from sqlalchemy import select
 
     try:
-        transaction = (
-            models.db.session.query(models.Transaction)
-            .filter_by(id=id, user=g.user)
-            .one()
-        )
+        row = models.db.session.execute(
+            select(models.Transaction)
+            .where(models.Transaction.id == id)
+            .where(models.Transaction.user == g.user)
+        ).one()
     except NoResultFound:
         return redirect(url_for("transactions._transactions"))
+    else:
+        transaction = row[0]
+
+    if len(transaction.meta) < 5 and app.config.get("TX_META_ENABLED", False):
+        q = Queue(connection=Redis.from_url(app.config["REDIS_URL"]))
+        q.enqueue(tasks.fetch_tx_meta, transaction.id)
 
     # If this is a child, redirect to the parent
     if transaction.parent_id:
@@ -238,7 +245,6 @@ def transaction(id):
             form_split = _get_form_split(request, form)
 
         if form.validate():
-
             if "delete" in request.form:
                 transaction.is_deleted = True
             elif "undelete" in request.form:
@@ -247,7 +253,6 @@ def transaction(id):
             new_split = _save_new_split_transaction(request, transaction)
 
             if request.form.get("update"):
-
                 # Update child accounts.  If a child account is updated
                 # a child_account_${id} key will exist within
                 # request.form where ${id} is the tx id of the child.
@@ -428,7 +433,6 @@ def upload(id):
     form = FormTransactionUpload()
 
     if form.validate_on_submit():
-
         filepath = os.path.join(
             app.config["TRANSACTION_UPLOADS_UPLOAD_FOLDER"],
             str(g.user.id),

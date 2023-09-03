@@ -13,6 +13,7 @@ from penny.cli.task import task_cli
 from penny.cli.seed import seed_cli
 from penny.cli.report import report_cli
 from penny.cli.txmeta import txmeta_cli
+from penny.cli.transaction import transaction_cli
 import os
 from pathlib import Path
 import locale
@@ -38,6 +39,7 @@ def create_app(test_config=None):
     app.cli.add_command(seed_cli)
     app.cli.add_command(report_cli)
     app.cli.add_command(txmeta_cli)
+    app.cli.add_command(transaction_cli)
 
     db.init_app(app)
     migrate.init_app(app, db)

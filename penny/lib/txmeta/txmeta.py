@@ -11,6 +11,10 @@ class TXResponse:
         self.body = body
 
     @property
+    def locality_name(self) -> Optional[str]:
+        return self.locality.get("name", None)
+
+    @property
     def sa4_name(self) -> Optional[str]:
         return self.locality.get("sa4", {}).get("name", None)
 
@@ -52,6 +56,7 @@ class TXMeta:
 
     def persist(self, transaction, session):
         for k, v in {
+            "locality_name": self.txresponse.locality_name,
             "postcode": self.txresponse.postcode,
             "state": self.txresponse.state,
             "sa3_name": self.txresponse.sa3_name,
