@@ -528,7 +528,7 @@ class TagMatchFilterRegex(db.Model):
 class TransactionMetaType(db.Model):
     __tablename__: str = "tx_meta_type"
     id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str] = mapped_column(String(), nullable=False)
+    name: Mapped[str] = mapped_column(String(128), nullable=False)
     meta: Mapped[List["TransactionMeta"]] = relationship(back_populates="metatype")
 
 
@@ -540,7 +540,7 @@ class TransactionMeta(db.Model):
     tx_meta_type_id: Mapped[int] = mapped_column(
         ForeignKey("tx_meta_type.id"), nullable=False
     )
-    value: Mapped[str] = mapped_column(String(), nullable=False)
+    value: Mapped[str] = mapped_column(String(256), nullable=False)
 
     metatype: Mapped["TransactionMetaType"] = relationship(back_populates="meta")
     transaction: Mapped["Transaction"] = relationship(back_populates="meta")
