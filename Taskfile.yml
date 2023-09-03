@@ -36,11 +36,14 @@ tasks:
     deps: [build:python3.9]
     cmds:
       - poetry install
+
   run:queue:
+    desc: "run the penny worker app locally"
     env:
       CONFIG_FILE: ./conf.py
     cmds:
       - poetry run rqworker --url redis://localhost:6379/0 --verbose --path=.
+
   run:www:
     desc: "run the penny web app locally"
     env:
@@ -54,6 +57,7 @@ tasks:
     cmds:
       - mkdir -p files/transactions files/uploads
       - poetry run flask run --host={{ .FLASK_HOST }} --port={{ .FLASK_PORT }}
+
   container:build:
     cmds:
       - podman build . -t {{.CONTAINER_REGISTRY}}/{{.CONTAINER_IMAGE_NAME}}:{{.CONTAINER_TAG}} {{.PODMAN_BUILD_ARGS}}
