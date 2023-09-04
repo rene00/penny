@@ -5,6 +5,9 @@ from flask_security.core import RoleMixin, UserMixin
 from flask_sqlalchemy import SQLAlchemy
 from marshmallow import Schema, fields
 from sqlalchemy.sql import func
+from sqlalchemy import String, Integer, ForeignKey
+from sqlalchemy.orm import mapped_column, Mapped, relationship
+from typing import Any, List
 import locale
 import pytz
 
@@ -113,7 +116,6 @@ class BankAccountType(db.Model):
 
 
 class BankAccountSchema(Schema):
-
     total_balance = fields.Method("get_total_balance")
     number_as_html = fields.Method("get_number_as_html")
     bankaccounttype_desc = fields.Method("get_bankaccounttype_desc")
@@ -286,6 +288,7 @@ class Transaction(db.Model):
     tags = db.relationship(
         "Tag", secondary=tag_transaction, back_populates="transactions", lazy="dynamic"
     )
+    meta: Mapped[List["TransactionMeta"]] = relationship(back_populates="transaction")
 
     def __str__(self):
         return """
@@ -520,3 +523,24 @@ class TagMatchFilterRegex(db.Model):
     tag_id = db.Column(db.Integer, db.ForeignKey("tag.id"))
     date_added = db.Column(db.DateTime, default=utcnow)
     tag = db.relationship("Tag", back_populates="regexes")
+
+
+class TransactionMetaType(db.Model):
+    __tablename__: str = "tx_meta_type"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(128), nullable=False)
+    meta: Mapped[List["TransactionMeta"]] = relationship(back_populates="metatype")
+
+
+class TransactionMeta(db.Model):
+    __tablename__: str = "tx_meta"
+    __table_args__: tuple[Any] = (db.UniqueConstraint("tx_id", "tx_meta_type_id"),)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    tx_id: Mapped[int] = mapped_column(ForeignKey("tx.id"), nullable=False)
+    tx_meta_type_id: Mapped[int] = mapped_column(
+        ForeignKey("tx_meta_type.id"), nullable=False
+    )
+    value: Mapped[str] = mapped_column(String(256), nullable=False)
+
+    metatype: Mapped["TransactionMetaType"] = relationship(back_populates="meta")
+    transaction: Mapped["Transaction"] = relationship(back_populates="meta")

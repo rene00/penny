@@ -5,11 +5,15 @@ from flask_security.core import Security
 from flask_security.datastore import SQLAlchemyUserDatastore
 from flask_security.decorators import auth_required
 from flask_migrate import Migrate
-from penny import models, resources, util
-from penny import models
+from penny import resources, util
+from penny.extensions import user_datastore
 from penny.models import db
 from penny.common.init_data import import_all_types
-from .cli import seed_cli, task_cli, report_cli
+from penny.cli.task import task_cli
+from penny.cli.seed import seed_cli
+from penny.cli.report import report_cli
+from penny.cli.txmeta import txmeta_cli
+from penny.cli.transaction import transaction_cli
 import os
 from pathlib import Path
 import locale
@@ -17,8 +21,6 @@ import locale
 PENNY_CONF_FILE = Path("/etc/penny/penny.conf.py")
 
 migrate = Migrate()
-
-user_datastore = SQLAlchemyUserDatastore(db, models.User, models.Role)
 
 
 def create_app(test_config=None):
@@ -33,9 +35,11 @@ def create_app(test_config=None):
     else:
         app.config.from_mapping(test_config)
 
-    app.cli.add_command(seed_cli)
     app.cli.add_command(task_cli)
+    app.cli.add_command(seed_cli)
     app.cli.add_command(report_cli)
+    app.cli.add_command(txmeta_cli)
+    app.cli.add_command(transaction_cli)
 
     db.init_app(app)
     migrate.init_app(app, db)

@@ -203,6 +203,34 @@
                           </td>
                           </td>
                       </tr>
+                      {% if config.TX_META_ENABLED %}
+                      <tr>
+                        <td>Metadata</td>
+                          <td>
+                            <table>
+                              {% for meta in transaction.meta %}
+
+                                {% set value = meta.value %}
+                                {% set name = meta.metatype.name %}
+                                {% if name == "sa3_name" %}
+                                  {% set name = "Region" %}
+                                {% elif name == "sa4_name" %}
+                                  {% set name = "Sub State Region" %}
+                                {% elif name == "locality_name" %}
+                                  {% set name = "Locality Name" %}
+                                  {% set value = value|capitalize %}
+                                {% endif %}
+
+                                <tr>
+                                  <td>{{ name|capitalize }}</td>
+                                  <td>{{ value }}</td>
+                                </tr>
+                                {% endfor %}
+                              </table>
+                          </td>
+                          </td>
+                      </tr>
+                      {% endif %}
                   </tbody>
                 </table>
                 <div class="input-group btn-block" style="padding-top:10px;">

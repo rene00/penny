@@ -3,6 +3,7 @@ from penny import models
 from sqlalchemy.exc import IntegrityError
 import re
 from typing import Pattern, Any
+from .fetch_tx_meta import fetch_tx_meta
 
 
 def tag_match(user_id: int) -> None:
