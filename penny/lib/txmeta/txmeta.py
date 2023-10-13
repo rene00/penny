@@ -15,16 +15,8 @@ class TXResponse:
         return self.locality.get("name", None)
 
     @property
-    def sa4_name(self) -> Optional[str]:
-        return self.locality.get("sa4", {}).get("name", None)
-
-    @property
-    def sa3_name(self) -> Optional[str]:
-        return self.locality.get("sa3", {}).get("name", None)
-
-    @property
     def locality(self) -> dict:
-        return self.body.get("locality", {}).get("names", {}).get("100", {})
+        return self.body.get("locality", {})
 
     @property
     def postcode(self) -> Optional[int]:
@@ -32,7 +24,19 @@ class TXResponse:
 
     @property
     def state(self) -> Optional[str]:
-        return self.body.get("locality", {}).get("state", {}).get("name", None)
+        return self.locality.get("state", None)
+
+    @property
+    def organisation(self) -> Optional[str]:
+        return self.body.get("organisation", None)
+
+    @property
+    def address(self) -> Optional[str]:
+        return self.body.get("address", None)
+
+    @property
+    def description(self) -> Optional[str]:
+        return self.body.get("description", None)
 
 
 class TXMeta:
@@ -59,8 +63,9 @@ class TXMeta:
             "locality_name": self.txresponse.locality_name,
             "postcode": self.txresponse.postcode,
             "state": self.txresponse.state,
-            "sa3_name": self.txresponse.sa3_name,
-            "sa4_name": self.txresponse.sa4_name,
+            "organisation": self.txresponse.organisation,
+            "address": self.txresponse.address,
+            "description": self.txresponse.description,
         }.items():
             if v is None:
                 continue
