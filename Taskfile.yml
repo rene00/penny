@@ -76,6 +76,7 @@ tasks:
       - poetry run flask seed account
   seed:types:
     desc: "seed the db with types"
+    dotenv: ['{{.HOME}}/.penny.env']
     cmds:
       - poetry run flask seed types
 

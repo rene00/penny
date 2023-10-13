@@ -89,7 +89,14 @@ def import_entitytypes(db):
 
 def import_tx_meta_name(db: SQLAlchemy) -> None:
     """Import Transaction Meta types"""
-    for name in ("locality_name", "postcode", "state", "sa3_name", "sa4_name"):
+    for name in (
+        "locality_name",
+        "postcode",
+        "state",
+        "organisation",
+        "address",
+        "description",
+    ):
         try:
             db.session.execute(
                 select(models.TransactionMetaType).where(
