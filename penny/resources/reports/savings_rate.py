@@ -92,14 +92,16 @@ class ReportsSavingsRate:
             .one()
         )  # noqa[E711]
 
-        if models.db.session.bind.engine.name == "sqlite":
+        if models.db.engine.name == "sqlite":
             transactions = (
                 models.db.session.query(
                     models.Transaction,
                     func.strftime("%Y", models.Transaction.date).label("year"),
                     func.strftime("%m", models.Transaction.date).label("month"),
                 )
-                .join(models.Account, models.Transaction.account_id == models.Account.id)
+                .join(
+                    models.Account, models.Transaction.account_id == models.Account.id
+                )
                 .filter(
                     models.Transaction.is_deleted == False,  # noqa[W0612]
                     models.Transaction.is_archived == False,
@@ -117,7 +119,9 @@ class ReportsSavingsRate:
                     func.date_format(models.Transaction.date, "%Y").label("year"),
                     func.date_format(models.Transaction.date, "%m").label("month"),
                 )
-                .join(models.Account, models.Transaction.account_id == models.Account.id)
+                .join(
+                    models.Account, models.Transaction.account_id == models.Account.id
+                )
                 .filter(
                     models.Transaction.is_deleted == False,  # noqa[W0612]
                     models.Transaction.is_archived == False,
