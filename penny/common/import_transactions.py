@@ -19,7 +19,6 @@ class ImportTransactions:
         self.user = user
 
     def process_ofx(self):
-
         _ofx = filetypes.ofx2bs4(self.transactionupload.filepath)
 
         # List of transactions that have been processed and will be
@@ -59,6 +58,12 @@ class ImportTransactions:
                 fitid=None,
                 user=self.user,
             )
+
+            # Strip double whitespace from transaction memo
+            transaction.memo = re.sub(r"\s\s+", " ", transaction.memo)
+
+            # Strip leading whitespace from transaction memo
+            transaction.memo = re.sub(r"\s$", "", transaction.memo)
 
             # If the OFX id exists, set is as the fitid for the
             # transaction.
