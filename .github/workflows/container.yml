@@ -28,6 +28,11 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Install qemu dependency
+        run: |
+          sudo apt-get update
+          sudo apt install -y qemu-user-static
+
       - name: Docker meta
         id: docker-metadata
         uses: docker/metadata-action@v4
@@ -41,6 +46,7 @@ jobs:
           image: penny
           tags: ${{ steps.docker-metadata.outputs.tags }}
           labels: ${{ steps.docker-metadata.outputs.labels }}
+          archs: amd64, arm64
           containerfiles: |
             ./Containerfile
           extra-args: |
@@ -61,3 +67,6 @@ jobs:
           registry: ghcr.io/${{ github.actor }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Print image URLs
+        run: echo "Image pushed to ${{ steps.push-to-quay.outputs.registry-paths }}"
