@@ -204,7 +204,10 @@ def transaction(id):
         transaction = row[0]
 
     if len(transaction.meta) < 5 and app.config.get("TX_META_ENABLED", False):
-        q = Queue(connection=Redis.from_url(app.config["REDIS_URL"]))
+        q = Queue(
+            connection=Redis.from_url(app.config["REDIS_URL"]),
+            default_timeout=app.config.get("RQ_DEFAULT_TIMEOUT", 180),
+        )
         q.enqueue(tasks.fetch_tx_meta, transaction.id)
 
     # If this is a child, redirect to the parent
@@ -464,8 +467,11 @@ def upload(id):
             models.db.session.rollback()
             flash("Failed Uploading Transactions.", "error")
 
-        q = Queue(connection=Redis.from_url(app.config["REDIS_URL"]))
-        task = q.enqueue(import_transactions, transactionupload.id, g.user.id)
+        q = Queue(
+            connection=Redis.from_url(app.config["REDIS_URL"]),
+            default_timeout=app.config.get("RQ_DEFAULT_TIMEOUT", 180),
+        )
+        q.enqueue(import_transactions, transactionupload.id, g.user.id)
         flash("Uploaded Transactions.", "success")
 
     return render_template("transaction_import.html", form=form)

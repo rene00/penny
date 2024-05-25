@@ -27,6 +27,7 @@ TRANSACTION_ATTACHMENTS_UPLOAD_FOLDER = "files/attachments"
 TRANSACTION_UPLOADS_UPLOAD_FOLDER = "files/uploads"
 
 REDIS_URL = "redis://localhost:6379/0"
+RQ_DEFAULT_TIMEOUT = 600
 
 # Debug
 DEBUG = True
