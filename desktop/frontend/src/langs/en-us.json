@@ -1,0 +1,10 @@
+{
+    "name": "English",
+    "common": {
+        "confirm": "Confirm",
+        "cancel": "Cancel",
+        "success": "Success",
+        "error": "Error",
+        "update": "Update"
+    }
+}
