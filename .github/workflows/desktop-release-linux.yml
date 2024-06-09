@@ -78,7 +78,7 @@ jobs:
 
       - name: Upload release asset
         shell: bash
-        working-directory: ./build/bin/
+        working-directory: ./desktop/build/bin/
         run: |
           filepath="penny"
           filename="penny_${{ steps.normalise_version.outputs.version }}_${{ steps.normalise_platform.outputs.tag }}"

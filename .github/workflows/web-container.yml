@@ -49,8 +49,9 @@ jobs:
           image: penny
           tags: ${{ steps.docker-metadata.outputs.tags }}
           labels: ${{ steps.docker-metadata.outputs.labels }}
+          context: web
           containerfiles: |
-            ./Containerfile
+            ./web/Containerfile
           extra-args: |
             --pull
 
