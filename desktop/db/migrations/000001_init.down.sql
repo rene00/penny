@@ -1,0 +1,9 @@
+DROP TABLE IF EXISTS entity;
+DROP TABLE IF EXISTS entity_attributes;
+DROP TABLE IF EXISTS entity_type;
+DROP TABLE IF EXISTS entity_type_attributes;
+DROP TABLE IF EXISTS account_type;
+DROP TABLE IF EXISTS account_type_attributes;
+DROP TABLE IF EXISTS account;
+DROP TABLE IF EXISTS account_entity;
+DROP TABLE IF EXISTS account_attributes;

@@ -67,3 +67,9 @@ files/
 *.db
 tmp
 .python-version
+
+/desktop/build
+/desktop/pennyapp.db
+node_modules
+/desktop/frontend/dist
+/desktop/dt

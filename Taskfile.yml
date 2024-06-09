@@ -3,7 +3,10 @@ version: '3'
 silent: true
 env:
   FLASK_SKIP_DOTENV: 1
-dotenv: ['.env']
+  FLASK_APP: penny
+  CONFIG_FILE: ./conf.py
+  FLASK_DEBUG: 1
+dotenv: ['{{.HOME}}/.penny.env', '.env']
 vars:
   CONTAINER_TAG:
     sh: git log -n1 --format=%h
@@ -11,112 +14,162 @@ vars:
   CONTAINER_IMAGE_NAME: rene00/penny
 
 tasks:
-  db:migrate:
-    desc: "run flask db migrate"
+
+  desktop:bin-data:
+    desc: "go-bindata"
+    dir: desktop/db/migrations
     cmds:
-      - poetry run flask db migrate
-  db:upgrade:
-    envs:
-      - PENNY_SKIP_IMPORT_ALL_TYPES: 1
+      - go-bindata -o bindata.go -pkg migrations -ignore bindata.go .
+
+  desktop:sqlboiler:
+    desc: "sqlboiler"
+    dir: desktop
+    deps: [desktop:bin-data]
     cmds:
-      - poetry run flask db upgrade
-  build:python3.9:
+      - migrate -source file://db/migrations -database sqlite3://pennyapp.db up
+      - sqlboiler --no-tests --no-hooks --no-auto-timestamps --wipe sqlite3
+
+  desktop:db:migrate:create:
+    desc: "db migrate create"
+    dir: desktop
+    cmds:
+      - migrate create -dir=./db/migrations -seq -digits 6 -ext sql {{.CLI_ARGS}}
+
+  desktop:db:migrate:up:
+    desc: "db migrate up 1"
+    dir: desktop
+    cmds:
+      - migrate -source file://db/migrations -database sqlite3://.pennyapp.db up 1
+
+  desktop:db:migrate:down:
+    desc: "db migrate down 1"
+    dir: desktop
+    cmds:
+      - migrate -source file://db/migrations -database sqlite3://.pennyapp.db down 1
+
+  desktop:wails:build:
+    desc: "wails build"
+    dir: desktop
+    cmds:
+      - wails build -v 2 -debug
+
+  desktop:wails:dev:
+    desc: "wails dev"
+    dir: desktop
+    cmds:
+      - wails dev
+
+  desktop:dt:build:
+    desc: "dt build"
+    dir: desktop
+    cmds:
+      - go build -o ./dt ./backend/cmd/dt
+
+  web:build:python3.9:
     desc: "check if python 3.9 is installed"
+    dir: web
     vars:
       PYTHON_MAJOR_MINOR_VERSION:
         sh: python -c 'import sys;print(f"{sys.version_info.major}{sys.version_info.minor}")'
     preconditions:
       - sh: '[ {{.PYTHON_MAJOR_MINOR_VERSION}} == "39" ]'
         msg: "python 3.9 must be installed"
-  build:
-    deps: [build:python3.9]
+  web:build:
+    deps: [web:build:python3.9]
+    dir: web
     cmds:
       - poetry install --no-dev
-  build:dev:
-    deps: [build:python3.9]
+  web:db:migrate:
+    desc: "run flask db migrate"
+    dir: web
+    cmds:
+      - poetry run flask db migrate
+  web:db:upgrade:
+    env:
+      FLASK_APP: penny
+      PENNY_SKIP_IMPORT_ALL_TYPES: 1
+    dir: web
+    cmds:
+      - poetry run flask db upgrade
+  web:build:dev:
+    deps: [web:build:python3.9]
+    dir: web
     cmds:
       - poetry install
-
-  run:queue:
+  web:run:queue:
     desc: "run the penny worker app locally"
-    dotenv: ['{{.HOME}}/.penny.env']
+    dir: web
     cmds:
       - poetry run rqworker --url redis://localhost:6379/0 --verbose --path=.
-
-  run:www:
+  web:run:www:
     desc: "run the penny web app locally"
-    dotenv: ['{{.HOME}}/.penny.env']
+    dir: web
     vars:
       FLASK_HOST: 127.0.0.1
       FLASK_PORT: 5000
     cmds:
       - mkdir -p files/transactions files/uploads
       - poetry run flask run --host={{ .FLASK_HOST }} --port={{ .FLASK_PORT }}
-
-  container:build:
+  web:container:build:
+    desc: "build web container"
+    dir: web
     cmds:
       - podman build . -t {{.CONTAINER_REGISTRY}}/{{.CONTAINER_IMAGE_NAME}}:{{.CONTAINER_TAG}} {{.PODMAN_BUILD_ARGS}}
-  container:run:
+  web:container:run:
+    desc: "run web container"
     vars:
       HOST_PORT: 5000
+    dir: web
     cmds:
       - |
         podman run -it --restart always \
           --publish {{ .HOST_PORT }}:5000 \
           -e CONFIG_FILE=/app/penny/conf.py \
-          --mount source=penny,target=/penny \
+          --mount type=bind,src=penny,target=/penny \
           --name penny {{.CONTAINER_REGISTRY}}/{{.CONTAINER_IMAGE_NAME}}:{{.CONTAINER_TAG}}
-  test:
-    deps: [build:dev]
+  web:test:
+    desc: "run web tests"
+    deps: [web:build:dev]
+    dir: web
     cmds:
       - poetry run pytest .
-  seed:account:
+  web:seed:account:
     desc: "seed the db with a test user account and resources"
+    dir: web
     cmds:
       - poetry run flask seed account
-  seed:types:
+  web:seed:types:
     desc: "seed the db with types"
-    dotenv: ['{{.HOME}}/.penny.env']
+    dir: web
     cmds:
       - poetry run flask seed types
-
-  task:tag_match:
+  web:task:tag_match:
+    desc: "run web task tag_match"
+    dir: web
     cmds:
       - poetry run flask task tag_match
-
-  task:fetch_tx_meta:
-    dotenv: ['{{.HOME}}/.penny.env']
+  web:task:fetch_tx_meta:
+    desc: "run web task fetch_tx_meta"
+    dir: web
     cmds:
       - poetry run flask task fetch-tx-meta {{.CLI_ARGS}}
-
-  txmeta:transaction:
-    desc: "txmeta transaction"
-    dotenv: ['{{.HOME}}/.penny.env']
+  web:task:txmeta:transaction:
+    desc: "run web task txmeta transaction"
+    dir: web
     cmds:
       - poetry run flask txmeta transaction {{.CLI_ARGS}}
-
-  transaction:get:
-    desc: "get transaction"
-    dotenv: ['{{.HOME}}/.penny.env']
+  web:task:transaction:get:
+    desc: "run web task get transaction"
+    dir: web
     cmds:
       - poetry run flask transaction get {{.CLI_ARGS}}
-
-
-  report:account_monthly_breakdown:
-    env:
-      FLASK_DEBUG: 1
-      FLASK_APP: penny
-      CONFIG_FILE: ./conf.py
-      USER_ID: 1
-      ACCOUNT_ID: 95
+  web:report:account_monthly_breakdown:
+    desc: "run web report account_monthly_breakdown"
+    dir: web
     cmds:
       - poetry run flask report account_monthly_breakdown $USER_ID $ACCOUNT_ID
-  report:tag_monthly_breakdown:
-    env:
-      FLASK_DEBUG: 1
-      FLASK_APP: penny
-      CONFIG_FILE: ./conf.py
-      USER_ID: 1
-      TAG_ID: 4
+  web:report:tag_monthly_breakdown:
+    desc: "run web report tag_monthly_breakdown"
+    dir: web
     cmds:
       - poetry run flask report tag_monthly_breakdown $USER_ID $TAG_ID
