@@ -1,6 +1,7 @@
 # penny
 
-penny is an **experimental** personal finance tracking web application.
+penny is an **experimental** personal finance tracking web and desktop
+application.
 
 ## Current Status
 
