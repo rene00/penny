@@ -37,11 +37,12 @@ export default {
     },
 
     async createAccount() {
-      const { success, msg } = await CreateAccount(this.account.name, this.account.description, this.account.accountTypeID)
+      const { success, msg, data } = await CreateAccount(this.account.name, this.account.description, this.account.accountTypeID)
       if (!success) {
         $message.error(msg)
       } else {
         $message.success(msg)
+        this.$router.push({name: 'get-account', params: { id: data.id }})
       }
       return 
     },

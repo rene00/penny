@@ -241,7 +241,9 @@ func (a *accountService) createAccount(name, description string, accountTypeID i
 	return account, nil
 }
 
-func (a *accountService) CreateAccount(name, description string, accountTypeID int64) (resp types.JSResp) {
+func (a *accountService) CreateAccount(name, description string, accountTypeID int64) types.AccountResponse {
+	resp := types.NewAccountResponse()
+
 	if len(name) == 0 {
 		resp.Msg = "Name must be not be empty"
 		return resp
@@ -252,14 +254,24 @@ func (a *accountService) CreateAccount(name, description string, accountTypeID i
 		return resp
 	}
 
-	if _, err := a.createAccount(name, description, accountTypeID); err != nil {
+	account, err := a.createAccount(name, description, accountTypeID)
+	if err != nil {
 		resp.Msg = fmt.Sprintf("Failed to create account: %s", err.Error())
+		a.logger.Error(resp.Msg)
+		return resp
+	}
+
+	data := types.NewAccount(a.logger, &account)
+	if err := data.SetDescription(a.ctx, a.db); err != nil {
+		resp.Msg = err.Error()
 		a.logger.Error(resp.Msg)
 		return resp
 	}
 
 	resp.Msg = "Account created"
 	resp.Success = true
+	resp.Data = data
+
 	return resp
 }
 

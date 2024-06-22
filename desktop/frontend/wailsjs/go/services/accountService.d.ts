@@ -7,7 +7,7 @@ import {context} from '../models';
 import {sql} from '../models';
 import {logwrap} from '../models';
 
-export function CreateAccount(arg1:string,arg2:string,arg3:number):Promise<types.JSResp>;
+export function CreateAccount(arg1:string,arg2:string,arg3:number):Promise<types.AccountResponse>;
 
 export function CreateBankAccount(arg1:ofxgo.BankAcct):Promise<model.Account>;
 

@@ -75,12 +75,7 @@ func NewTransaction(logger *logwrap.LogWrap, t *model.Transaction) (Transaction,
 }
 
 func (t *Transaction) SetSplits(ctx context.Context, db *sql.DB) error {
-	var q []qm.QueryMod
-
-	q = []qm.QueryMod{
-		qm.Select("splits.id, splits.transactions_id, splits.account_id, splits.value_num, splits.value_denom"),
-	}
-	splits, err := t.modelTransaction.Splits(q...).All(ctx, db)
+	splits, err := t.modelTransaction.Splits(qm.Select("splits.id, splits.transactions_id, splits.account_id, splits.value_num, splits.value_denom")).All(ctx, db)
 	if err != nil {
 		t.logger.Error(err.Error())
 		return err
