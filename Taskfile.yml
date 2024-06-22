@@ -14,6 +14,10 @@ vars:
   CONTAINER_IMAGE_NAME: rene00/penny
 
 tasks:
+  desktop:tests:
+    dir: desktop/
+    cmds:
+      - go test ./...
 
   desktop:bin-data:
     desc: "go-bindata"
