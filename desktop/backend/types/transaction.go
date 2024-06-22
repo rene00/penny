@@ -66,7 +66,7 @@ func (t *Transaction) SetSplits(ctx context.Context, db *sql.DB) error {
 	var q []qm.QueryMod
 
 	q = []qm.QueryMod{
-		qm.Select("splits.id, splits.account_id, splits.value_num, splits.value_denom"),
+		qm.Select("splits.id, splits.transactions_id, splits.account_id, splits.value_num, splits.value_denom"),
 	}
 	splits, err := t.modelTransaction.Splits(q...).All(ctx, db)
 	if err != nil {
