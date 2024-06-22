@@ -28,6 +28,10 @@ export default {
           text: "Type",
           value: "account_type.name",
         },
+        {
+          text: "Amount",
+          value: "amount",
+        },
       ]
     }
   },
@@ -54,6 +58,7 @@ export default {
           id: account.id,
           name: account.name,
           description: account.description,
+          amount: account.amount,
           account_type: {
             id: account.account_type.id,
             name: account.account_type.name,

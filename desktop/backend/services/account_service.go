@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"hash"
+	"math/big"
 	"pennyapp/backend/internal/hashers"
 	"pennyapp/backend/logwrap"
 	"pennyapp/backend/model"
@@ -14,6 +15,7 @@ import (
 	"strings"
 
 	"github.com/aclindsa/ofxgo"
+	"github.com/shopspring/decimal"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
@@ -245,6 +247,11 @@ func (a *accountService) CreateAccount(name, description string, accountTypeID i
 		return resp
 	}
 
+	if accountTypeID == 0 {
+		resp.Msg = "Account Type must not be empty"
+		return resp
+	}
+
 	if _, err := a.createAccount(name, description, accountTypeID); err != nil {
 		resp.Msg = fmt.Sprintf("Failed to create account: %s", err.Error())
 		a.logger.Error(resp.Msg)
@@ -264,9 +271,7 @@ func (a *accountService) GetAccount(id int64) types.JSResp {
 	q = []qm.QueryMod{
 		qm.Where("account.id=?", id),
 		qm.Where("account.entity_id=?", a.defaultEntity.ID),
-		qm.InnerJoin("account_attributes on account_attributes.account_id = account.id"),
 		qm.InnerJoin("account_type on account_type.id = account.account_type_id"),
-		qm.Load("AccountAttributes"),
 		qm.Load("AccountType"),
 	}
 	account, err := model.Accounts(q...).One(a.ctx, a.db)
@@ -284,13 +289,30 @@ func (a *accountService) GetAccount(id int64) types.JSResp {
 			Name: account.R.AccountType.Name,
 		},
 	}
-	for _, accountAttribute := range account.R.AccountAttributes {
+
+	accountAttributes, err := model.AccountAttributes(qm.Where("account_id=?", account.ID)).All(a.ctx, a.db)
+	for _, accountAttribute := range accountAttributes {
 		switch strings.ToLower(accountAttribute.Name) {
 		case "description":
 			accountResp.Description = accountAttribute.Value
 		default:
 		}
 	}
+
+	splits, err := model.Splits(qm.Where("account_id=?", account.ID)).All(a.ctx, a.db)
+	if err != nil {
+		resp.Msg = err.Error()
+		a.logger.Error(resp.Msg)
+		return resp
+	}
+
+	amount := float64(0)
+	for _, split := range splits {
+		r := big.NewRat(split.ValueNum, split.ValueDenom)
+		f, _ := r.Float64()
+		amount = amount + f
+	}
+	accountResp.Amount = decimal.NewFromFloat(amount).StringFixed(2)
 
 	resp.Success = true
 	resp.Data = accountResp
@@ -353,7 +375,23 @@ func (a *accountService) GetAccounts() types.JSResp {
 			}
 		}
 
+		splits, err := model.Splits(qm.Where("account_id=?", i.ID)).All(a.ctx, a.db)
+		if err != nil {
+			resp.Msg = err.Error()
+			a.logger.Error(resp.Msg)
+			return resp
+		}
+
+		amount := float64(0)
+		for _, split := range splits {
+			r := big.NewRat(split.ValueNum, split.ValueDenom)
+			f, _ := r.Float64()
+			amount = amount + f
+		}
+		account.Amount = decimal.NewFromFloat(amount).StringFixed(2)
+
 		data = append(data, account)
+
 	}
 
 	resp.Success = true

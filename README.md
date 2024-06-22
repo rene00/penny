@@ -15,3 +15,25 @@ recommend using other free and open applications such as
 There is a [web](./web) and [desktop](./desktop) version. I'm focused on
 developing the desktop version with the web version mostly only receiving
 maintenance fixes.
+
+## User Documentation
+
+Documentation for the desktop application. Check out [web](./web) for
+documentation for web application.
+
+
+### Install
+
+Download the penny binary the
+[latest](https://github.com/rene00/penny/releases/latest) releases page.
+
+Currently only linux amd64 is supported.
+
+### Importing Transactions
+
+Only OFX files for Credit Card Statements and Checking Accounts are currently
+supported.
+
+When transactions are imported, the credit card or checking account will be
+automatically created with the new transaction being automatically assigned to
+this account.

@@ -8,7 +8,7 @@ export default {
   data() {
     return {
       transaction: {},
-      splits: {},
+      splits: [],
       accounts: [],
     }
   },
@@ -72,8 +72,16 @@ export default {
         let s = {
           id: split.id,
           amount: split.amount,
-          account: split.account,
+          account: { ...split.account },
         }
+
+        // Use account_id to keep track of account.id. I'm unable to figure
+        // out how to mutate nested account object.
+        s.account_id = 0
+        if (s.account && s.account.id) {
+          s.account_id = s.account.id
+        }
+
         splits.push(s)
       }
 
@@ -99,8 +107,8 @@ export default {
         let updateTransactionMessage = $message
 
         for (const split of this.splits) {
-            if (split.id === 0 && split.account !== 0) {
-              const { success, msg, data } = await CreateSplit(this.transaction.id, split.account.id, split.amount)
+            if (split.id === 0 && split.account_id !== 0) {
+              const { success, msg, data } = await CreateSplit(this.transaction.id, split.account_id, split.amount)
               if (!success) {
                 $message.error(msg)
                 return
@@ -165,12 +173,13 @@ export default {
                                     <div class="col-md-6">
                                         <label class="small mb-1" for="inputFirstName">Account</label>
                                         <div class="mb-3">
-                                            <select class="form-select" aria-label="Type" v-model="splits[index].account.id">
+                                            <select class="form-select" aria-label="Type" v-model="splits[index].account_id">
                                                 <option v-for="account in accounts" :key="account.id" :value="account.id">{{ account.name }}</option>
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="col-md-6">
+                                    <!-- Only display amount for first split for now. I'm yet to understand how other split amounts will be displayed. Whether they will be + or -, depending on their account type, for example. -->
+                                    <div class="col-md-6" v-if="index == 0">
                                         <label class="small mb-1">Amount</label>
                                         <input class="form-control" v-model="splits[index].amount" name="amount" type="number" value="0.00" step="any">
                                     </div>

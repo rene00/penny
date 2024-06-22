@@ -296,6 +296,7 @@ export namespace types {
 	    name: string;
 	    description: string;
 	    account_type: AccountType;
+	    amount: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new Account(source);
@@ -307,6 +308,7 @@ export namespace types {
 	        this.name = source["name"];
 	        this.description = source["description"];
 	        this.account_type = this.convertValues(source["account_type"], AccountType);
+	        this.amount = source["amount"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -416,28 +418,30 @@ export namespace types {
 		    return a;
 		}
 	}
-	export class Transaction {
-	    id: number;
-	    memo: string;
-	    date: string;
-	    id: number;
+	export class TransactionDisplayAccount {
 	    name: string;
-	    splits: Split[];
-	    amount: string;
+	    id: number;
 	
 	    static createFrom(source: any = {}) {
-	        return new Transaction(source);
+	        return new TransactionDisplayAccount(source);
 	    }
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.id = source["id"];
-	        this.memo = source["memo"];
-	        this.date = source["date"];
-	        this.id = source["id"];
 	        this.name = source["name"];
-	        this.splits = this.convertValues(source["splits"], Split);
-	        this.amount = source["amount"];
+	        this.id = source["id"];
+	    }
+	}
+	export class TransactionDisplay {
+	    account: TransactionDisplayAccount;
+	
+	    static createFrom(source: any = {}) {
+	        return new TransactionDisplay(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.account = this.convertValues(source["account"], TransactionDisplayAccount);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -458,6 +462,52 @@ export namespace types {
 		    return a;
 		}
 	}
+	export class Transaction {
+	    id: number;
+	    memo: string;
+	    date: string;
+	    id: number;
+	    name: string;
+	    splits: Split[];
+	    amount: string;
+	    display: TransactionDisplay;
+	
+	    static createFrom(source: any = {}) {
+	        return new Transaction(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.memo = source["memo"];
+	        this.date = source["date"];
+	        this.id = source["id"];
+	        this.name = source["name"];
+	        this.splits = this.convertValues(source["splits"], Split);
+	        this.amount = source["amount"];
+	        this.display = this.convertValues(source["display"], TransactionDisplay);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	
+	
 	export class TransactionResponse {
 	    msg: boolean;
 	    success: string;
