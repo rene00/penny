@@ -60,6 +60,7 @@ export default {
         id: data.id,
         name: data.name,
         description: "",
+        amount: data.amount,
         account_type: {
           id: data.account_type.id,
           name: data.account_type.name,
@@ -119,6 +120,12 @@ export default {
                                       Description
                                     </label>
                                     <input class="form-control" type="text" v-model="account.description">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="small mb-1">
+                                      Amount
+                                    </label>
+                                    <input class="form-control" readonly type="text" v-model="account.amount">
                                 </div>
                                 <div class="mb-1">
                                     <label class="small mb-1">

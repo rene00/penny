@@ -178,6 +178,5 @@ func (t *Transaction) SetAmount() {
 func getAmountAsString(num, denom int64) string {
 	r := big.NewRat(num, denom)
 	f, _ := r.Float64()
-	amount := decimal.NewFromFloat(f)
-	return fmt.Sprintf("%s", amount)
+	return decimal.NewFromFloat(f).StringFixed(2)
 }

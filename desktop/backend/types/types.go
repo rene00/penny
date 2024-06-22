@@ -11,6 +11,7 @@ type Account struct {
 	Name        string      `json:"name"`
 	Description string      `json:"description"`
 	AccountType AccountType `json:"account_type"`
+	Amount      string      `json:"amount"`
 }
 
 type AccountType struct {

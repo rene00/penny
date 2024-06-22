@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"hash"
+	"math/big"
 	"pennyapp/backend/internal/hashers"
 	"pennyapp/backend/logwrap"
 	"pennyapp/backend/model"
@@ -14,6 +15,7 @@ import (
 	"strings"
 
 	"github.com/aclindsa/ofxgo"
+	"github.com/shopspring/decimal"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
@@ -297,6 +299,21 @@ func (a *accountService) GetAccount(id int64) types.JSResp {
 		}
 	}
 
+	splits, err := model.Splits(qm.Where("account_id=?", account.ID)).All(a.ctx, a.db)
+	if err != nil {
+		resp.Msg = err.Error()
+		a.logger.Error(resp.Msg)
+		return resp
+	}
+
+	amount := float64(0)
+	for _, split := range splits {
+		r := big.NewRat(split.ValueNum, split.ValueDenom)
+		f, _ := r.Float64()
+		amount = amount + f
+	}
+	accountResp.Amount = decimal.NewFromFloat(amount).StringFixed(2)
+
 	resp.Success = true
 	resp.Data = accountResp
 
@@ -358,7 +375,23 @@ func (a *accountService) GetAccounts() types.JSResp {
 			}
 		}
 
+		splits, err := model.Splits(qm.Where("account_id=?", i.ID)).All(a.ctx, a.db)
+		if err != nil {
+			resp.Msg = err.Error()
+			a.logger.Error(resp.Msg)
+			return resp
+		}
+
+		amount := float64(0)
+		for _, split := range splits {
+			r := big.NewRat(split.ValueNum, split.ValueDenom)
+			f, _ := r.Float64()
+			amount = amount + f
+		}
+		account.Amount = decimal.NewFromFloat(amount).StringFixed(2)
+
 		data = append(data, account)
+
 	}
 
 	resp.Success = true
