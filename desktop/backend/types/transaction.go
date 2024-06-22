@@ -43,6 +43,18 @@ type Transaction struct {
 	Amount           string  `json:"amount"`
 	modelTransaction *model.Transaction
 	logger           *logwrap.LogWrap
+
+	// Display attributes are potentially shown in UI and not used in any other logic.
+	Display TransactionDisplay `json:"display"`
+}
+
+type TransactionDisplay struct {
+	Account TransactionDisplayAccount `json:"account"`
+}
+
+type TransactionDisplayAccount struct {
+	Name string `json:"name"`
+	ID   int64  `json:"id"`
 }
 
 func NewTransaction(logger *logwrap.LogWrap, t *model.Transaction) (Transaction, error) {
@@ -124,6 +136,25 @@ func (t *Transaction) SetSplits(ctx context.Context, db *sql.DB) error {
 	t.Splits = s
 
 	return nil
+}
+
+func (t *Transaction) SetDisplay() {
+	display := TransactionDisplay{
+		Account: TransactionDisplayAccount{},
+	}
+	switch len(t.Splits) {
+	case 1:
+	default:
+		split := t.Splits[1]
+		display = TransactionDisplay{
+			Account: TransactionDisplayAccount{
+				Name: split.Account.Name,
+				ID:   split.Account.ID,
+			},
+		}
+	}
+	t.Display = display
+	return
 }
 
 func (t *Transaction) SetAmount() {

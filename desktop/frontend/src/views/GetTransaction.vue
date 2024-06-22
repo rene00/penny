@@ -178,7 +178,8 @@ export default {
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="col-md-6">
+                                    <!-- Only display amount for first split for now. I'm yet to understand how other split amounts will be displayed. Whether they will be + or -, depending on their account type, for example. -->
+                                    <div class="col-md-6" v-if="index == 0">
                                         <label class="small mb-1">Amount</label>
                                         <input class="form-control" v-model="splits[index].amount" name="amount" type="number" value="0.00" step="any">
                                     </div>

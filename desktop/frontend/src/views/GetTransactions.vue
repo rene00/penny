@@ -26,6 +26,10 @@ export default {
           value: 'memo',
         },
         {
+          text: 'Account',
+          value: 'display.account.name',
+        },
+        {
           text: 'Amount',
           value: 'amount',
         },
@@ -57,6 +61,12 @@ export default {
           memo: transaction.memo,
           date: transaction.date,
           amount: transaction.amount,
+          display: {
+            account: {
+              name: transaction.display.account.name,
+              id: transaction.display.account.id
+            }
+          }
         }
         transactions.push(t)
       }
@@ -104,14 +114,11 @@ export default {
                                   </div>
                                 </template>
 
-                                <!--
-                                <template #item-account.name="item">
+                                <template #item-display.account.name="item">
                                   <div>
-                                    <router-link :to="{ name: 'get-account', params: { id: item.account.id }}">{{ item.account.name }}</router-link>
+                                    <router-link :to="{ name: 'get-account', params: { id: item.display.account.id }}">{{ item.display.account.name }}</router-link>
                                   </div>
                                 </template>
-                                -->
-
                               </EasyDataTable>
                             </div>
                         </div>

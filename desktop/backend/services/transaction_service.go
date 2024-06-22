@@ -124,6 +124,7 @@ func (t *transactionService) GetTransactions() types.JSResp {
 		}
 
 		transaction.SetAmount()
+		transaction.SetDisplay()
 
 		data = append(data, transaction)
 	}
