@@ -269,9 +269,7 @@ func (a *accountService) GetAccount(id int64) types.JSResp {
 	q = []qm.QueryMod{
 		qm.Where("account.id=?", id),
 		qm.Where("account.entity_id=?", a.defaultEntity.ID),
-		qm.InnerJoin("account_attributes on account_attributes.account_id = account.id"),
 		qm.InnerJoin("account_type on account_type.id = account.account_type_id"),
-		qm.Load("AccountAttributes"),
 		qm.Load("AccountType"),
 	}
 	account, err := model.Accounts(q...).One(a.ctx, a.db)
@@ -289,7 +287,9 @@ func (a *accountService) GetAccount(id int64) types.JSResp {
 			Name: account.R.AccountType.Name,
 		},
 	}
-	for _, accountAttribute := range account.R.AccountAttributes {
+
+	accountAttributes, err := model.AccountAttributes(qm.Where("account_id=?", account.ID)).All(a.ctx, a.db)
+	for _, accountAttribute := range accountAttributes {
 		switch strings.ToLower(accountAttribute.Name) {
 		case "description":
 			accountResp.Description = accountAttribute.Value
