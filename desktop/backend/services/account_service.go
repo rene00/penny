@@ -245,6 +245,11 @@ func (a *accountService) CreateAccount(name, description string, accountTypeID i
 		return resp
 	}
 
+	if accountTypeID == 0 {
+		resp.Msg = "Account Type must not be empty"
+		return resp
+	}
+
 	if _, err := a.createAccount(name, description, accountTypeID); err != nil {
 		resp.Msg = fmt.Sprintf("Failed to create account: %s", err.Error())
 		a.logger.Error(resp.Msg)
