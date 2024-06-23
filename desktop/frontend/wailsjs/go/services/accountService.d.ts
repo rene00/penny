@@ -7,18 +7,22 @@ import {context} from '../models';
 import {sql} from '../models';
 import {logwrap} from '../models';
 
-export function CreateAccount(arg1:string,arg2:string,arg3:number):Promise<types.JSResp>;
+export function CreateAccount(arg1:string,arg2:string,arg3:number):Promise<types.AccountResponse>;
 
 export function CreateBankAccount(arg1:ofxgo.BankAcct):Promise<model.Account>;
 
 export function CreateCreditCardAccount(arg1:ofxgo.CCAcct):Promise<model.Account>;
 
-export function GetAccount(arg1:number):Promise<types.JSResp>;
+export function DeleteAccount(arg1:number):Promise<types.AccountResponse>;
+
+export function GetAccount(arg1:number):Promise<types.AccountResponse>;
 
 export function GetAccounts():Promise<types.JSResp>;
 
 export function GetChildAccountTypes():Promise<types.JSResp>;
 
 export function Start(arg1:context.Context,arg2:sql.DB,arg3:logwrap.LogWrap):Promise<void>;
+
+export function UndeleteAccount(arg1:number):Promise<types.AccountResponse>;
 
 export function UpdateAccount(arg1:number,arg2:string,arg3:string,arg4:number):Promise<types.JSResp>;

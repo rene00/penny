@@ -6,7 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"hash"
-	"math/big"
+	"pennyapp/backend/internal/dberror"
 	"pennyapp/backend/internal/hashers"
 	"pennyapp/backend/logwrap"
 	"pennyapp/backend/model"
@@ -15,7 +15,6 @@ import (
 	"strings"
 
 	"github.com/aclindsa/ofxgo"
-	"github.com/shopspring/decimal"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
@@ -223,7 +222,8 @@ func (a *accountService) createAccount(name, description string, accountTypeID i
 		AccountTypeID: accountType.ID,
 		ParentID:      a.grandParentAccount.ID,
 	}
-	if err := account.Insert(a.ctx, a.db, boil.Infer()); err != nil {
+
+	if err := account.Upsert(a.ctx, a.db, true, []string{"name", "parent_id", "entity_id", "account_type_id"}, boil.Whitelist("name"), boil.Infer()); err != nil {
 		return account, err
 	}
 
@@ -241,7 +241,79 @@ func (a *accountService) createAccount(name, description string, accountTypeID i
 	return account, nil
 }
 
-func (a *accountService) CreateAccount(name, description string, accountTypeID int64) (resp types.JSResp) {
+func (a *accountService) deleteAccountAttribute(accountID int64, name string) (int64, error) {
+	return model.AccountAttributes(qm.Where("account_id=? AND name=?", accountID, name)).DeleteAll(a.ctx, a.db)
+}
+
+func (a *accountService) upsertAccountAttribute(accountID int64, name, value string) (model.AccountAttribute, error) {
+	accountAttribute := model.AccountAttribute{
+		ID:        0,
+		AccountID: accountID,
+		Name:      name,
+		Value:     value,
+	}
+	if err := accountAttribute.Upsert(a.ctx, a.db, true, []string{"account_id", "name"}, boil.Whitelist("value"), boil.Infer()); err != nil {
+		return accountAttribute, err
+	}
+	return accountAttribute, nil
+}
+
+func (a *accountService) UndeleteAccount(accountID int64) types.AccountResponse {
+	resp := types.NewAccountResponse()
+	account, err := model.FindAccount(a.ctx, a.db, accountID)
+	if err != nil {
+		resp.Msg = fmt.Sprintf("Unable to find account: %s", err.Error())
+		a.logger.Error(resp.Msg)
+		return resp
+	}
+
+	if _, err := a.deleteAccountAttribute(account.ID, "deleted"); err != nil {
+		resp.Msg = fmt.Sprintf("Failed to undelete account: %s", err.Error())
+		a.logger.Error(resp.Msg)
+		return resp
+	}
+
+	resp.Msg = "Account undeleted"
+	resp.Success = true
+
+	return resp
+}
+
+func (a *accountService) DeleteAccount(accountID int64) types.AccountResponse {
+	resp := types.NewAccountResponse()
+	account, err := model.FindAccount(a.ctx, a.db, accountID)
+	if err != nil {
+		resp.Msg = fmt.Sprintf("Unable to find account: %s", err.Error())
+		a.logger.Error(resp.Msg)
+		return resp
+	}
+
+	splitsExist, err := model.Splits(qm.Where("account_id=?", accountID)).Exists(a.ctx, a.db)
+	switch {
+	case err != nil:
+		resp.Msg = err.Error()
+		a.logger.Error(resp.Msg)
+		return resp
+	case splitsExist:
+		resp.Msg = "Account still assigned to transactions"
+		return resp
+	}
+
+	if _, err := a.upsertAccountAttribute(account.ID, "deleted", "true"); err != nil {
+		resp.Msg = fmt.Sprintf("Failed to delete account: %s", err.Error())
+		a.logger.Error(resp.Msg)
+		return resp
+	}
+
+	resp.Msg = "Account deleted"
+	resp.Success = true
+
+	return resp
+}
+
+func (a *accountService) CreateAccount(name, description string, accountTypeID int64) types.AccountResponse {
+	resp := types.NewAccountResponse()
+
 	if len(name) == 0 {
 		resp.Msg = "Name must be not be empty"
 		return resp
@@ -252,70 +324,91 @@ func (a *accountService) CreateAccount(name, description string, accountTypeID i
 		return resp
 	}
 
-	if _, err := a.createAccount(name, description, accountTypeID); err != nil {
+	account, err := a.createAccount(name, description, accountTypeID)
+	switch {
+	case dberror.IsUniqueConstraint(err):
+		resp.Msg = fmt.Sprintf("Account already exists")
+		return resp
+	case err != nil:
 		resp.Msg = fmt.Sprintf("Failed to create account: %s", err.Error())
+		a.logger.Error(resp.Msg)
+		return resp
+	}
+
+	// Check if the account was previously deleted and if it was, remove the account attribute delete.
+	accountAttribute, err := model.AccountAttributes(qm.Where("account_id=? AND name=?", account.ID, "deleted")).One(a.ctx, a.db)
+	switch {
+	case dberror.IsNoRowsFound(err):
+	case err != nil:
+		resp.Msg = err.Error()
+		a.logger.Error(resp.Msg)
+		return resp
+	default:
+		if _, err := accountAttribute.Delete(a.ctx, a.db); err != nil {
+			resp.Msg = err.Error()
+			a.logger.Error(resp.Msg)
+			return resp
+		}
+	}
+
+	data := types.NewAccount(a.logger, &account)
+
+	if err := data.SetAttributes(a.ctx, a.db); err != nil {
+		resp.Msg = err.Error()
 		a.logger.Error(resp.Msg)
 		return resp
 	}
 
 	resp.Msg = "Account created"
 	resp.Success = true
+	resp.Data = data
+
 	return resp
 }
 
-func (a *accountService) GetAccount(id int64) types.JSResp {
-	var err error
-	var resp types.JSResp
-	var q []qm.QueryMod
-
-	q = []qm.QueryMod{
+func (a *accountService) getAccount(id int64) (*model.Account, error) {
+	q := []qm.QueryMod{
 		qm.Where("account.id=?", id),
 		qm.Where("account.entity_id=?", a.defaultEntity.ID),
 		qm.InnerJoin("account_type on account_type.id = account.account_type_id"),
 		qm.Load("AccountType"),
 	}
-	account, err := model.Accounts(q...).One(a.ctx, a.db)
-	if err != nil {
+	return model.Accounts(q...).One(a.ctx, a.db)
+}
+
+func (a *accountService) GetAccount(id int64) types.AccountResponse {
+	var err error
+
+	resp := types.NewAccountResponse()
+
+	account, err := a.getAccount(id)
+	switch {
+	case dberror.IsNoRowsFound(err):
+		resp.Msg = "Account not found"
+		a.logger.Error(resp.Msg)
+		return resp
+	case err != nil:
 		resp.Msg = fmt.Sprintf("Failed to find account: %s", err.Error())
 		a.logger.Error(resp.Msg)
 		return resp
 	}
 
-	accountResp := types.Account{
-		ID:   account.ID,
-		Name: account.Name,
-		AccountType: types.AccountType{
-			ID:   account.R.AccountType.ID,
-			Name: account.R.AccountType.Name,
-		},
-	}
+	data := types.NewAccount(a.logger, account)
 
-	accountAttributes, err := model.AccountAttributes(qm.Where("account_id=?", account.ID)).All(a.ctx, a.db)
-	for _, accountAttribute := range accountAttributes {
-		switch strings.ToLower(accountAttribute.Name) {
-		case "description":
-			accountResp.Description = accountAttribute.Value
-		default:
-		}
-	}
-
-	splits, err := model.Splits(qm.Where("account_id=?", account.ID)).All(a.ctx, a.db)
-	if err != nil {
+	if err := data.SetAmount(a.ctx, a.db); err != nil {
 		resp.Msg = err.Error()
 		a.logger.Error(resp.Msg)
 		return resp
 	}
 
-	amount := float64(0)
-	for _, split := range splits {
-		r := big.NewRat(split.ValueNum, split.ValueDenom)
-		f, _ := r.Float64()
-		amount = amount + f
+	if err := data.SetAttributes(a.ctx, a.db); err != nil {
+		resp.Msg = err.Error()
+		a.logger.Error(resp.Msg)
+		return resp
 	}
-	accountResp.Amount = decimal.NewFromFloat(amount).StringFixed(2)
 
 	resp.Success = true
-	resp.Data = accountResp
+	resp.Data = data
 
 	return resp
 }
@@ -351,47 +444,22 @@ func (a *accountService) GetAccounts() types.JSResp {
 	}
 
 	data := []types.Account{}
-	for _, i := range accounts {
-		account := types.Account{
-			ID:   i.ID,
-			Name: i.Name,
-			AccountType: types.AccountType{
-				ID:   i.R.AccountType.ID,
-				Name: i.R.AccountType.Name,
-			},
-		}
-
-		accountAttributes, err := model.AccountAttributes(qm.Where("account_id = ?", i.ID)).All(a.ctx, a.db)
-		if err != nil {
+	for _, account := range accounts {
+		d := types.NewAccount(a.logger, account)
+		if err := d.SetAmount(a.ctx, a.db); err != nil {
 			resp.Msg = err.Error()
 			a.logger.Error(resp.Msg)
 			return resp
 		}
-		for _, accountAttribute := range accountAttributes {
-			switch strings.ToLower(accountAttribute.Name) {
-			case "description":
-				account.Description = accountAttribute.Value
-			default:
-			}
-		}
-
-		splits, err := model.Splits(qm.Where("account_id=?", i.ID)).All(a.ctx, a.db)
-		if err != nil {
+		if err := d.SetAttributes(a.ctx, a.db); err != nil {
 			resp.Msg = err.Error()
 			a.logger.Error(resp.Msg)
 			return resp
 		}
-
-		amount := float64(0)
-		for _, split := range splits {
-			r := big.NewRat(split.ValueNum, split.ValueDenom)
-			f, _ := r.Float64()
-			amount = amount + f
+		if d.Deleted == true {
+			continue
 		}
-		account.Amount = decimal.NewFromFloat(amount).StringFixed(2)
-
-		data = append(data, account)
-
+		data = append(data, d)
 	}
 
 	resp.Success = true

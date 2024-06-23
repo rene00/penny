@@ -9,9 +9,9 @@ import (
 	"path"
 	"path/filepath"
 	"pennyapp/backend/config"
+	"pennyapp/backend/internal/dberror"
 	"pennyapp/backend/model"
 	"pennyapp/db/migrations"
-	"strings"
 	"sync"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -126,7 +126,7 @@ func (d *dbService) initTransactionsHashType(ctx context.Context) error {
 	transactionHashType := &model.TransactionsHashType{Name: "v1"}
 	if err := transactionHashType.Insert(ctx, d.DB, boil.Infer()); err != nil {
 		switch {
-		case isUniqueConstraint(err):
+		case dberror.IsUniqueConstraint(err):
 		default:
 			return fmt.Errorf("failed to insert transaction hash type: %w", err)
 		}
@@ -138,7 +138,7 @@ func (d *dbService) initCurrency(ctx context.Context) error {
 	currency := &model.Currency{Name: "Australian Dollar"}
 	if err := currency.Insert(ctx, d.DB, boil.Infer()); err != nil {
 		switch {
-		case isUniqueConstraint(err):
+		case dberror.IsUniqueConstraint(err):
 			currency, err = model.Currencies([]qm.QueryMod{
 				qm.Where("name=?", currency.Name),
 			}...).One(ctx, d.DB)
@@ -160,7 +160,7 @@ func (d *dbService) initCurrency(ctx context.Context) error {
 	for _, i := range currencyAttributes {
 		if err := i.Insert(ctx, d.DB, boil.Infer()); err != nil {
 			switch {
-			case isUniqueConstraint(err):
+			case dberror.IsUniqueConstraint(err):
 				continue
 			default:
 				return fmt.Errorf("failed to insert currency attributes: %w", err)
@@ -182,7 +182,7 @@ func (d *dbService) initEntity(ctx context.Context) error {
 	entity := &model.Entity{Name: "Default", EntityTypeID: entityType.ID}
 	if err := entity.Insert(ctx, d.DB, boil.Infer()); err != nil {
 		switch {
-		case isUniqueConstraint(err):
+		case dberror.IsUniqueConstraint(err):
 			q = []qm.QueryMod{
 				qm.Where("name=?", "Default"),
 				qm.Where("entity_type_id=?", entityType.ID),
@@ -222,7 +222,7 @@ func (d *dbService) initAccount(ctx context.Context) error {
 	_, err = model.Accounts(qm.Where("name=? AND parent_id=0 AND entity_id=?", "Account", defaultEntity.ID)).One(ctx, d.DB)
 	if err != nil {
 		switch {
-		case isNoRowsFound(err):
+		case dberror.IsNoRowsFound(err):
 			grandParentAccountType, err := d.getGrantParentAccountType()
 			if err != nil {
 				return err
@@ -253,7 +253,7 @@ func (d *dbService) initEntityTypes(ctx context.Context) error {
 	for _, entityType := range entityTypes {
 		if err := entityType.Insert(ctx, d.DB, boil.Infer()); err != nil {
 			switch {
-			case isUniqueConstraint(err):
+			case dberror.IsUniqueConstraint(err):
 				continue
 			default:
 				return fmt.Errorf("failed to insert entity type: %w", err)
@@ -288,7 +288,7 @@ func (d *dbService) initAccountTypes(ctx context.Context) error {
 	for _, parentAccountType := range parentAccountTypes {
 		if err := parentAccountType.Insert(ctx, d.DB, boil.Infer()); err != nil {
 			switch {
-			case isUniqueConstraint(err):
+			case dberror.IsUniqueConstraint(err):
 				continue
 			default:
 				return fmt.Errorf("failed to insert parent account type: %w", err)
@@ -322,7 +322,7 @@ func (d *dbService) initAccountTypes(ctx context.Context) error {
 			accountType.ParentID = parentAccountType.ID
 			if err := accountType.Insert(ctx, d.DB, boil.Infer()); err != nil {
 				switch {
-				case isUniqueConstraint(err):
+				case dberror.IsUniqueConstraint(err):
 					continue
 				default:
 					return fmt.Errorf("failed to insert child account type: %w", err)
@@ -332,15 +332,4 @@ func (d *dbService) initAccountTypes(ctx context.Context) error {
 	}
 
 	return nil
-}
-
-func isNoRowsFound(err error) bool {
-	return errors.Is(err, sql.ErrNoRows)
-}
-
-func isUniqueConstraint(err error) bool {
-	if err == nil {
-		return false
-	}
-	return strings.Contains(err.Error(), "UNIQUE constraint failed")
 }
