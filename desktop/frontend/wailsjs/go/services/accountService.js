@@ -14,6 +14,10 @@ export function CreateCreditCardAccount(arg1) {
   return window['go']['services']['accountService']['CreateCreditCardAccount'](arg1);
 }
 
+export function DeleteAccount(arg1) {
+  return window['go']['services']['accountService']['DeleteAccount'](arg1);
+}
+
 export function GetAccount(arg1) {
   return window['go']['services']['accountService']['GetAccount'](arg1);
 }
@@ -28,6 +32,10 @@ export function GetChildAccountTypes() {
 
 export function Start(arg1, arg2, arg3) {
   return window['go']['services']['accountService']['Start'](arg1, arg2, arg3);
+}
+
+export function UndeleteAccount(arg1) {
+  return window['go']['services']['accountService']['UndeleteAccount'](arg1);
 }
 
 export function UpdateAccount(arg1, arg2, arg3, arg4) {

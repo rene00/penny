@@ -1,5 +1,5 @@
 <script>
-import { GetAccount, GetChildAccountTypes, UpdateAccount } from 'wailsjs/go/services/accountService.js'
+import { GetAccount, GetChildAccountTypes, UpdateAccount, DeleteAccount, UndeleteAccount } from 'wailsjs/go/services/accountService.js'
 
 export default {
   props: ['id'],
@@ -59,15 +59,13 @@ export default {
       account = {
         id: data.id,
         name: data.name,
-        description: "",
+        description: data.description,
         amount: data.amount,
         account_type: {
           id: data.account_type.id,
           name: data.account_type.name,
         },
-      }
-      if (Object.hasOwn(data, 'description')) {
-          account.description = data.description
+        deleted: data.deleted,
       }
       this.account = account
     },
@@ -81,6 +79,28 @@ export default {
         $message.success(msg)
         return
     },
+
+    async deleteAccount(){
+        const { success, msg } = await DeleteAccount(Number(this.account.id))
+        if (!success) {
+            $message.error(msg)
+            return
+        }
+        $message.success(msg)
+        this.getAccount()
+        return
+    },
+
+    async undeleteAccount(){
+        const { success, msg } = await UndeleteAccount(Number(this.account.id))
+        if (!success) {
+            $message.error(msg)
+            return
+        }
+        $message.success(msg)
+        this.getAccount()
+        return
+    }
   },
 }
 </script>
@@ -137,8 +157,14 @@ export default {
                                         <option v-for="accountType in accountTypes" :value="accountType.id" :selected="accountType.id == account.account_type.id">{{ accountType.name }}</option>
                                     </select>
                                 </div>
-                                <div class="mb-3">
-                                    <button class="btn btn-primary" type="submit">Save changes</button>
+                                <div class="row">
+                                    <div class="col-auto">
+                                        <button class="btn btn-danger btn-primary me-2" type="button" @click="undeleteAccount" v-if="account.deleted">Undelete</button>
+                                        <button class="btn btn-danger btn-primary me-2" type="button" @click="deleteAccount" v-else>Delete</button>
+                                    </div>
+                                    <div class="col-auto">
+                                        <button class="btn btn-primary" type="submit">Save changes</button>
+                                    </div>
                                 </div>
                             </form>
                         </div>
@@ -164,24 +190,4 @@ export default {
     <a class="scroll-to-top rounded" href="#page-top">
         <i class="fas fa-angle-up"></i>
     </a>
-
-    <!-- Logout Modal-->
-    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
-                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
-                    </button>
-                </div>
-                <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-                    <a class="btn btn-primary" href="login.html">Logout</a>
-                </div>
-            </div>
-        </div>
-    </div>
 </template>

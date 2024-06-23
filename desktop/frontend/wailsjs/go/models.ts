@@ -297,6 +297,7 @@ export namespace types {
 	    description: string;
 	    account_type: AccountType;
 	    amount: string;
+	    deleted: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new Account(source);
@@ -309,6 +310,7 @@ export namespace types {
 	        this.description = source["description"];
 	        this.account_type = this.convertValues(source["account_type"], AccountType);
 	        this.amount = source["amount"];
+	        this.deleted = source["deleted"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
