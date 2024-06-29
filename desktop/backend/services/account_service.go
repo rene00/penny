@@ -451,14 +451,17 @@ func (a *accountService) GetAccounts() types.JSResp {
 			a.logger.Error(resp.Msg)
 			return resp
 		}
+
 		if err := d.SetAttributes(a.ctx, a.db); err != nil {
 			resp.Msg = err.Error()
 			a.logger.Error(resp.Msg)
 			return resp
 		}
+
 		if d.Deleted == true {
 			continue
 		}
+
 		data = append(data, d)
 	}
 

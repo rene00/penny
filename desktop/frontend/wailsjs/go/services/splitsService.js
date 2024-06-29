@@ -6,8 +6,16 @@ export function CreateSplit(arg1, arg2, arg3) {
   return window['go']['services']['splitsService']['CreateSplit'](arg1, arg2, arg3);
 }
 
+export function DeleteSplit(arg1) {
+  return window['go']['services']['splitsService']['DeleteSplit'](arg1);
+}
+
 export function Start(arg1, arg2, arg3) {
   return window['go']['services']['splitsService']['Start'](arg1, arg2, arg3);
+}
+
+export function UndeleteSplit(arg1) {
+  return window['go']['services']['splitsService']['UndeleteSplit'](arg1);
 }
 
 export function UpdateSplit(arg1, arg2, arg3) {

@@ -43,6 +43,23 @@ func (s *splitsService) getSplit(splitID int64) (*model.Split, error) {
 	return model.Splits(q...).One(s.ctx, s.db)
 }
 
+func (s *splitsService) deleteSplit(split *model.Split) error {
+	splitsAttribute := model.SplitsAttribute{
+		SplitsID: split.ID,
+		Name:     "deleted",
+		Value:    "true",
+	}
+	return splitsAttribute.Upsert(s.ctx, s.db, true, []string{"splits_id", "name"}, boil.Whitelist("name"), boil.Infer())
+}
+
+func (s *splitsService) undeleteSplit(split *model.Split) error {
+	_, err := model.SplitsAttributes(qm.Where("splits_id=? AND name=?", split.ID, "deleted")).DeleteAll(s.ctx, s.db)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (s *splitsService) updateSplit(splitID, accountID int64, amount float64) (*model.Split, error) {
 	var split *model.Split
 	var err error
@@ -63,6 +80,48 @@ func (s *splitsService) updateSplit(splitID, accountID int64, amount float64) (*
 	}
 
 	return split, nil
+}
+
+func (s *splitsService) UndeleteSplit(id int64) types.SplitResponse {
+	var resp types.SplitResponse
+
+	split, err := s.getSplit(id)
+	if err != nil {
+		resp.Msg = fmt.Sprintf("Failed to find split: %s", err)
+		return resp
+	}
+
+	if err := s.undeleteSplit(split); err != nil {
+		resp.Msg = fmt.Sprintf("Failed to undelete split: %s", err)
+		s.logger.Error(resp.Msg)
+		return resp
+	}
+
+	resp.Msg = "Split undeleted"
+	resp.Success = true
+
+	return resp
+}
+
+func (s *splitsService) DeleteSplit(id int64) types.SplitResponse {
+	var resp types.SplitResponse
+
+	split, err := s.getSplit(id)
+	if err != nil {
+		resp.Msg = fmt.Sprintf("Failed to find split: %s", err)
+		return resp
+	}
+
+	if err := s.deleteSplit(split); err != nil {
+		resp.Msg = fmt.Sprintf("Failed to delete split: %s", err)
+		s.logger.Error(resp.Msg)
+		return resp
+	}
+
+	resp.Msg = "Split deleted"
+	resp.Success = true
+
+	return resp
 }
 
 func (s *splitsService) UpdateSplit(splitID, accountID int64, amount float64) types.SplitResponse {

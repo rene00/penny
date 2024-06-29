@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"math/big"
+	"pennyapp/backend/internal/dberror"
 	"pennyapp/backend/logwrap"
 	"pennyapp/backend/model"
 	"time"
@@ -17,8 +18,8 @@ import (
 const DefaultDBTimeLayout string = "2006-01-02 15:04:05.000"
 
 type TransactionResponse struct {
-	Success bool        `json:"msg"`
-	Msg     string      `json:"success"`
+	Success bool        `json:"success"`
+	Msg     string      `json:"msg"`
 	Data    Transaction `json:"data"`
 }
 
@@ -35,12 +36,14 @@ func NewTransactionResponse() TransactionResponse {
 }
 
 type Transaction struct {
-	ID               int64  `json:"id"`
-	Memo             string `json:"memo"`
-	Date             string `json:"date"`
-	Currency         `json:"currency"`
-	Splits           []Split `json:"splits"`
-	Amount           string  `json:"amount"`
+	ID       int64  `json:"id"`
+	Memo     string `json:"memo"`
+	Date     string `json:"date"`
+	Currency `json:"currency"`
+	Splits   []Split `json:"splits"`
+	Amount   string  `json:"amount"`
+	Deleted  bool    `json:"deleted"`
+
 	modelTransaction *model.Transaction
 	logger           *logwrap.LogWrap
 
@@ -166,6 +169,27 @@ func (t *Transaction) SetAmount() {
 	if firstSplit.Account.AccountType.ParentAccountType.Name == "Expenses" {
 		t.Amount = fmt.Sprintf("-%s", t.Amount)
 	}
+}
+
+func (t *Transaction) SetAttributes(ctx context.Context, db *sql.DB) error {
+	if err := t.setDeleted(ctx, db); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (t *Transaction) setDeleted(ctx context.Context, db *sql.DB) error {
+	transactionAttribute, err := model.TransactionsAttributes(qm.Where("transactions_id=? AND name=?", t.modelTransaction.ID, "deleted")).One(ctx, db)
+	switch {
+	case dberror.IsNoRowsFound(err):
+	case err != nil:
+		return err
+	default:
+		if transactionAttribute.Value == "true" {
+			t.Deleted = true
+		}
+	}
+	return nil
 }
 
 // getAmountAsString accepts a numerator, a denominator and returns the decimal
