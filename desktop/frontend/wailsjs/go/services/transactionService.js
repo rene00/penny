@@ -10,6 +10,10 @@ export function CreateTransaction(arg1, arg2) {
   return window['go']['services']['transactionService']['CreateTransaction'](arg1, arg2);
 }
 
+export function DeleteTransaction(arg1) {
+  return window['go']['services']['transactionService']['DeleteTransaction'](arg1);
+}
+
 export function GetTransaction(arg1) {
   return window['go']['services']['transactionService']['GetTransaction'](arg1);
 }
@@ -24,6 +28,10 @@ export function ImportTransactions(arg1) {
 
 export function Start(arg1, arg2, arg3) {
   return window['go']['services']['transactionService']['Start'](arg1, arg2, arg3);
+}
+
+export function UndeleteTransaction(arg1) {
+  return window['go']['services']['transactionService']['UndeleteTransaction'](arg1);
 }
 
 export function UpdateTransaction(arg1, arg2, arg3) {

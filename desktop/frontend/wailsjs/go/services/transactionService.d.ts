@@ -10,6 +10,8 @@ export function AddAccountSvcHandler(arg1:services.accountService):Promise<void>
 
 export function CreateTransaction(arg1:string,arg2:string):Promise<types.TransactionResponse>;
 
+export function DeleteTransaction(arg1:number):Promise<types.TransactionResponse>;
+
 export function GetTransaction(arg1:number):Promise<types.TransactionResponse>;
 
 export function GetTransactions():Promise<types.JSResp>;
@@ -17,5 +19,7 @@ export function GetTransactions():Promise<types.JSResp>;
 export function ImportTransactions(arg1:string):Promise<types.JSResp>;
 
 export function Start(arg1:context.Context,arg2:sql.DB,arg3:logwrap.LogWrap):Promise<void>;
+
+export function UndeleteTransaction(arg1:number):Promise<types.TransactionResponse>;
 
 export function UpdateTransaction(arg1:number,arg2:string,arg3:string):Promise<types.JSResp>;

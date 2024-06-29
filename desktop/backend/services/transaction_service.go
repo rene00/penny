@@ -80,6 +80,12 @@ func (t *transactionService) GetTransaction(id int64) types.TransactionResponse 
 		return resp
 	}
 
+	if err := data.SetAttributes(t.ctx, t.db); err != nil {
+		resp.Msg = fmt.Sprintf("Failed to set attributes for transaction %d: %s", transaction.ID, err.Error())
+		t.logger.Error(resp.Msg)
+		return resp
+	}
+
 	if err := data.SetSplits(t.ctx, t.db); err != nil {
 		resp.Msg = err.Error()
 		t.logger.Error(resp.Msg)
@@ -120,7 +126,19 @@ func (t *transactionService) GetTransactions() types.JSResp {
 		}
 
 		if err := transaction.SetSplits(t.ctx, t.db); err != nil {
-			t.logger.Error(fmt.Sprintf("failed to set splits for transaction %d: %s", transaction.ID, err.Error()))
+			resp.Msg = fmt.Sprintf("Failed to get splits for transaction %d: %s", i.ID, err.Error())
+			t.logger.Error(resp.Msg)
+			return resp
+		}
+
+		if err := transaction.SetAttributes(t.ctx, t.db); err != nil {
+			resp.Msg = fmt.Sprintf("Failed to set attributes for transaction %d: %s", i.ID, err.Error())
+			t.logger.Error(resp.Msg)
+			return resp
+		}
+
+		if transaction.Deleted == true {
+			continue
 		}
 
 		transaction.SetAmount()
@@ -198,6 +216,23 @@ func (t *transactionService) getDefaultCurrency() (*model.Currency, error) {
 	return model.Currencies(qm.Where("name=?", DefaultCurrency)).One(t.ctx, t.db)
 }
 
+func (t *transactionService) deleteTransaction(transaction *model.Transaction) error {
+	transactionAttribute := model.TransactionsAttribute{
+		TransactionsID: transaction.ID,
+		Name:           "deleted",
+		Value:          "true",
+	}
+	return transactionAttribute.Upsert(t.ctx, t.db, true, []string{"transactions_id", "name"}, boil.Whitelist("name"), boil.Infer())
+}
+
+func (t *transactionService) undeleteTransaction(transaction *model.Transaction) error {
+	_, err := model.TransactionsAttributes(qm.Where("transactions_id=? AND name=?", transaction.ID, "deleted")).DeleteAll(t.ctx, t.db)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (t *transactionService) createTransaction(memo, date string) (model.Transaction, error) {
 	var transaction model.Transaction
 	var err error
@@ -269,6 +304,48 @@ func (t *transactionService) CreateTransaction(memo, date string) types.Transact
 			Name: currency.Name,
 		},
 	}
+
+	return resp
+}
+
+func (t *transactionService) UndeleteTransaction(id int64) types.TransactionResponse {
+	var resp types.TransactionResponse
+
+	transaction, err := t.getTransaction(id)
+	if err != nil {
+		resp.Msg = fmt.Sprintf("Failed to find transaction: %s", err)
+		return resp
+	}
+
+	if err := t.undeleteTransaction(transaction); err != nil {
+		resp.Msg = fmt.Sprintf("Failed to undelete transaction: %s", err)
+		t.logger.Error(resp.Msg)
+		return resp
+	}
+
+	resp.Msg = "Transaction undeleted"
+	resp.Success = true
+
+	return resp
+}
+
+func (t *transactionService) DeleteTransaction(id int64) types.TransactionResponse {
+	var resp types.TransactionResponse
+
+	transaction, err := t.getTransaction(id)
+	if err != nil {
+		resp.Msg = fmt.Sprintf("Failed to find transaction: %s", err)
+		return resp
+	}
+
+	if err := t.deleteTransaction(transaction); err != nil {
+		resp.Msg = fmt.Sprintf("Failed to delete transaction: %s", err)
+		t.logger.Error(resp.Msg)
+		return resp
+	}
+
+	resp.Msg = "Transaction deleted"
+	resp.Success = true
 
 	return resp
 }

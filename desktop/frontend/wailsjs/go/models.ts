@@ -506,6 +506,7 @@ export namespace types {
 	    name: string;
 	    splits: Split[];
 	    amount: string;
+	    deleted: boolean;
 	    display: TransactionDisplay;
 	
 	    static createFrom(source: any = {}) {
@@ -521,6 +522,7 @@ export namespace types {
 	        this.name = source["name"];
 	        this.splits = this.convertValues(source["splits"], Split);
 	        this.amount = source["amount"];
+	        this.deleted = source["deleted"];
 	        this.display = this.convertValues(source["display"], TransactionDisplay);
 	    }
 	
@@ -545,8 +547,8 @@ export namespace types {
 	
 	
 	export class TransactionResponse {
-	    msg: boolean;
-	    success: string;
+	    success: boolean;
+	    msg: string;
 	    data: Transaction;
 	
 	    static createFrom(source: any = {}) {
@@ -555,8 +557,8 @@ export namespace types {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.msg = source["msg"];
 	        this.success = source["success"];
+	        this.msg = source["msg"];
 	        this.data = this.convertValues(source["data"], Transaction);
 	    }
 	

@@ -1,7 +1,7 @@
 <script>
-import { GetTransaction, UpdateTransaction } from 'wailsjs/go/services/transactionService.js'
+import { GetTransaction, UpdateTransaction, DeleteTransaction, UndeleteTransaction } from 'wailsjs/go/services/transactionService.js'
 import { GetAccounts } from 'wailsjs/go/services/accountService.js'
-import { UpdateSplit, CreateSplit } from 'wailsjs/go/services/splitsService.js'
+import { UpdateSplit, CreateSplit, DeleteSplit, UndeleteSplit } from 'wailsjs/go/services/splitsService.js'
 
 export default {
   props: ['id'],
@@ -51,6 +51,7 @@ export default {
       }
       this.accounts = accounts
     },
+
     async getTransaction() {
       let transaction = {}
       let splits = []
@@ -61,11 +62,11 @@ export default {
         return
       }
 
-
       transaction = {
         id: data.id,
         memo: data.memo,
         date: data.date,
+        deleted: data.deleted
       }
 
       for (const split of data.splits) {
@@ -75,7 +76,7 @@ export default {
           account: { ...split.account },
         }
 
-        // Use account_id to keep track of account.id. I'm unable to figure
+        // Use account_id to keep track of account.id. Im unable to figure
         // out how to mutate nested account object.
         s.account_id = 0
         if (s.account && s.account.id) {
@@ -116,8 +117,7 @@ export default {
               continue
             }
 
-            const { success, msg, data } = await UpdateSplit(split.id, split.account.id, Number(split.amount))
-            console.log("success:" + success + " msg:" + msg + " data: " + data)
+            const { success, msg, data } = await UpdateSplit(split.id, split.account_id, Number(split.amount))
             if (!success) {
               $message.error(msg)
               return
@@ -127,6 +127,61 @@ export default {
         updateTransactionMessage.success(msg)
         return
     },
+
+    async deleteTransaction() {
+        const { success, msg } = await DeleteTransaction(Number(this.transaction.id))
+        if (!success) {
+            $message.error(msg)
+            return
+        }
+
+        const result = await this.deleteSplits()
+        if (result instanceof Error) {
+            $message.error(result.msg)
+            return
+        }
+
+        $message.success(msg)
+        this.getTransaction()
+        return
+    },
+
+    async undeleteTransaction() {
+        const { success, msg } = await UndeleteTransaction(Number(this.transaction.id))
+        if (!success) {
+            $message.error(msg)
+            return
+        }
+
+        const result = await this.undeleteSplits()
+        if (result instanceof Error) {
+            $message.error(result.msg)
+            return
+        }
+
+        $message.success(msg)
+        this.getTransaction()
+        return
+    },
+
+    async deleteSplits() {
+        for (const split of this.splits) {
+            const { success, msg } = await DeleteSplit(Number(split.id))
+            if (!success) {
+                return new Error(msg)
+            }
+        }
+    },
+
+    async undeleteSplits() {
+        for (const split of this.splits) {
+            const { success, msg } = await UndeleteSplit(Number(split.id))
+            if (!success) {
+                return new Error(msg)
+            }
+        }
+    },
+
   },
 }
 </script>
@@ -184,8 +239,14 @@ export default {
                                         <input class="form-control" v-model="splits[index].amount" name="amount" type="number" value="0.00" step="any">
                                     </div>
                                 </div>
-                                <div class="mb-3">
-                                    <button class="btn btn-primary" type="submit">Save changes</button>
+                                <div class="row">
+                                    <div class="col-auto">
+                                        <button class="btn btn-danger btn-primary me-2" type="button" @click="undeleteTransaction" v-if="transaction.deleted">Undelete</button>
+                                        <button class="btn btn-danger btn-primary me-2" type="button" @click="deleteTransaction" v-else>Delete</button>
+                                    </div>
+                                    <div class="col-auto">
+                                        <button class="btn btn-primary" type="submit" v-if="transaction.deleted == false">Save changes</button>
+                                    </div>
                                 </div>
                             </form>
                         </div>

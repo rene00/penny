@@ -7,6 +7,10 @@ import {logwrap} from '../models';
 
 export function CreateSplit(arg1:number,arg2:number,arg3:number):Promise<types.JSResp>;
 
+export function DeleteSplit(arg1:number):Promise<types.SplitResponse>;
+
 export function Start(arg1:context.Context,arg2:sql.DB,arg3:logwrap.LogWrap):Promise<void>;
+
+export function UndeleteSplit(arg1:number):Promise<types.SplitResponse>;
 
 export function UpdateSplit(arg1:number,arg2:number,arg3:number):Promise<types.SplitResponse>;
