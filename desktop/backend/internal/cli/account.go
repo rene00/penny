@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"pennyapp/backend/config"
+	"pennyapp/backend/defaultresources"
 	"pennyapp/backend/logwrap"
 	"pennyapp/backend/model"
 	"pennyapp/backend/services"
@@ -50,11 +51,21 @@ func accountUpdateCmd(cli *cli) *cobra.Command {
 
 			ctx := cmd.Context()
 
-			conf := config.NewConfig(configOpts...)
+			conf, err := config.NewConfig(configOpts...)
+			if err != nil {
+				return err
+			}
+
 			accountSvc := services.Account()
 			dbSvc := services.DB()
 			dbSvc.Start(ctx, conf)
-			accountSvc.Start(ctx, dbSvc.DB, logger)
+
+			defaultResources, err := defaultresources.NewDefaultResources(ctx, dbSvc.DB)
+			if err != nil {
+				return err
+			}
+
+			accountSvc.Start(ctx, dbSvc.DB, logger, defaultResources)
 
 			account, err := model.FindAccount(ctx, dbSvc.DB, flags.accountID)
 			if err != nil {
@@ -97,10 +108,19 @@ func accountListCmd(cli *cli) *cobra.Command {
 			accountSvc := services.Account()
 			dbSvc := services.DB()
 
-			conf := config.NewConfig(configOpts...)
+			conf, err := config.NewConfig(configOpts...)
+			if err != nil {
+				return err
+			}
 
 			dbSvc.Start(ctx, conf)
-			accountSvc.Start(ctx, dbSvc.DB, logger)
+
+			defaultResources, err := defaultresources.NewDefaultResources(ctx, dbSvc.DB)
+			if err != nil {
+				return err
+			}
+
+			accountSvc.Start(ctx, dbSvc.DB, logger, defaultResources)
 
 			resp := accountSvc.GetAccounts()
 			fmt.Printf("Success: %t\n", resp.Success)

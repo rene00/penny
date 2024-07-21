@@ -2,10 +2,10 @@ package services
 
 import (
 	"context"
+	"crypto/sha256"
 	"database/sql"
 	"encoding/base64"
 	"fmt"
-	"pennyapp/backend/internal/hashers"
 	"pennyapp/backend/logwrap"
 	"pennyapp/backend/model"
 	"pennyapp/backend/types"
@@ -13,7 +13,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/aclindsa/ofxgo"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
@@ -21,11 +20,12 @@ import (
 const DefaultCurrency string = "Australian Dollar"
 
 type transactionService struct {
-	ctx           context.Context
-	db            *sql.DB
-	logger        *logwrap.LogWrap
-	defaultEntity *model.Entity
-	accountSvc    *accountService
+	ctx                    context.Context
+	db                     *sql.DB
+	logger                 *logwrap.LogWrap
+	defaultEntity          *model.Entity
+	accountSvc             *accountService
+	transactionImporterSvc *transactionImporterService
 }
 
 var transaction *transactionService
@@ -35,18 +35,17 @@ func Transaction() *transactionService {
 	return transaction
 }
 
-func (t *transactionService) Start(ctx context.Context, db *sql.DB, logger *logwrap.LogWrap) {
+func (t *transactionService) Start(ctx context.Context, db *sql.DB, logger *logwrap.LogWrap, transactionImporterSvc *transactionImporterService) {
 	t.ctx = ctx
 	t.db = db
 	t.logger = logger
+	t.transactionImporterSvc = transactionImporterSvc
 
 	entity, err := model.Entities(qm.Where("name=?", "Default")).One(t.ctx, t.db)
 	if err != nil {
 		t.logger.Error(fmt.Sprintf("Failed to find default entity: %s", err.Error()))
 	}
 	t.defaultEntity = entity
-
-	return
 }
 
 // TODO: refactor to AddHandler() with Opts and support WithAccountService() opt func.
@@ -370,285 +369,17 @@ func (t *transactionService) ImportTransactions(s string) types.JSResp {
 		return resp
 	}
 
-	ofxResp, err := ofxgo.ParseResponse(strings.NewReader(string(decoded)))
-	if err != nil {
-		resp.Msg = fmt.Sprintf("Failed to parse: %s", err.Error())
-		t.logger.Error(resp.Msg)
-		return resp
+	h := sha256.New()
+	h.Write(decoded)
+
+	req := TransactionImporterRequest{
+		Path:     ":blob:",
+		Contents: decoded,
+		Checksum: h.Sum(nil),
 	}
-
-	switch {
-	case len(ofxResp.Bank) > 0:
-		for _, msg := range ofxResp.Bank {
-			stmt, ok := msg.(*ofxgo.StatementResponse)
-			if !ok {
-				resp.Msg = fmt.Sprintf("failed to parse bank account response: %s", err.Error())
-				t.logger.Error(resp.Msg)
-				return resp
-			}
-
-			account, err := t.accountSvc.getBankAccount(stmt.BankAcctFrom)
-			switch {
-			case err == ErrAccountNotFound:
-				account, err = t.accountSvc.CreateBankAccount(stmt.BankAcctFrom)
-				if err != nil {
-					resp.Msg = err.Error()
-					t.logger.Error(resp.Msg)
-					return resp
-				}
-			case err != nil:
-				resp.Msg = err.Error()
-				t.logger.Error(resp.Msg)
-				return resp
-			default:
-			}
-
-			currency, err := t.getCurrencyFromOfxCurrencySymbol(stmt.CurDef)
-			if err != nil {
-				resp.Msg = err.Error()
-				return resp
-			}
-
-			for _, i := range stmt.BankTranList.Transactions {
-				transaction := model.Transaction{
-					EntityID:   t.defaultEntity.ID,
-					Memo:       i.Memo.String(),
-					CurrencyID: currency.ID,
-					Date:       i.DtPosted.Format("2006-01-02 03:04:05.000"),
-				}
-
-				v1Hash := hashers.NewTransactionHashV1()
-				transactionHash := v1Hash.Hash(transaction)
-				hashType, err := model.TransactionsHashTypes(qm.Where("name=?", v1Hash.String())).One(t.ctx, t.db)
-				if err != nil {
-					resp.Msg = err.Error()
-					t.logger.Error(resp.Msg)
-					return resp
-				}
-
-				q := []qm.QueryMod{
-					qm.Where("hash=?", fmt.Sprintf("%x", transactionHash.Sum(nil))),
-					qm.Where("transactions_hash_type_id=?", hashType.ID),
-				}
-				exists, err := model.TransactionsHashes(q...).Exists(t.ctx, t.db)
-				if err != nil {
-					resp.Msg = err.Error()
-					t.logger.Error(resp.Msg)
-					return resp
-				}
-				if exists {
-					continue
-				}
-
-				if err := transaction.Insert(t.ctx, t.db, boil.Infer()); err != nil {
-					resp.Msg = err.Error()
-					t.logger.Error(resp.Msg)
-					return resp
-				}
-
-				th := model.TransactionsHash{
-					TransactionsID:         transaction.ID,
-					TransactionsHashTypeID: hashType.ID,
-					Hash:                   fmt.Sprintf("%x", transactionHash.Sum(nil)),
-				}
-				if err := th.Insert(t.ctx, t.db, boil.Infer()); err != nil {
-					resp.Msg = err.Error()
-					t.logger.Error(resp.Msg)
-					return resp
-				}
-
-				var attr model.TransactionsAttribute
-				transactionAttributes := []model.TransactionsAttribute{}
-
-				if len(i.FiTID.String()) != 0 {
-					attr = model.TransactionsAttribute{
-						TransactionsID: transaction.ID,
-						Name:           "fitid",
-						Value:          i.FiTID.String(),
-					}
-					transactionAttributes = append(transactionAttributes, attr)
-				}
-
-				if len(i.TrnType.String()) != 0 {
-					attr = model.TransactionsAttribute{
-						TransactionsID: transaction.ID,
-						Name:           "trntype",
-						Value:          i.TrnType.String(),
-					}
-					transactionAttributes = append(transactionAttributes, attr)
-				}
-
-				for _, ii := range transactionAttributes {
-					if err := ii.Insert(t.ctx, t.db, boil.Infer()); err != nil {
-						resp.Msg = err.Error()
-						t.logger.Error(resp.Msg)
-						return resp
-					}
-				}
-
-				splits := []model.Split{
-					{
-						TransactionsID: transaction.ID,
-						AccountID:      account.ID,
-						ValueNum:       i.TrnAmt.Num().Int64(),
-						ValueDenom:     i.TrnAmt.Denom().Int64(),
-					},
-				}
-				for _, ii := range splits {
-					if err := ii.Insert(t.ctx, t.db, boil.Infer()); err != nil {
-						resp.Msg = err.Error()
-						t.logger.Error(resp.Msg)
-						return resp
-					}
-				}
-			}
-		}
-	case len(ofxResp.CreditCard) > 0:
-		for _, msg := range ofxResp.CreditCard {
-			stmt, ok := msg.(*ofxgo.CCStatementResponse)
-			if !ok {
-				resp.Msg = fmt.Sprintf("failed to parse credit card response: %s", err.Error())
-				t.logger.Error(resp.Msg)
-			}
-
-			account, err := t.accountSvc.getCreditCardAccount(stmt.CCAcctFrom)
-			if err != nil {
-				resp.Msg = err.Error()
-				t.logger.Error(resp.Msg)
-				return resp
-			}
-
-			currency, err := t.getCurrencyFromOfxCurrencySymbol(stmt.CurDef)
-			if err != nil {
-				resp.Msg = err.Error()
-				return resp
-			}
-
-			for _, i := range stmt.BankTranList.Transactions {
-				transaction := model.Transaction{
-					EntityID:   t.defaultEntity.ID,
-					Memo:       i.Memo.String(),
-					CurrencyID: currency.ID,
-					Date:       i.DtPosted.Format("2006-01-02 03:04:05.000"),
-				}
-
-				v1Hash := hashers.NewTransactionHashV1()
-				transactionHash := v1Hash.Hash(transaction)
-				hashType, err := model.TransactionsHashTypes(qm.Where("name=?", v1Hash.String())).One(t.ctx, t.db)
-				if err != nil {
-					resp.Msg = err.Error()
-					t.logger.Error(resp.Msg)
-					return resp
-				}
-
-				q := []qm.QueryMod{
-					qm.Where("hash=?", fmt.Sprintf("%x", transactionHash.Sum(nil))),
-					qm.Where("transactions_hash_type_id=?", hashType.ID),
-				}
-				exists, err := model.TransactionsHashes(q...).Exists(t.ctx, t.db)
-				if err != nil {
-					resp.Msg = err.Error()
-					t.logger.Error(resp.Msg)
-					return resp
-				}
-				if exists {
-					continue
-				}
-
-				if err := transaction.Insert(t.ctx, t.db, boil.Infer()); err != nil {
-					resp.Msg = err.Error()
-					t.logger.Error(resp.Msg)
-					return resp
-				}
-
-				th := model.TransactionsHash{
-					TransactionsID:         transaction.ID,
-					TransactionsHashTypeID: hashType.ID,
-					Hash:                   fmt.Sprintf("%x", transactionHash.Sum(nil)),
-				}
-				if err := th.Insert(t.ctx, t.db, boil.Infer()); err != nil {
-					resp.Msg = err.Error()
-					t.logger.Error(resp.Msg)
-					return resp
-				}
-
-				var attr model.TransactionsAttribute
-				transactionAttributes := []model.TransactionsAttribute{}
-
-				if len(i.FiTID.String()) != 0 {
-					attr = model.TransactionsAttribute{
-						TransactionsID: transaction.ID,
-						Name:           "fitid",
-						Value:          i.FiTID.String(),
-					}
-					transactionAttributes = append(transactionAttributes, attr)
-				}
-
-				if len(i.TrnType.String()) != 0 {
-					attr = model.TransactionsAttribute{
-						TransactionsID: transaction.ID,
-						Name:           "trntype",
-						Value:          i.TrnType.String(),
-					}
-					transactionAttributes = append(transactionAttributes, attr)
-				}
-
-				for _, ii := range transactionAttributes {
-					if err := ii.Insert(t.ctx, t.db, boil.Infer()); err != nil {
-						resp.Msg = err.Error()
-						t.logger.Error(resp.Msg)
-						return resp
-					}
-				}
-
-				splits := []model.Split{
-					{
-						TransactionsID: transaction.ID,
-						AccountID:      account.ID,
-						ValueNum:       i.TrnAmt.Num().Int64(),
-						ValueDenom:     i.TrnAmt.Denom().Int64(),
-					},
-				}
-				for _, ii := range splits {
-					if err := ii.Insert(t.ctx, t.db, boil.Infer()); err != nil {
-						resp.Msg = err.Error()
-						t.logger.Error(resp.Msg)
-						return resp
-					}
-				}
-			}
-
-		}
-	default:
-		resp.Msg = fmt.Sprintf("OFX file not supported")
-		return resp
-	}
+	t.transactionImporterSvc.TransactionImporterRequestC <- req
 
 	resp.Msg = "Imported transactions"
 	resp.Success = true
 	return resp
-}
-
-func (t transactionService) getCurrencyFromOfxCurrencySymbol(curDef ofxgo.CurrSymbol) (*model.Currency, error) {
-	var currency *model.Currency
-	var err error
-
-	currencyAttribute, err := model.CurrencyAttributes(
-		[]qm.QueryMod{
-			qm.Where("name=?", "code"),
-			qm.Where("value=?", fmt.Sprintf("%s", curDef)),
-		}...,
-	).One(t.ctx, t.db)
-	if err != nil {
-		t.logger.Error(err.Error())
-		return currency, err
-	}
-
-	currency, err = model.FindCurrency(t.ctx, t.db, currencyAttribute.ID)
-	if err != nil {
-		t.logger.Error(err.Error())
-		return currency, err
-	}
-
-	return currency, nil
 }

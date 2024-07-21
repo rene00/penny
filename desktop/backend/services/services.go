@@ -1,6 +1,8 @@
 package services
 
-import "time"
+import (
+	"time"
+)
 
 const sqliteTimeFormat string = "2006-01-02 03:04:05.000"
 

@@ -8,6 +8,8 @@
 // 000003_import_transaction.up.sql
 // 000004_transaction_hash.down.sql
 // 000004_transaction_hash.up.sql
+// 000005_auto-importer.down.sql
+// 000005_auto-importer.up.sql
 // migrations.go
 // migrations_test.go
 package migrations
@@ -90,7 +92,7 @@ func _000001_initDownSql() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "000001_init.down.sql", size: 337, mode: os.FileMode(420), modTime: time.Unix(1706390466, 0)}
+	info := bindataFileInfo{name: "000001_init.down.sql", size: 337, mode: os.FileMode(420), modTime: time.Unix(1717891973, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -110,7 +112,7 @@ func _000001_initUpSql() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "000001_init.up.sql", size: 2210, mode: os.FileMode(420), modTime: time.Unix(1708024654, 0)}
+	info := bindataFileInfo{name: "000001_init.up.sql", size: 2210, mode: os.FileMode(420), modTime: time.Unix(1717891973, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -130,7 +132,7 @@ func _000002_transactionsDownSql() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "000002_transactions.down.sql", size: 181, mode: os.FileMode(420), modTime: time.Unix(1711782395, 0)}
+	info := bindataFileInfo{name: "000002_transactions.down.sql", size: 181, mode: os.FileMode(420), modTime: time.Unix(1717891973, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -150,7 +152,7 @@ func _000002_transactionsUpSql() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "000002_transactions.up.sql", size: 1291, mode: os.FileMode(420), modTime: time.Unix(1711782395, 0)}
+	info := bindataFileInfo{name: "000002_transactions.up.sql", size: 1291, mode: os.FileMode(420), modTime: time.Unix(1717891973, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -170,7 +172,7 @@ func _000003_import_transactionDownSql() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "000003_import_transaction.down.sql", size: 42, mode: os.FileMode(420), modTime: time.Unix(1713555761, 0)}
+	info := bindataFileInfo{name: "000003_import_transaction.down.sql", size: 42, mode: os.FileMode(420), modTime: time.Unix(1717891973, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -190,7 +192,7 @@ func _000003_import_transactionUpSql() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "000003_import_transaction.up.sql", size: 256, mode: os.FileMode(420), modTime: time.Unix(1713555761, 0)}
+	info := bindataFileInfo{name: "000003_import_transaction.up.sql", size: 256, mode: os.FileMode(420), modTime: time.Unix(1717891973, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -210,7 +212,7 @@ func _000004_transaction_hashDownSql() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "000004_transaction_hash.down.sql", size: 86, mode: os.FileMode(420), modTime: time.Unix(1713555761, 0)}
+	info := bindataFileInfo{name: "000004_transaction_hash.down.sql", size: 86, mode: os.FileMode(420), modTime: time.Unix(1717891973, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -230,7 +232,47 @@ func _000004_transaction_hashUpSql() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "000004_transaction_hash.up.sql", size: 536, mode: os.FileMode(420), modTime: time.Unix(1713555761, 0)}
+	info := bindataFileInfo{name: "000004_transaction_hash.up.sql", size: 536, mode: os.FileMode(420), modTime: time.Unix(1717891973, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
+var __000005_autoImporterDownSql = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x72\x09\xf2\x0f\x50\x08\x71\x74\xf2\x71\x55\xf0\x74\x53\x70\x8d\xf0\x0c\x0e\x09\x56\x28\x29\x4a\xcc\x2b\x4e\x4c\x2e\xc9\xcc\xcf\x8b\xcf\xcc\x2d\xc8\x2f\x2a\x49\x2d\x8a\x2f\x2e\x49\x2c\x29\x2d\xb6\xe6\x22\x5a\x87\x35\x17\x20\x00\x00\xff\xff\x7a\x91\x57\x28\x5d\x00\x00\x00")
+
+func _000005_autoImporterDownSqlBytes() ([]byte, error) {
+	return bindataRead(
+		__000005_autoImporterDownSql,
+		"000005_auto-importer.down.sql",
+	)
+}
+
+func _000005_autoImporterDownSql() (*asset, error) {
+	bytes, err := _000005_autoImporterDownSqlBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "000005_auto-importer.down.sql", size: 93, mode: os.FileMode(420), modTime: time.Unix(1720331795, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
+var __000005_autoImporterUpSql = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x94\x91\xc1\x6e\xc3\x20\x10\x44\xef\x7c\xc5\x1e\x41\xea\x1f\xf4\xe4\x46\xeb\x08\xd5\x25\x2d\xc1\x52\x72\x42\x08\xb6\x2a\x6a\xed\x54\x40\x2e\xfd\xfa\xca\x26\xcd\xc9\xae\xe4\xeb\xce\x8c\x78\x33\xec\x34\x36\x06\xc1\x34\x4f\x1d\x82\x6c\x41\x1d\x0c\xe0\x49\x1e\xcd\x11\x4a\x72\x63\x76\xbe\xc4\xcb\x68\xe3\xf0\x7d\x49\x85\x92\xcd\xc5\x95\x6b\x66\x9c\x01\x00\xc4\x00\x52\x19\xdc\xa3\x9e\x73\xaa\xef\x3a\x78\xd5\xf2\xa5\xd1\x67\x78\xc6\xf3\xc3\x6c\x1a\xdd\x40\x60\xf0\x64\xee\x9e\x7a\xef\x95\x7c\xeb\x91\x4f\xb2\x60\xe2\x91\xb1\x8d\x28\x5b\x18\x2a\xb5\x5d\xf0\x56\xfd\x3d\x7e\xd1\x1a\xe7\xa4\xe5\xf8\x43\x2b\x51\xff\x41\xfe\x33\x5f\x87\xa5\x68\x70\x85\xac\x4f\xe4\x0a\x85\x55\xfd\xd6\x67\xd1\x70\xdb\xe8\xef\x0d\x51\xaf\xed\x41\xa3\xdc\xab\xa9\x1e\xbf\x37\x13\xa0\xb1\x45\x8d\x6a\x87\xff\x7e\x1d\x8f\x61\x9e\xfb\x37\x00\x00\xff\xff\x63\xbf\x7c\xae\xf9\x01\x00\x00")
+
+func _000005_autoImporterUpSqlBytes() ([]byte, error) {
+	return bindataRead(
+		__000005_autoImporterUpSql,
+		"000005_auto-importer.up.sql",
+	)
+}
+
+func _000005_autoImporterUpSql() (*asset, error) {
+	bytes, err := _000005_autoImporterUpSqlBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "000005_auto-importer.up.sql", size: 505, mode: os.FileMode(420), modTime: time.Unix(1720757318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -250,7 +292,7 @@ func migrationsGo() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "migrations.go", size: 755, mode: os.FileMode(420), modTime: time.Unix(1706011324, 0)}
+	info := bindataFileInfo{name: "migrations.go", size: 755, mode: os.FileMode(420), modTime: time.Unix(1717891973, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -270,7 +312,7 @@ func migrations_testGo() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "migrations_test.go", size: 159, mode: os.FileMode(420), modTime: time.Unix(1706011327, 0)}
+	info := bindataFileInfo{name: "migrations_test.go", size: 159, mode: os.FileMode(420), modTime: time.Unix(1717891973, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -335,6 +377,8 @@ var _bindata = map[string]func() (*asset, error){
 	"000003_import_transaction.up.sql": _000003_import_transactionUpSql,
 	"000004_transaction_hash.down.sql": _000004_transaction_hashDownSql,
 	"000004_transaction_hash.up.sql": _000004_transaction_hashUpSql,
+	"000005_auto-importer.down.sql": _000005_autoImporterDownSql,
+	"000005_auto-importer.up.sql": _000005_autoImporterUpSql,
 	"migrations.go": migrationsGo,
 	"migrations_test.go": migrations_testGo,
 }
@@ -387,6 +431,8 @@ var _bintree = &bintree{nil, map[string]*bintree{
 	"000003_import_transaction.up.sql": &bintree{_000003_import_transactionUpSql, map[string]*bintree{}},
 	"000004_transaction_hash.down.sql": &bintree{_000004_transaction_hashDownSql, map[string]*bintree{}},
 	"000004_transaction_hash.up.sql": &bintree{_000004_transaction_hashUpSql, map[string]*bintree{}},
+	"000005_auto-importer.down.sql": &bintree{_000005_autoImporterDownSql, map[string]*bintree{}},
+	"000005_auto-importer.up.sql": &bintree{_000005_autoImporterUpSql, map[string]*bintree{}},
 	"migrations.go": &bintree{migrationsGo, map[string]*bintree{}},
 	"migrations_test.go": &bintree{migrations_testGo, map[string]*bintree{}},
 }}

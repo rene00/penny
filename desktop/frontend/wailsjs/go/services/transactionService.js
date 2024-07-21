@@ -26,8 +26,8 @@ export function ImportTransactions(arg1) {
   return window['go']['services']['transactionService']['ImportTransactions'](arg1);
 }
 
-export function Start(arg1, arg2, arg3) {
-  return window['go']['services']['transactionService']['Start'](arg1, arg2, arg3);
+export function Start(arg1, arg2, arg3, arg4) {
+  return window['go']['services']['transactionService']['Start'](arg1, arg2, arg3, arg4);
 }
 
 export function UndeleteTransaction(arg1) {

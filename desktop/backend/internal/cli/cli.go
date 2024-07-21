@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"pennyapp/backend/config"
+	"pennyapp/backend/defaultresources"
 	"pennyapp/backend/logwrap"
 	"pennyapp/backend/services"
 
@@ -73,14 +74,27 @@ func importTransactionsCmd(cli *cli) *cobra.Command {
 			ctx := cmd.Context()
 
 			transactionSvc := services.Transaction()
+			transactionImporterSvc := services.TransactionImporter()
 			accountSvc := services.Account()
 			dbSvc := services.DB()
 
-			conf := config.NewConfig(config.WithDebug(cli.debug))
+			conf, err := config.NewConfig(config.WithDebug(cli.debug))
+			if err != nil {
+				return err
+			}
 
 			dbSvc.Start(ctx, conf)
-			accountSvc.Start(ctx, dbSvc.DB, logger)
-			transactionSvc.Start(ctx, dbSvc.DB, logger)
+
+			defaultResources, err := defaultresources.NewDefaultResources(ctx, dbSvc.DB)
+			if err != nil {
+				return err
+			}
+
+			accountSvc.Start(ctx, dbSvc.DB, logger, defaultResources)
+
+			transactionImporterSvc.Start(ctx, conf, dbSvc.DB, logger, defaultResources)
+
+			transactionSvc.Start(ctx, dbSvc.DB, logger, transactionImporterSvc)
 			transactionSvc.AddAccountSvcHandler(accountSvc)
 
 			resp := transactionSvc.ImportTransactions(s)

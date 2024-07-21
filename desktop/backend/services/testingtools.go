@@ -5,16 +5,18 @@ import (
 	"fmt"
 	"os"
 	"pennyapp/backend/config"
+	"pennyapp/backend/defaultresources"
 	"pennyapp/backend/logwrap"
 	"pennyapp/backend/model"
 	"testing"
 )
 
 type TestServices struct {
-	DB           *dbService
-	Accounts     *accountService
-	Transactions *transactionService
-	Splits       *splitsService
+	DB                  *dbService
+	Accounts            *accountService
+	Transactions        *transactionService
+	Splits              *splitsService
+	TransactionImporter *transactionImporterService
 }
 
 func TestSetupApp(t *testing.T) (TestServices, error) {
@@ -35,15 +37,26 @@ func TestSetupApp(t *testing.T) (TestServices, error) {
 		return services, err
 	}
 
-	conf := config.NewConfig(config.WithDBFile(dbFile.Name()))
+	conf, err := config.NewConfig(config.WithDBFile(dbFile.Name()))
+	if err != nil {
+		return services, err
+	}
+
 	dbSvc := DB()
+	transactionImporterSvc := TransactionImporter()
 	transactionSvc := Transaction()
 	splitSvc := Splits()
 	accountSvc := Account()
 	dbSvc.Start(ctx, conf)
-	transactionSvc.Start(ctx, dbSvc.DB, logger)
+
+	defaultResources, err := defaultresources.NewDefaultResources(ctx, dbSvc.DB)
+	if err != nil {
+		return services, err
+	}
+
+	transactionSvc.Start(ctx, dbSvc.DB, logger, transactionImporterSvc)
 	splitSvc.Start(ctx, dbSvc.DB, logger)
-	accountSvc.Start(ctx, dbSvc.DB, logger)
+	accountSvc.Start(ctx, dbSvc.DB, logger, defaultResources)
 
 	services = TestServices{
 		DB:           dbSvc,

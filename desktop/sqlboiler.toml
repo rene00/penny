@@ -4,5 +4,5 @@ wipe = true
 no-tests = true
 
 [sqlite3]
-dbname = "./pennyapp.db"
+dbname = "./.pennyapp.db"
 blacklist = ["schema_migrations"]
