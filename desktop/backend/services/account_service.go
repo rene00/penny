@@ -5,16 +5,13 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"hash"
+	"pennyapp/backend/defaultresources"
 	"pennyapp/backend/internal/dberror"
-	"pennyapp/backend/internal/hashers"
 	"pennyapp/backend/logwrap"
 	"pennyapp/backend/model"
 	"pennyapp/backend/types"
-	"regexp"
 	"strings"
 
-	"github.com/aclindsa/ofxgo"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
@@ -25,11 +22,10 @@ var (
 )
 
 type accountService struct {
-	ctx                context.Context
-	db                 *sql.DB
-	logger             *logwrap.LogWrap
-	defaultEntity      *model.Entity
-	grandParentAccount *model.Account
+	ctx              context.Context
+	db               *sql.DB
+	logger           *logwrap.LogWrap
+	defaultResources defaultresources.DefaultResources
 }
 
 var account *accountService
@@ -39,26 +35,11 @@ func Account() *accountService {
 	return account
 }
 
-func (a *accountService) Start(ctx context.Context, db *sql.DB, logger *logwrap.LogWrap) {
+func (a *accountService) Start(ctx context.Context, db *sql.DB, logger *logwrap.LogWrap, defaultResources defaultresources.DefaultResources) {
 	a.ctx = ctx
 	a.db = db
 	a.logger = logger
-
-	entity, err := model.Entities(qm.Where("name=?", "Default")).One(a.ctx, a.db)
-	if err != nil {
-		a.logger.Error(fmt.Sprintf("Failed to find default entity: %s", err.Error()))
-	}
-	a.defaultEntity = entity
-
-	q := []qm.QueryMod{
-		qm.Where("name=?", "Account"),
-		qm.Where("parent_id=0"),
-	}
-	account, err := model.Accounts(q...).One(a.ctx, a.db)
-	if err != nil {
-		a.logger.Error(fmt.Sprintf("Failed to find grand parent account: %s", err.Error()))
-	}
-	a.grandParentAccount = account
+	a.defaultResources = defaultResources
 }
 
 func (a *accountService) getChildAccountType(name string) (model.AccountType, error) {
@@ -218,9 +199,9 @@ func (a *accountService) createAccount(name, description string, accountTypeID i
 
 	account = model.Account{
 		Name:          name,
-		EntityID:      a.defaultEntity.ID,
+		EntityID:      a.defaultResources.EntityID(),
 		AccountTypeID: accountType.ID,
-		ParentID:      a.grandParentAccount.ID,
+		ParentID:      a.defaultResources.GrandParentAccountID(),
 	}
 
 	if err := account.Upsert(a.ctx, a.db, true, []string{"name", "parent_id", "entity_id", "account_type_id"}, boil.Whitelist("name"), boil.Infer()); err != nil {
@@ -369,7 +350,7 @@ func (a *accountService) CreateAccount(name, description string, accountTypeID i
 func (a *accountService) getAccount(id int64) (*model.Account, error) {
 	q := []qm.QueryMod{
 		qm.Where("account.id=?", id),
-		qm.Where("account.entity_id=?", a.defaultEntity.ID),
+		qm.Where("account.entity_id=?", a.defaultResources.EntityID()),
 		qm.InnerJoin("account_type on account_type.id = account.account_type_id"),
 		qm.Load("AccountType"),
 	}
@@ -419,23 +400,12 @@ func (a *accountService) GetAccounts() types.JSResp {
 	var q []qm.QueryMod
 
 	q = []qm.QueryMod{
-		qm.Where("name=?", "Account"),
-		qm.Where("entity_id=?", a.defaultEntity.ID),
-		qm.Where("parent_id=0"),
-	}
-	grandParentAccount, err := model.Accounts(q...).One(a.ctx, a.db)
-	if err != nil {
-		resp.Msg = fmt.Sprintf("Failed to find grand parent account: %s", err.Error())
-		a.logger.Error(resp.Msg)
-		return resp
-	}
-
-	q = []qm.QueryMod{
-		qm.Where("account.entity_id=?", a.defaultEntity.ID),
-		qm.Where("account.parent_id=?", grandParentAccount.ID),
+		qm.Where("account.entity_id=?", a.defaultResources.EntityID()),
+		qm.Where("account.parent_id=?", a.defaultResources.GrandParentAccountID()),
 		qm.InnerJoin("account_type on account_type.id = account.account_type_id"),
 		qm.Load("AccountType"),
 	}
+
 	accounts, err := model.Accounts(q...).All(a.ctx, a.db)
 	if err != nil {
 		resp.Msg = err.Error()
@@ -469,229 +439,4 @@ func (a *accountService) GetAccounts() types.JSResp {
 	resp.Data = data
 
 	return resp
-}
-
-func (a *accountService) CreateBankAccount(bankAccount ofxgo.BankAcct) (model.Account, error) {
-	var account model.Account
-	var err error
-
-	tx, err := a.db.BeginTx(a.ctx, nil)
-	if err != nil {
-		a.logger.Error(err.Error())
-		return account, err
-	}
-
-	accountType, err := model.AccountTypes(qm.Where("name=?", "Asset")).One(a.ctx, tx)
-	if err != nil {
-		a.logger.Error(err.Error())
-		return account, err
-	}
-
-	account = model.Account{
-		Name:          fmt.Sprintf("Bank Account %s%s", bankAccount.BankID.String(), bankAccount.AcctID.String()),
-		AccountTypeID: accountType.ID,
-		EntityID:      a.defaultEntity.ID,
-		ParentID:      a.grandParentAccount.ID,
-	}
-
-	if err := account.Insert(a.ctx, tx, boil.Infer()); err != nil {
-		a.logger.Error(err.Error())
-		return account, err
-	}
-
-	accountAttributes := []model.AccountAttribute{
-		{
-			AccountID: account.ID,
-			Name:      "bsb",
-			Value:     bankAccount.BankID.String(),
-		},
-		{
-			AccountID: account.ID,
-			Name:      "account_number",
-			Value:     bankAccount.AcctID.String(),
-		},
-		{
-			AccountID: account.ID,
-			Name:      "ofx_accttype",
-			Value:     bankAccount.AcctType.String(),
-		},
-	}
-
-	for _, i := range accountAttributes {
-		if err := i.Insert(a.ctx, tx, boil.Infer()); err != nil {
-			a.logger.Error(err.Error())
-			return account, err
-		}
-	}
-
-	if err := tx.Commit(); err != nil {
-		tx.Rollback()
-		a.logger.Error(err.Error())
-		return account, err
-	}
-
-	return account, nil
-}
-
-func (a accountService) getSurpressedCreditCardNumber(s string) (string, error) {
-	re := regexp.MustCompile(`^\d{16}$`)
-	if !re.MatchString(s) {
-		return "", fmt.Errorf("not a credit card")
-	}
-
-	rs := []rune(s)
-	for i := 0; i < len(rs)-4; i++ {
-		rs[i] = 'X'
-	}
-
-	return string(rs), nil
-}
-
-func (a accountService) CreateCreditCardAccount(cc ofxgo.CCAcct) (model.Account, error) {
-	var account model.Account
-	var err error
-
-	tx, err := a.db.BeginTx(a.ctx, nil)
-	if err != nil {
-		a.logger.Error(err.Error())
-		return account, err
-	}
-
-	accountType, err := model.AccountTypes(qm.Where("name=?", "Liability")).One(a.ctx, tx)
-	if err != nil {
-		a.logger.Error(err.Error())
-		return account, err
-	}
-
-	ccSurpressed, err := a.getSurpressedCreditCardNumber(cc.AcctID.String())
-	if err != nil {
-		a.logger.Error(err.Error())
-		return account, err
-	}
-
-	account = model.Account{
-		Name:          fmt.Sprintf("Credit Card %s", ccSurpressed),
-		AccountTypeID: accountType.ID,
-		EntityID:      a.defaultEntity.ID,
-		ParentID:      a.grandParentAccount.ID,
-	}
-
-	if err := account.Insert(a.ctx, tx, boil.Infer()); err != nil {
-		a.logger.Error(err.Error())
-		return account, err
-	}
-
-	accountAttributes := []model.AccountAttribute{
-		{
-			AccountID: account.ID,
-			Name:      "cc_account_id_hash",
-			Value:     getCreditCardHash(cc),
-		},
-	}
-
-	for _, i := range accountAttributes {
-		if err := i.Insert(a.ctx, tx, boil.Infer()); err != nil {
-			a.logger.Error(err.Error())
-			return account, err
-		}
-	}
-
-	if err := tx.Commit(); err != nil {
-		tx.Rollback()
-		a.logger.Error(err.Error())
-		return account, err
-	}
-
-	return account, nil
-}
-
-func (a accountService) getAccountAttributesWithBankAccountBSB(bankAccountBSB string) (model.AccountAttributeSlice, error) {
-	q := []qm.QueryMod{
-		qm.Where("name=?", "bsb"),
-		qm.Where("value=?", bankAccountBSB),
-	}
-	return model.AccountAttributes(q...).All(a.ctx, a.db)
-}
-
-func (a accountService) getAccountAttributeWithCCAccountIDHash(h hash.Hash) (*model.AccountAttribute, error) {
-	q := []qm.QueryMod{
-		qm.Where("aa.name=?", "cc_account_id_hash"),
-		qm.Where("aa.value=?", fmt.Sprintf("%x", h.Sum(nil))),
-		qm.InnerJoin("account a on a.id = aa.account_id"),
-		qm.From("account_attributes as aa"),
-		qm.Load("Account"),
-	}
-	return model.AccountAttributes(q...).One(a.ctx, a.db)
-}
-
-func (a accountService) getCreditCardAccount(cc ofxgo.CCAcct) (model.Account, error) {
-	var account model.Account
-	var err error
-
-	h := hashers.NewCreditCardHash()
-	creditCardHash := h.Hash(cc.AcctID.String())
-
-	accountAttributesWithCCAccountIDHash, err := a.getAccountAttributeWithCCAccountIDHash(creditCardHash)
-	if err != nil {
-		switch {
-		case errors.Is(err, sql.ErrNoRows):
-			// CC account does not exist so create it.
-			account, err = a.CreateCreditCardAccount(cc)
-			if err != nil {
-				a.logger.Error(err.Error())
-				return account, err
-			}
-			return account, nil
-		default:
-			a.logger.Error(err.Error())
-			return account, err
-		}
-	}
-	account = *accountAttributesWithCCAccountIDHash.R.GetAccount()
-
-	return account, nil
-}
-
-func (a accountService) getBankAccount(bankAccount ofxgo.BankAcct) (model.Account, error) {
-	var account model.Account
-	var err error
-
-	accountAttributesWithBSB, err := a.getAccountAttributesWithBankAccountBSB(bankAccount.BankID.String())
-	if err != nil {
-		return account, err
-	}
-
-	for _, i := range accountAttributesWithBSB {
-		// All accounts which share the same account number and BSB.
-		q := []qm.QueryMod{
-			qm.Where("aa.name=?", "account_number"),
-			qm.Where("aa.value=?", bankAccount.AcctID.String()),
-			qm.Where("aa.account_id=?", i.AccountID),
-			qm.InnerJoin("account a on a.id = aa.account_id"),
-			qm.From("account_attributes as aa"),
-			qm.Load("Account"),
-		}
-		accountAttributesWithBSBAndAccountNumber, err := model.AccountAttributes(q...).One(a.ctx, a.db)
-		if err != nil {
-			return account, err
-		}
-		switch {
-		case accountAttributesWithBSBAndAccountNumber == nil:
-			// No accounts found, move to next account.
-			continue
-		default:
-			account = *accountAttributesWithBSBAndAccountNumber.R.GetAccount()
-			break
-		}
-	}
-
-	if (model.Account{}) == account {
-		return account, ErrAccountNotFound
-	}
-
-	return account, err
-}
-
-func getCreditCardHash(cc ofxgo.CCAcct) string {
-	return fmt.Sprintf("%x", hashers.NewCreditCardHash().Hash(cc.AcctID.String()).Sum(nil))
 }

@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"pennyapp/backend/config"
+	"pennyapp/backend/defaultresources"
 	"pennyapp/backend/logwrap"
 	"pennyapp/backend/services"
 
@@ -40,11 +41,16 @@ func main() {
 		logger.SetLevel(logwrap.DEBUG)
 	}
 
-	conf := config.NewConfig(configOpts...)
+	conf, err := config.NewConfig(configOpts...)
+	if err != nil {
+		logger.Error(err.Error())
+		os.Exit(1)
+	}
 
+	dbSvc := services.DB()
+	transactionImporterSvc := services.TransactionImporter()
 	accountSvc := services.Account()
 	entitySvc := services.Entity()
-	dbSvc := services.DB()
 	transactionSvc := services.Transaction()
 	splitsSvc := services.Splits()
 
@@ -62,9 +68,18 @@ func main() {
 		BackgroundColour: &options.RGBA{R: 27, G: 38, B: 54, A: 1},
 		OnStartup: func(ctx context.Context) {
 			dbSvc.Start(ctx, conf)
+
+			defaultResources, err := defaultresources.NewDefaultResources(ctx, dbSvc.DB)
+			if err != nil {
+				println("Failed to find default resources: ", err.Error())
+				panic(err.Error())
+			}
+
+			transactionImporterSvc.Start(ctx, conf, dbSvc.DB, logger, defaultResources)
+
 			entitySvc.Start(ctx, dbSvc.DB)
-			accountSvc.Start(ctx, dbSvc.DB, logger)
-			transactionSvc.Start(ctx, dbSvc.DB, logger)
+			accountSvc.Start(ctx, dbSvc.DB, logger, defaultResources)
+			transactionSvc.Start(ctx, dbSvc.DB, logger, transactionImporterSvc)
 			splitsSvc.Start(ctx, dbSvc.DB, logger)
 
 			transactionSvc.AddAccountSvcHandler(accountSvc)
@@ -77,11 +92,11 @@ func main() {
 			accountSvc,
 			transactionSvc,
 			splitsSvc,
-			// app,
 		},
 	})
 
 	if err != nil {
-		println("Error:", err.Error())
+		logger.Error(err.Error())
+		os.Exit(1)
 	}
 }

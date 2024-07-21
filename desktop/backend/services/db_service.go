@@ -5,9 +5,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"os"
-	"path"
-	"path/filepath"
 	"pennyapp/backend/config"
 	"pennyapp/backend/internal/dberror"
 	"pennyapp/backend/model"
@@ -52,23 +49,6 @@ func (d *dbService) Start(ctx context.Context, conf config.Config) {
 	d.conf = conf
 
 	dbFile := conf.DBFile
-	if dbFile == "" {
-		dataHome, ok := os.LookupEnv("XDG_DATA_HOME")
-		if ok {
-			dbFile = path.Join(dataHome, "pennyapp", "pennyapp.db")
-		} else {
-			homeDir, err := os.UserHomeDir()
-			if err != nil {
-				panic(err)
-			}
-			dbFile = path.Join(homeDir, ".local", "share", "pennyapp", "pennyapp.db")
-		}
-	}
-
-	dbDir := filepath.Dir(dbFile)
-	if err := os.MkdirAll(dbDir, os.ModePerm); err != nil {
-		panic(err)
-	}
 
 	err = migrations.DoMigrateDb("sqlite3://" + dbFile)
 	if err != nil {
@@ -117,6 +97,31 @@ func (d *dbService) initAllData(ctx context.Context) error {
 
 	if err := d.initTransactionsHashType(ctx); err != nil {
 		return err
+	}
+
+	if err := d.initTransactionImporterStatus(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (d *dbService) initTransactionImporterStatus() error {
+	transactionImporterStatuses := []model.TransactionImporterStatus{
+		{Name: "pending"},
+		{Name: "completed"},
+		{Name: "failed"},
+	}
+
+	for _, transactionImporterStatus := range transactionImporterStatuses {
+		if err := transactionImporterStatus.Insert(d.ctx, d.DB, boil.Infer()); err != nil {
+			switch {
+			case dberror.IsUniqueConstraint(err):
+				continue
+			default:
+				return fmt.Errorf("failed to insert transaction importer status: %w", err)
+			}
+		}
 	}
 
 	return nil

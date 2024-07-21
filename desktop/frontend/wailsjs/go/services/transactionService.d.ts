@@ -18,7 +18,7 @@ export function GetTransactions():Promise<types.JSResp>;
 
 export function ImportTransactions(arg1:string):Promise<types.JSResp>;
 
-export function Start(arg1:context.Context,arg2:sql.DB,arg3:logwrap.LogWrap):Promise<void>;
+export function Start(arg1:context.Context,arg2:sql.DB,arg3:logwrap.LogWrap,arg4:services.transactionImporterService):Promise<void>;
 
 export function UndeleteTransaction(arg1:number):Promise<types.TransactionResponse>;
 

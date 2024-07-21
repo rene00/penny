@@ -30,7 +30,7 @@ tasks:
     dir: desktop
     deps: [desktop:bin-data]
     cmds:
-      - migrate -source file://db/migrations -database sqlite3://pennyapp.db up
+      - migrate -source file://db/migrations -database sqlite3://.pennyapp.db up
       - sqlboiler --no-tests --no-hooks --no-auto-timestamps --wipe sqlite3
 
   desktop:db:migrate:create:
@@ -60,8 +60,10 @@ tasks:
   desktop:wails:dev:
     desc: "wails dev"
     dir: desktop
+    env:
+      PENNY_DEBUG: true
     cmds:
-      - wails dev
+      - wails dev -appargs "--debug=true"
 
   desktop:dt:build:
     desc: "dt build"

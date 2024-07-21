@@ -97,6 +97,7 @@ export default {
         $message.error(transactionResponse.msg)
       } else {
         $message.success(transactionResponse.msg)
+        this.$router.push({name: 'get-transaction', params: { id: transaction.id }})
       }
       return
     },

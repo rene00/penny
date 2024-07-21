@@ -163,7 +163,7 @@ export default {
                                         <button class="btn btn-danger btn-primary me-2" type="button" @click="deleteAccount" v-else>Delete</button>
                                     </div>
                                     <div class="col-auto">
-                                        <button class="btn btn-primary" type="submit">Save changes</button>
+                                        <button class="btn btn-primary" type="submit" v-if="account.deleted == false">Save changes</button>
                                     </div>
                                 </div>
                             </form>

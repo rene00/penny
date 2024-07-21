@@ -37,3 +37,12 @@ supported.
 When transactions are imported, the credit card or checking account will be
 automatically created with the new transaction being automatically assigned to
 this account.
+
+#### Auto Importing Transactions
+
+OFX files found within `DATA_HOME/import` will be automatically imported when
+`penny` is running. On Linux, `DATA_HOME` is generally
+`$HOME/.local/share/pennyapp`.
+
+Files that have been successfully imported will be deleted from
+`DATA_HOME/import`.

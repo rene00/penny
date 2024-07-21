@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"pennyapp/backend/config"
+	"pennyapp/backend/defaultresources"
 	"pennyapp/backend/logwrap"
 	"pennyapp/backend/model"
 	"pennyapp/backend/services"
@@ -45,11 +46,23 @@ func transactionUpdateCmd(cli *cli) *cobra.Command {
 			}
 
 			ctx := cmd.Context()
-			conf := config.NewConfig(configOpts...)
+			conf, err := config.NewConfig(configOpts...)
+			if err != nil {
+				return err
+			}
 			transactionSvc := services.Transaction()
+			transactionImporterSvc := services.TransactionImporter()
 			dbSvc := services.DB()
 			dbSvc.Start(ctx, conf)
-			transactionSvc.Start(ctx, dbSvc.DB, logger)
+
+			defaultResources, err := defaultresources.NewDefaultResources(ctx, dbSvc.DB)
+			if err != nil {
+				return err
+			}
+
+			transactionImporterSvc.Start(ctx, conf, dbSvc.DB, logger, defaultResources)
+
+			transactionSvc.Start(ctx, dbSvc.DB, logger, transactionImporterSvc)
 
 			transaction, err := model.FindTransaction(ctx, dbSvc.DB, flags.transactionID)
 			if err != nil {
