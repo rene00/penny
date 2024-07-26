@@ -1,6 +1,7 @@
 ---
 version: '3'
 silent: true
+
 env:
   FLASK_SKIP_DOTENV: 1
   FLASK_APP: penny

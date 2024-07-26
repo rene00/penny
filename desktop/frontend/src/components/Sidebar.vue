@@ -41,8 +41,29 @@
                 </div>
             </li>
 
+            <li class="nav-item">
+                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseAccountMatches"
+                    aria-expanded="true" aria-controls="collapseAccountMatchess">
+                    <i class="fas fa-fw fa-cog"></i>
+                    <span>Account Matches</span>
+                </a>
+                <div id="collapseAccountMatches" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+                    <div class="bg-white py-2 collapse-inner rounded">
+                        <router-link :to="{ name: 'create-account-match' }" class="collapse-item">Create</router-link>
+                        <router-link :to="{ name: 'get-account-matches' }" class="collapse-item">List</router-link>
+                    </div>
+                </div>
+            </li>
+
             <!-- Divider -->
             <hr class="sidebar-divider">
+
+            <li class="nav-item">
+                <router-link :to="{ name: 'tasks' }" class="nav-link">
+                    <i class="fas fa-fw fa-cog"></i>
+                    <span>Tasks</span>
+                </router-link>
+            </li>
 
         </ul>
         <!-- End of Sidebar -->

@@ -226,7 +226,7 @@ export default {
 
                                 <div v-for="(split, index) in splits" class="row gx-3 mb-3">
                                     <div class="col-md-6">
-                                        <label class="small mb-1" for="inputFirstName">Account</label>
+                                        <label class="small mb-1">Account</label>
                                         <div class="mb-3">
                                             <select class="form-select" aria-label="Type" v-model="splits[index].account_id">
                                                 <option v-for="account in accounts" :key="account.id" :value="account.id">{{ account.name }}</option>

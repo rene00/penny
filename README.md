@@ -46,3 +46,15 @@ OFX files found within `DATA_HOME/import` will be automatically imported when
 
 Files that have been successfully imported will be deleted from
 `DATA_HOME/import`.
+
+### Account Matches
+
+Account matches match transactions with accounts using filters. They are used
+to automate the categorisation of transactions with accounts.
+
+An account match has a source account, destination account and a list of
+filters. Filters are regular expressions and an attempt to match the filter on
+the transaction memo is done when account matches are processed.
+
+Account matches are processed via the Tasks page or when an account match has
+been updated.

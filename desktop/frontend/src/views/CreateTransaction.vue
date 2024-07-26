@@ -152,7 +152,7 @@ export default {
                                         <div class="mb-3">
                                             <select class="form-select" aria-label="Type" v-model="splits[0].account.id">
                                                 <option selected="" disabled="">Select an account:</option>
-                                                <option v-for="account in accounts.filter(account => account.account_type.name === 'Expense')" :value="account.id">{{ account.name }}</option>
+                                                <option v-for="account in accounts" :value="account.id">{{ account.name }}</option>
                                             </select>
                                         </div>
                                     </div>
@@ -173,7 +173,7 @@ export default {
                                           <select class="form-select" aria-label="Type" v-model="splits[1].account.id">
                                               <option selected="" disabled="">Select an account:</option>
                                               <!-- <option v-for="account in accounts.filter(account => account.account_type.name === 'Current Liability')" :value="account.id">{{ account.name }}</option> -->
-                                              <option v-for="account in accounts.filter(account => ['Liability', 'Asset'].includes(account.account_type.name))" :value="account.id">{{ account.name }}</option>
+                                              <option v-for="account in accounts" :value="account.id">{{ account.name }}</option>
                                           </select>
                                       </div>
                                   </div>

@@ -58,6 +58,165 @@ export namespace types {
 		    return a;
 		}
 	}
+	export class AccountMatchRegex {
+	    id: number;
+	    regex: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new AccountMatchRegex(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.regex = source["regex"];
+	    }
+	}
+	export class AccountMatch {
+	    id: number;
+	    name: string;
+	    description: string;
+	    deleted: boolean;
+	    source_account: Account;
+	    destination_account: Account;
+	    regexes: AccountMatchRegex[];
+	
+	    static createFrom(source: any = {}) {
+	        return new AccountMatch(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.name = source["name"];
+	        this.description = source["description"];
+	        this.deleted = source["deleted"];
+	        this.source_account = this.convertValues(source["source_account"], Account);
+	        this.destination_account = this.convertValues(source["destination_account"], Account);
+	        this.regexes = this.convertValues(source["regexes"], AccountMatchRegex);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	
+	export class AccountMatchRegexResponse {
+	    success: boolean;
+	    msg: string;
+	    data: AccountMatchRegex;
+	
+	    static createFrom(source: any = {}) {
+	        return new AccountMatchRegexResponse(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.success = source["success"];
+	        this.msg = source["msg"];
+	        this.data = this.convertValues(source["data"], AccountMatchRegex);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class AccountMatchResponse {
+	    success: boolean;
+	    msg: string;
+	    data: AccountMatch;
+	
+	    static createFrom(source: any = {}) {
+	        return new AccountMatchResponse(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.success = source["success"];
+	        this.msg = source["msg"];
+	        this.data = this.convertValues(source["data"], AccountMatch);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class AccountMatchesResponse {
+	    success: boolean;
+	    msg: string;
+	    data: AccountMatch[];
+	
+	    static createFrom(source: any = {}) {
+	        return new AccountMatchesResponse(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.success = source["success"];
+	        this.msg = source["msg"];
+	        this.data = this.convertValues(source["data"], AccountMatch);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 	export class AccountResponse {
 	    success: boolean;
 	    msg: string;
