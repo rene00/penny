@@ -46,6 +46,28 @@ const router = createRouter({
         name: 'import-transactions',
         component: () => import('../views/ImportTransactions.vue'),
     },
+    {
+        path: '/get-account-matches',
+        name: 'get-account-matches',
+        component: () => import('../views/GetAccountMatches.vue'),
+    },
+    {
+        path: '/create-account-match',
+        name: 'create-account-match',
+        component: () => import('../views/CreateAccountMatch.vue'),
+    },
+    {
+        path: '/get-account-match/:id',
+        name: 'get-account-match',
+        component: () => import('../views/GetAccountMatch.vue'),
+        props: true
+    },
+    {
+        path: '/tasks',
+        name: 'tasks',
+        component: () => import('../views/Tasks.vue'),
+        props: true
+    },
   ]
 })
 

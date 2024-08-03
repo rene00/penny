@@ -308,10 +308,10 @@ func (a *accountService) CreateAccount(name, description string, accountTypeID i
 	account, err := a.createAccount(name, description, accountTypeID)
 	switch {
 	case dberror.IsUniqueConstraint(err):
-		resp.Msg = fmt.Sprintf("Account already exists")
+		resp.Msg = "Account already exists"
 		return resp
 	case err != nil:
-		resp.Msg = fmt.Sprintf("Failed to create account: %s", err.Error())
+		resp.Msg = fmt.Sprintf("Failed to create Account: %s", err.Error())
 		a.logger.Error(resp.Msg)
 		return resp
 	}

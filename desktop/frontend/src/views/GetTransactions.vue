@@ -72,9 +72,7 @@ export default {
       }
       this.transactions = transactions
     },
-
   },
-
 }
 
 </script>

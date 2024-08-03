@@ -53,6 +53,7 @@ func main() {
 	entitySvc := services.Entity()
 	transactionSvc := services.Transaction()
 	splitsSvc := services.Splits()
+	accountMatchesSvc := services.AccountMatch()
 
 	// Create an instance of the app structure
 	app := NewApp()
@@ -80,9 +81,9 @@ func main() {
 			entitySvc.Start(ctx, dbSvc.DB)
 			accountSvc.Start(ctx, dbSvc.DB, logger, defaultResources)
 			transactionSvc.Start(ctx, dbSvc.DB, logger, transactionImporterSvc)
-			splitsSvc.Start(ctx, dbSvc.DB, logger)
-
 			transactionSvc.AddAccountSvcHandler(accountSvc)
+			splitsSvc.Start(ctx, dbSvc.DB, logger)
+			accountMatchesSvc.Start(ctx, dbSvc.DB, logger, defaultResources)
 
 			app.startup(ctx)
 		},
@@ -92,6 +93,7 @@ func main() {
 			accountSvc,
 			transactionSvc,
 			splitsSvc,
+			accountMatchesSvc,
 		},
 	})
 
