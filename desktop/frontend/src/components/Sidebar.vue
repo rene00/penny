@@ -43,7 +43,7 @@
 
             <li class="nav-item">
                 <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseAccountMatches"
-                    aria-expanded="true" aria-controls="collapseAccountMatchess">
+                    aria-expanded="true" aria-controls="collapseAccountMatches">
                     <i class="fas fa-fw fa-cog"></i>
                     <span>Account Matches</span>
                 </a>
@@ -51,6 +51,20 @@
                     <div class="bg-white py-2 collapse-inner rounded">
                         <router-link :to="{ name: 'create-account-match' }" class="collapse-item">Create</router-link>
                         <router-link :to="{ name: 'get-account-matches' }" class="collapse-item">List</router-link>
+                    </div>
+                </div>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTags"
+                    aria-expanded="true" aria-controls="collapseTags">
+                    <i class="fas fa-fw fa-cog"></i>
+                    <span>Tags</span>
+                </a>
+                <div id="collapseTags" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+                    <div class="bg-white py-2 collapse-inner rounded">
+                        <router-link :to="{ name: 'create-tag' }" class="collapse-item">Create</router-link>
+                        <router-link :to="{ name: 'get-tags' }" class="collapse-item">List</router-link>
                     </div>
                 </div>
             </li>

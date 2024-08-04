@@ -1,0 +1,4 @@
+DROP TABLE IF EXISTS tag;
+DROP TABLE IF EXISTS tag_attributes;
+DROP TABLE IF EXISTS tag_transactions;
+DROP TABLE IF EXISTS tag_regex;

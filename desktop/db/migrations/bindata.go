@@ -12,6 +12,8 @@
 // 000005_auto-importer.up.sql
 // 000006_account_match.down.sql
 // 000006_account_match.up.sql
+// 000007_tags.down.sql
+// 000007_tags.up.sql
 // migrations.go
 // migrations_test.go
 package migrations
@@ -254,7 +256,7 @@ func _000005_autoImporterDownSql() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "000005_auto-importer.down.sql", size: 93, mode: os.FileMode(420), modTime: time.Unix(1720331795, 0)}
+	info := bindataFileInfo{name: "000005_auto-importer.down.sql", size: 93, mode: os.FileMode(420), modTime: time.Unix(1722728994, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -274,7 +276,7 @@ func _000005_autoImporterUpSql() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "000005_auto-importer.up.sql", size: 505, mode: os.FileMode(420), modTime: time.Unix(1720757318, 0)}
+	info := bindataFileInfo{name: "000005_auto-importer.up.sql", size: 505, mode: os.FileMode(420), modTime: time.Unix(1722728994, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -294,7 +296,7 @@ func _000006_account_matchDownSql() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "000006_account_match.down.sql", size: 125, mode: os.FileMode(420), modTime: time.Unix(1722248780, 0)}
+	info := bindataFileInfo{name: "000006_account_match.down.sql", size: 125, mode: os.FileMode(420), modTime: time.Unix(1722729088, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -314,7 +316,47 @@ func _000006_account_matchUpSql() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "000006_account_match.up.sql", size: 911, mode: os.FileMode(420), modTime: time.Unix(1722724271, 0)}
+	info := bindataFileInfo{name: "000006_account_match.up.sql", size: 911, mode: os.FileMode(420), modTime: time.Unix(1722729088, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
+var __000007_tagsDownSql = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x72\x09\xf2\x0f\x50\x08\x71\x74\xf2\x71\x55\xf0\x74\x53\x70\x8d\xf0\x0c\x0e\x09\x56\x28\x49\x4c\xb7\xe6\xc2\x25\x13\x9f\x58\x52\x52\x94\x99\x54\x5a\x92\x5a\x8c\x47\x51\x49\x51\x62\x5e\x71\x62\x72\x49\x66\x7e\x1e\x3e\x65\x45\xa9\xe9\xa9\x15\xd6\x5c\x80\x00\x00\x00\xff\xff\xa1\xc0\x1b\x0d\x86\x00\x00\x00")
+
+func _000007_tagsDownSqlBytes() ([]byte, error) {
+	return bindataRead(
+		__000007_tagsDownSql,
+		"000007_tags.down.sql",
+	)
+}
+
+func _000007_tagsDownSql() (*asset, error) {
+	bytes, err := _000007_tagsDownSqlBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "000007_tags.down.sql", size: 134, mode: os.FileMode(420), modTime: time.Unix(1722739904, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
+var __000007_tagsUpSql = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\xac\x91\x41\x6b\x84\x30\x10\x85\xef\xf9\x15\x73\x34\xe0\x3f\xe8\xc9\xca\x28\xa1\x36\xb6\x31\x82\x9e\x4a\x5a\x83\x04\xba\x2e\x68\x5c\xf6\xe7\x2f\xc6\x65\x71\xc5\x15\x05\xaf\x79\xdf\x7b\x93\x37\x13\x0a\x0c\x24\x82\x0c\xde\x13\x04\x16\x01\x4f\x25\x60\xc1\x32\x99\x81\x55\x35\xf1\x08\x00\x80\xa9\x80\x71\x89\x31\x0a\xa7\xf3\x3c\x49\xe0\x4b\xb0\xcf\x40\x94\xf0\x81\xa5\xef\xa0\x46\x9d\x34\x48\x2c\xe4\x83\x19\xdf\x73\xce\xbe\x73\xf4\x06\x99\x12\xfa\x46\xc8\xfa\xc8\x1f\x65\x6d\x6b\x7e\x7b\xab\xbb\x3d\xd3\x07\xe7\x02\xb8\xfe\xb5\x8b\xfa\xef\xd7\xfe\x3c\x86\xfa\xce\x4f\x47\x25\x4a\x05\xb2\x98\x0f\x83\xef\x32\x05\x81\x11\x0a\xe4\x21\xba\x02\x9e\xa9\x36\xf5\xb4\xad\x6a\x3a\xf5\x67\xcd\xb9\x39\xae\xe9\x34\xf4\x35\x35\xab\x37\x33\xed\x6a\xba\xc0\xce\xd2\x9e\x4c\x13\x6d\xeb\x9e\x5a\x5d\xeb\xeb\x61\x0b\x72\x69\x1b\x4e\xee\xb8\xdd\x37\xbf\x05\x00\x00\xff\xff\x2e\x2b\xc4\x5a\x4e\x03\x00\x00")
+
+func _000007_tagsUpSqlBytes() ([]byte, error) {
+	return bindataRead(
+		__000007_tagsUpSql,
+		"000007_tags.up.sql",
+	)
+}
+
+func _000007_tagsUpSql() (*asset, error) {
+	bytes, err := _000007_tagsUpSqlBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "000007_tags.up.sql", size: 846, mode: os.FileMode(420), modTime: time.Unix(1722739890, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -423,6 +465,8 @@ var _bindata = map[string]func() (*asset, error){
 	"000005_auto-importer.up.sql": _000005_autoImporterUpSql,
 	"000006_account_match.down.sql": _000006_account_matchDownSql,
 	"000006_account_match.up.sql": _000006_account_matchUpSql,
+	"000007_tags.down.sql": _000007_tagsDownSql,
+	"000007_tags.up.sql": _000007_tagsUpSql,
 	"migrations.go": migrationsGo,
 	"migrations_test.go": migrations_testGo,
 }
@@ -479,6 +523,8 @@ var _bintree = &bintree{nil, map[string]*bintree{
 	"000005_auto-importer.up.sql": &bintree{_000005_autoImporterUpSql, map[string]*bintree{}},
 	"000006_account_match.down.sql": &bintree{_000006_account_matchDownSql, map[string]*bintree{}},
 	"000006_account_match.up.sql": &bintree{_000006_account_matchUpSql, map[string]*bintree{}},
+	"000007_tags.down.sql": &bintree{_000007_tagsDownSql, map[string]*bintree{}},
+	"000007_tags.up.sql": &bintree{_000007_tagsUpSql, map[string]*bintree{}},
 	"migrations.go": &bintree{migrationsGo, map[string]*bintree{}},
 	"migrations_test.go": &bintree{migrations_testGo, map[string]*bintree{}},
 }}

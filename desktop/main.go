@@ -54,6 +54,7 @@ func main() {
 	transactionSvc := services.Transaction()
 	splitsSvc := services.Splits()
 	accountMatchesSvc := services.AccountMatch()
+	tagSvc := services.Tag()
 
 	// Create an instance of the app structure
 	app := NewApp()
@@ -84,6 +85,7 @@ func main() {
 			transactionSvc.AddAccountSvcHandler(accountSvc)
 			splitsSvc.Start(ctx, dbSvc.DB, logger)
 			accountMatchesSvc.Start(ctx, dbSvc.DB, logger, defaultResources)
+			tagSvc.Start(ctx, dbSvc.DB, logger)
 
 			app.startup(ctx)
 		},
@@ -94,6 +96,7 @@ func main() {
 			transactionSvc,
 			splitsSvc,
 			accountMatchesSvc,
+			tagSvc,
 		},
 	})
 

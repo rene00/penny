@@ -106,7 +106,7 @@ export default {
           continue
         }
 
-        const updateRegexResp = await UpdateAccountMatchRegex(regex.id, regex.regex);
+        const updateRegexResp = await UpdateAccountMatchRegex(regex.id, regex.regex)
         if (!updateRegexResp.success) {
           $message.error(updateRegexResp.msg)
           return

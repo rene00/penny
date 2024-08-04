@@ -82,12 +82,14 @@ var TransactionRels = struct {
 	Entity                 string
 	Currency               string
 	Splits                 string
+	TagTransactions        string
 	TransactionsAttributes string
 	TransactionsHashes     string
 }{
 	Entity:                 "Entity",
 	Currency:               "Currency",
 	Splits:                 "Splits",
+	TagTransactions:        "TagTransactions",
 	TransactionsAttributes: "TransactionsAttributes",
 	TransactionsHashes:     "TransactionsHashes",
 }
@@ -97,6 +99,7 @@ type transactionR struct {
 	Entity                 *Entity                    `boil:"Entity" json:"Entity" toml:"Entity" yaml:"Entity"`
 	Currency               *Currency                  `boil:"Currency" json:"Currency" toml:"Currency" yaml:"Currency"`
 	Splits                 SplitSlice                 `boil:"Splits" json:"Splits" toml:"Splits" yaml:"Splits"`
+	TagTransactions        TagTransactionSlice        `boil:"TagTransactions" json:"TagTransactions" toml:"TagTransactions" yaml:"TagTransactions"`
 	TransactionsAttributes TransactionsAttributeSlice `boil:"TransactionsAttributes" json:"TransactionsAttributes" toml:"TransactionsAttributes" yaml:"TransactionsAttributes"`
 	TransactionsHashes     TransactionsHashSlice      `boil:"TransactionsHashes" json:"TransactionsHashes" toml:"TransactionsHashes" yaml:"TransactionsHashes"`
 }
@@ -125,6 +128,13 @@ func (r *transactionR) GetSplits() SplitSlice {
 		return nil
 	}
 	return r.Splits
+}
+
+func (r *transactionR) GetTagTransactions() TagTransactionSlice {
+	if r == nil {
+		return nil
+	}
+	return r.TagTransactions
 }
 
 func (r *transactionR) GetTransactionsAttributes() TransactionsAttributeSlice {
@@ -277,6 +287,20 @@ func (o *Transaction) Splits(mods ...qm.QueryMod) splitQuery {
 	)
 
 	return Splits(queryMods...)
+}
+
+// TagTransactions retrieves all the tag_transaction's TagTransactions with an executor.
+func (o *Transaction) TagTransactions(mods ...qm.QueryMod) tagTransactionQuery {
+	var queryMods []qm.QueryMod
+	if len(mods) != 0 {
+		queryMods = append(queryMods, mods...)
+	}
+
+	queryMods = append(queryMods,
+		qm.Where("\"tag_transactions\".\"transactions_id\"=?", o.ID),
+	)
+
+	return TagTransactions(queryMods...)
 }
 
 // TransactionsAttributes retrieves all the transactions_attribute's TransactionsAttributes with an executor.
@@ -628,6 +652,113 @@ func (transactionL) LoadSplits(ctx context.Context, e boil.ContextExecutor, sing
 				local.R.Splits = append(local.R.Splits, foreign)
 				if foreign.R == nil {
 					foreign.R = &splitR{}
+				}
+				foreign.R.Transaction = local
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
+// LoadTagTransactions allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-M or N-M relationship.
+func (transactionL) LoadTagTransactions(ctx context.Context, e boil.ContextExecutor, singular bool, maybeTransaction interface{}, mods queries.Applicator) error {
+	var slice []*Transaction
+	var object *Transaction
+
+	if singular {
+		var ok bool
+		object, ok = maybeTransaction.(*Transaction)
+		if !ok {
+			object = new(Transaction)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeTransaction)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeTransaction))
+			}
+		}
+	} else {
+		s, ok := maybeTransaction.(*[]*Transaction)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeTransaction)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeTransaction))
+			}
+		}
+	}
+
+	args := make([]interface{}, 0, 1)
+	if singular {
+		if object.R == nil {
+			object.R = &transactionR{}
+		}
+		args = append(args, object.ID)
+	} else {
+	Outer:
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &transactionR{}
+			}
+
+			for _, a := range args {
+				if a == obj.ID {
+					continue Outer
+				}
+			}
+
+			args = append(args, obj.ID)
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	query := NewQuery(
+		qm.From(`tag_transactions`),
+		qm.WhereIn(`tag_transactions.transactions_id in ?`, args...),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load tag_transactions")
+	}
+
+	var resultSlice []*TagTransaction
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice tag_transactions")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results in eager load on tag_transactions")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for tag_transactions")
+	}
+
+	if singular {
+		object.R.TagTransactions = resultSlice
+		for _, foreign := range resultSlice {
+			if foreign.R == nil {
+				foreign.R = &tagTransactionR{}
+			}
+			foreign.R.Transaction = object
+		}
+		return nil
+	}
+
+	for _, foreign := range resultSlice {
+		for _, local := range slice {
+			if local.ID == foreign.TransactionsID {
+				local.R.TagTransactions = append(local.R.TagTransactions, foreign)
+				if foreign.R == nil {
+					foreign.R = &tagTransactionR{}
 				}
 				foreign.R.Transaction = local
 				break
@@ -990,6 +1121,59 @@ func (o *Transaction) AddSplits(ctx context.Context, exec boil.ContextExecutor, 
 	for _, rel := range related {
 		if rel.R == nil {
 			rel.R = &splitR{
+				Transaction: o,
+			}
+		} else {
+			rel.R.Transaction = o
+		}
+	}
+	return nil
+}
+
+// AddTagTransactions adds the given related objects to the existing relationships
+// of the transaction, optionally inserting them as new records.
+// Appends related to o.R.TagTransactions.
+// Sets related.R.Transaction appropriately.
+func (o *Transaction) AddTagTransactions(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*TagTransaction) error {
+	var err error
+	for _, rel := range related {
+		if insert {
+			rel.TransactionsID = o.ID
+			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
+				return errors.Wrap(err, "failed to insert into foreign table")
+			}
+		} else {
+			updateQuery := fmt.Sprintf(
+				"UPDATE \"tag_transactions\" SET %s WHERE %s",
+				strmangle.SetParamNames("\"", "\"", 0, []string{"transactions_id"}),
+				strmangle.WhereClause("\"", "\"", 0, tagTransactionPrimaryKeyColumns),
+			)
+			values := []interface{}{o.ID, rel.ID}
+
+			if boil.IsDebug(ctx) {
+				writer := boil.DebugWriterFrom(ctx)
+				fmt.Fprintln(writer, updateQuery)
+				fmt.Fprintln(writer, values)
+			}
+			if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+				return errors.Wrap(err, "failed to update foreign table")
+			}
+
+			rel.TransactionsID = o.ID
+		}
+	}
+
+	if o.R == nil {
+		o.R = &transactionR{
+			TagTransactions: related,
+		}
+	} else {
+		o.R.TagTransactions = append(o.R.TagTransactions, related...)
+	}
+
+	for _, rel := range related {
+		if rel.R == nil {
+			rel.R = &tagTransactionR{
 				Transaction: o,
 			}
 		} else {
