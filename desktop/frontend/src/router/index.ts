@@ -68,6 +68,22 @@ const router = createRouter({
         component: () => import('../views/Tasks.vue'),
         props: true
     },
+    {
+        path: '/get-tags',
+        name: 'get-tags',
+        component: () => import('../views/GetTags.vue'),
+    },
+    {
+        path: '/create-tag',
+        name: 'create-tag',
+        component: () => import('../views/CreateTag.vue'),
+    },
+    {
+        path: '/get-tag/:id',
+        name: 'get-tag',
+        component: () => import('../views/GetTag.vue'),
+        props: true
+    },
   ]
 })
 

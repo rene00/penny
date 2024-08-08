@@ -38,61 +38,74 @@ func (a *accountMatchService) Start(ctx context.Context, db *sql.DB, logger *log
 	a.defaultResources = defaultResources
 	a.AccountMatchRequestC = make(chan AccountMatchRequest)
 
-	go func() { a.matcher() }()
+	go func() { a.matcher(a.ctx, a.db, a.logger) }()
 }
 
-type accountMatchRequestTransactionSplit struct {
-	transaction        *model.Transaction
-	splits             []*model.Split
-	sourceAccount      *model.Account
-	destinationAccount *model.Account
-}
-
-func (a *accountMatchService) matcher() {
+func (a *accountMatchService) matcher(ctx context.Context, db *sql.DB, logger *logwrap.LogWrap) {
 	var q []qm.QueryMod
 
 	for range a.AccountMatchRequestC {
-		a.logger.Info(fmt.Sprintf("received new account match request"))
+		logger.Info(fmt.Sprintf("received new account match request"))
 
-		accountMatches, err := model.AccountMatches().All(a.ctx, a.db)
+		accountMatches, err := model.AccountMatches().All(ctx, db)
 		if err != nil {
-			a.logger.Error("Failed to find Account Matches")
+			logger.Error("Failed to find Account Matches")
 		}
 
 		q = []qm.QueryMod{
 			qm.Load("Splits"),
 			qm.Load("Splits.Account"),
 		}
-		transactions, err := model.Transactions(q...).All(a.ctx, a.db)
+		transactions, err := model.Transactions(q...).All(ctx, db)
 		if err != nil {
-			a.logger.Error(err.Error())
+			logger.Error(err.Error())
 			continue
 		}
 
 		for _, accountMatch := range accountMatches {
+			attr, err := model.AccountMatchAttributes(qm.Where("account_match_id=? AND name=?", accountMatch.ID, "deleted")).One(ctx, db)
+			switch {
+			case dberror.IsNoRowsFound(err):
+			case err != nil:
+				logger.Error(err.Error())
+				continue
+			default:
+				if attr.Value == "true" {
+					continue
+				}
+			}
+
+			accountMatchRegexes, err := model.AccountMatchRegexes(qm.Where("account_match_id=?", accountMatch.ID)).All(ctx, db)
+			if err != nil {
+				logger.Error(err.Error())
+				continue
+			}
+
 			for _, transaction := range transactions {
+				transactionDeleted, err := model.TransactionsAttributes(qm.Where("transactions_id=? AND name=? AND value=?", transaction.ID, "deleted", "true")).Exists(ctx, db)
+				if err != nil {
+					logger.Error(err.Error())
+					continue
+				}
+				if transactionDeleted {
+					continue
+				}
+
 				for _, split := range transaction.R.Splits {
 					if accountMatch.SourceAccountID == split.R.Account.ID {
-						exists, err := model.Splits(qm.Where("transactions_id=? AND id!=?", split.TransactionsID, split.ID)).Exists(a.ctx, a.db)
+						exists, err := model.Splits(qm.Where("transactions_id=? AND id!=?", split.TransactionsID, split.ID)).Exists(ctx, db)
 						if err != nil {
-							a.logger.Error(err.Error())
+							logger.Error(err.Error())
 							continue
 						}
 						if exists {
 							continue
 						}
 
-						accountMatchRegexes, err := model.AccountMatchRegexes(qm.Where("account_match_id=?", accountMatch.ID)).All(a.ctx, a.db)
-						if err != nil {
-							a.logger.Error(err.Error())
-							continue
-						}
-
 						for _, regex := range accountMatchRegexes {
-
 							r, err := regexp.Compile(fmt.Sprintf("(?i)%s", regex.Regex))
 							if err != nil {
-								a.logger.Error(fmt.Sprintf("regexp compile %d: %s", regex.ID, err.Error()))
+								logger.Error(fmt.Sprintf("regexp compile %d: %s", regex.ID, err.Error()))
 								continue
 							}
 
@@ -110,8 +123,8 @@ func (a *accountMatchService) matcher() {
 									ValueNum:       valueNum,
 									ValueDenom:     split.ValueDenom,
 								}
-								if err := s.Insert(a.ctx, a.db, boil.Infer()); err != nil {
-									a.logger.Error(err.Error())
+								if err := s.Insert(ctx, db, boil.Infer()); err != nil {
+									logger.Error(err.Error())
 									continue
 								}
 							}
@@ -274,6 +287,7 @@ func (a *accountMatchService) GetAccountMatch(id int64) types.AccountMatchRespon
 	resp.Data, err = types.NewAccountMatch(a.ctx, a.db, am)
 	if err != nil {
 		resp.Msg = err.Error()
+		a.logger.Error(resp.Msg)
 		return resp
 	}
 
@@ -289,6 +303,7 @@ func (a *accountMatchService) UpdateAccountMatch(id, sourceAccountID, destinatio
 	tx, err := a.db.BeginTx(a.ctx, nil)
 	if err != nil {
 		resp.Msg = err.Error()
+		a.logger.Error(resp.Msg)
 		return resp
 	}
 	defer tx.Rollback()
@@ -296,6 +311,7 @@ func (a *accountMatchService) UpdateAccountMatch(id, sourceAccountID, destinatio
 	am, err := model.FindAccountMatch(a.ctx, tx, id)
 	if err != nil {
 		resp.Msg = err.Error()
+		a.logger.Error(resp.Msg)
 		return resp
 	}
 	am.Name = name
@@ -315,11 +331,13 @@ func (a *accountMatchService) UpdateAccountMatch(id, sourceAccountID, destinatio
 	}
 	if err = attr.Upsert(a.ctx, tx, true, []string{"account_match_id", "name"}, boil.Whitelist("value"), boil.Infer()); err != nil {
 		resp.Msg = err.Error()
+		a.logger.Error(resp.Msg)
 		return resp
 	}
 
 	if err := tx.Commit(); err != nil {
 		resp.Msg = err.Error()
+		a.logger.Error(resp.Msg)
 		return resp
 	}
 
@@ -373,6 +391,7 @@ func (a *accountMatchService) DeleteAccountMatch(id int64) types.AccountMatchRes
 	}
 	if err := attr.Upsert(a.ctx, a.db, true, []string{"account_match_id", "name"}, boil.Whitelist("value"), boil.Infer()); err != nil {
 		resp.Msg = err.Error()
+		a.logger.Error(resp.Msg)
 		return resp
 	}
 	resp.Success = true

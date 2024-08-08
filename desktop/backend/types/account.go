@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"math/big"
 	"pennyapp/backend/internal/dberror"
-	"pennyapp/backend/logwrap"
 	"pennyapp/backend/model"
 
 	"github.com/shopspring/decimal"
@@ -19,14 +18,12 @@ type AccountResponse struct {
 }
 
 type Account struct {
-	ID           int64       `json:"id"`
-	Name         string      `json:"name"`
-	Description  string      `json:"description"`
-	AccountType  AccountType `json:"account_type"`
-	Amount       string      `json:"amount"`
-	Deleted      bool        `json:"deleted"`
-	modelAccount *model.Account
-	logger       *logwrap.LogWrap
+	ID          int64       `json:"id"`
+	Name        string      `json:"name"`
+	Description string      `json:"description"`
+	AccountType AccountType `json:"account_type"`
+	Amount      string      `json:"amount"`
+	Deleted     bool        `json:"deleted"`
 }
 
 type AccountType struct {
@@ -49,12 +46,12 @@ func NewAccountResponse() AccountResponse {
 	return a
 }
 
-func NewAccount(logger *logwrap.LogWrap, a *model.Account) Account {
+func NewAccount(ctx context.Context, db *sql.DB, a *model.Account) (Account, error) {
+	var err error
+
 	account := Account{
-		ID:           a.ID,
-		Name:         a.Name,
-		modelAccount: a,
-		logger:       logger,
+		ID:   a.ID,
+		Name: a.Name,
 	}
 
 	if a.R != nil && a.R.AccountType != nil {
@@ -64,11 +61,21 @@ func NewAccount(logger *logwrap.LogWrap, a *model.Account) Account {
 		}
 	}
 
-	return account
+	if err = account.setAmount(ctx, db, a); err != nil {
+		return account, err
+	}
+	if err = account.setDeleted(ctx, db, a); err != nil {
+		return account, err
+	}
+	if err = account.setDescription(ctx, db, a); err != nil {
+		return account, err
+	}
+
+	return account, err
 }
 
-func (a *Account) SetAmount(ctx context.Context, db *sql.DB) error {
-	splits, err := model.Splits(qm.Where("account_id=?", a.modelAccount.ID)).All(ctx, db)
+func (a *Account) setAmount(ctx context.Context, db *sql.DB, account *model.Account) error {
+	splits, err := model.Splits(qm.Where("account_id=?", account.ID)).All(ctx, db)
 	if err != nil {
 		return err
 	}
@@ -83,18 +90,8 @@ func (a *Account) SetAmount(ctx context.Context, db *sql.DB) error {
 	return nil
 }
 
-func (a *Account) SetAttributes(ctx context.Context, db *sql.DB) error {
-	if err := a.setDeleted(ctx, db); err != nil {
-		return err
-	}
-	if err := a.setDescription(ctx, db); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (a *Account) setDeleted(ctx context.Context, db *sql.DB) error {
-	accountAttribute, err := model.AccountAttributes(qm.Where("account_id=? AND name=?", a.modelAccount.ID, "deleted")).One(ctx, db)
+func (a *Account) setDeleted(ctx context.Context, db *sql.DB, account *model.Account) error {
+	accountAttribute, err := model.AccountAttributes(qm.Where("account_id=? AND name=?", account.ID, "deleted")).One(ctx, db)
 	switch {
 	case dberror.IsNoRowsFound(err):
 	case err != nil:
@@ -107,8 +104,8 @@ func (a *Account) setDeleted(ctx context.Context, db *sql.DB) error {
 	return nil
 }
 
-func (a *Account) setDescription(ctx context.Context, db *sql.DB) error {
-	accountAttribute, err := model.AccountAttributes(qm.Where("account_id=? AND name=?", a.modelAccount.ID, "description")).One(ctx, db)
+func (a *Account) setDescription(ctx context.Context, db *sql.DB, account *model.Account) error {
+	accountAttribute, err := model.AccountAttributes(qm.Where("account_id=? AND name=?", account.ID, "description")).One(ctx, db)
 	switch {
 	case dberror.IsNoRowsFound(err):
 	case err != nil:

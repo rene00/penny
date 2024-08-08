@@ -332,9 +332,8 @@ func (a *accountService) CreateAccount(name, description string, accountTypeID i
 		}
 	}
 
-	data := types.NewAccount(a.logger, &account)
-
-	if err := data.SetAttributes(a.ctx, a.db); err != nil {
+	resp.Data, err = types.NewAccount(a.ctx, a.db, &account)
+	if err != nil {
 		resp.Msg = err.Error()
 		a.logger.Error(resp.Msg)
 		return resp
@@ -342,8 +341,6 @@ func (a *accountService) CreateAccount(name, description string, accountTypeID i
 
 	resp.Msg = "Account created"
 	resp.Success = true
-	resp.Data = data
-
 	return resp
 }
 
@@ -374,22 +371,14 @@ func (a *accountService) GetAccount(id int64) types.AccountResponse {
 		return resp
 	}
 
-	data := types.NewAccount(a.logger, account)
-
-	if err := data.SetAmount(a.ctx, a.db); err != nil {
-		resp.Msg = err.Error()
-		a.logger.Error(resp.Msg)
-		return resp
-	}
-
-	if err := data.SetAttributes(a.ctx, a.db); err != nil {
+	resp.Data, err = types.NewAccount(a.ctx, a.db, account)
+	if err != nil {
 		resp.Msg = err.Error()
 		a.logger.Error(resp.Msg)
 		return resp
 	}
 
 	resp.Success = true
-	resp.Data = data
 
 	return resp
 }
@@ -415,14 +404,8 @@ func (a *accountService) GetAccounts() types.JSResp {
 
 	data := []types.Account{}
 	for _, account := range accounts {
-		d := types.NewAccount(a.logger, account)
-		if err := d.SetAmount(a.ctx, a.db); err != nil {
-			resp.Msg = err.Error()
-			a.logger.Error(resp.Msg)
-			return resp
-		}
-
-		if err := d.SetAttributes(a.ctx, a.db); err != nil {
+		d, err := types.NewAccount(a.ctx, a.db, account)
+		if err != nil {
 			resp.Msg = err.Error()
 			a.logger.Error(resp.Msg)
 			return resp

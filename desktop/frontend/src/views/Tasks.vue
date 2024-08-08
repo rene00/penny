@@ -1,20 +1,35 @@
 <script>
 import { SendAccountMatchRequest } from 'wailsjs/go/services/accountMatchService.js'
+import { SendTagRequest } from 'wailsjs/go/services/tagService.js'
 
 export default {
   data() {
     return {
-      processAccountMatches: false
+      processAccountMatches: false,
+      processTagMatches: false,
     }
   },
   methods: {
     async runTasks() {
-      const resp = await SendAccountMatchRequest()
-      if (!resp.success) {
+
+
+      if (this.processAccountMatches) {
+        let resp = await SendAccountMatchRequest()
+        if (!resp.success) {
+            $message.error(resp.msg)
+            return
+        }
+      }
+
+      if (this.processTagMatches) {
+        let resp = await SendTagRequest()
+        if (!resp.success) {
           $message.error(resp.msg)
           return
+        }
       }
-      $message.success(resp.msg)
+
+      $message.success("Request sent")
       return
     }
   },
@@ -50,6 +65,11 @@ export default {
                                     <div class="checkbox">
                                         <label>
                                         <input id="processAccountMatches" name="processAccountMatches" type="checkbox" v-model="processAccountMatches"> Process Account Matches
+                                        </label>
+                                    </div>
+                                    <div class="checkbox">
+                                        <label>
+                                        <input id="processTagMatches" name="processTagMatches" type="checkbox" v-model="processTagMatches"> Process Tag Matches
                                         </label>
                                     </div>
                                   </div>

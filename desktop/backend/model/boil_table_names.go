@@ -20,6 +20,10 @@ var TableNames = struct {
 	EntityTypeAttributes      string
 	Splits                    string
 	SplitsAttributes          string
+	Tag                       string
+	TagAttributes             string
+	TagRegex                  string
+	TagTransactions           string
 	TransactionImporter       string
 	TransactionImporterStatus string
 	Transactions              string
@@ -43,6 +47,10 @@ var TableNames = struct {
 	EntityTypeAttributes:      "entity_type_attributes",
 	Splits:                    "splits",
 	SplitsAttributes:          "splits_attributes",
+	Tag:                       "tag",
+	TagAttributes:             "tag_attributes",
+	TagRegex:                  "tag_regex",
+	TagTransactions:           "tag_transactions",
 	TransactionImporter:       "transaction_importer",
 	TransactionImporterStatus: "transaction_importer_status",
 	Transactions:              "transactions",
