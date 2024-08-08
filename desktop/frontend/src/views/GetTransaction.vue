@@ -1,6 +1,7 @@
 <script>
 import { GetTransaction, UpdateTransaction, DeleteTransaction, UndeleteTransaction } from 'wailsjs/go/services/transactionService.js'
 import { GetAccounts } from 'wailsjs/go/services/accountService.js'
+import { GetTransactionNote, CreateTransactionNote, DeleteTransactionNote, UpdateTransactionNote } from 'wailsjs/go/services/noteService.js'
 import { UpdateSplit, CreateSplit, DeleteSplit, UndeleteSplit } from 'wailsjs/go/services/splitsService.js'
 
 export default {
@@ -10,6 +11,10 @@ export default {
       transaction: {},
       splits: [],
       accounts: [],
+      note: {
+        id: 0,
+        note: "",
+      },
     }
   },
   created() {
@@ -95,6 +100,14 @@ export default {
         splits.push(s)
       }
 
+      const transactionNoteResp = await GetTransactionNote(Number(this.id))
+      if (!transactionNoteResp.success) {
+        $message.error(transactionNoteResp.msg)
+        return
+      }
+      if ('note' in transactionNoteResp.data) {
+        this.note = transactionNoteResp.data
+      }
       this.transaction = transaction
       this.splits = splits
     },
@@ -108,7 +121,11 @@ export default {
         let updateTransactionMessage = $message
 
         for (const split of this.splits) {
-            if (split.id === 0 && split.account_id !== 0) {
+            if (typeof split.account_id === "undefined") {
+              continue
+            }
+
+            if (split.id === 0) {
               const { success, msg, data } = await CreateSplit(this.transaction.id, split.account_id, split.amount)
               if (!success) {
                 $message.error(msg)
@@ -124,7 +141,32 @@ export default {
             }
         }
 
+        if (this.note.note.length != 0) {
+          const newTransactionNoteResp = await CreateTransactionNote(this.transaction.id, this.note.note)
+          if (!newTransactionNoteResp.success) {
+            $message.error(newTransactionNoteResp.msg)
+            return
+          }
+        }
+
+        if (this.note.note.length == 0 && this.note.id != 0) {
+          const deleteTransactionNoteResp = await DeleteTransactionNote(this.note.id)
+          if (!deleteTransactionNoteResp.success) {
+            $message.error(deleteTransactionNoteResp.msg)
+            return
+          }
+        }
+
+        if (this.note.id != 0) {
+          const updateTransactionNoteResp = await UpdateTransactionNote(this.transaction.id, this.note.note)
+          if (!updateTransactionNoteResp.success) {
+            $message.error(updateTransactionNoteResp.msg)
+            return
+          }
+        }
+
         updateTransactionMessage.success(msg)
+        this.getTransaction()
         return
     },
 
@@ -223,7 +265,6 @@ export default {
                                     </label>
                                     <input class="form-control" type="text" v-model="transaction.memo">
                                 </div>
-
                                 <div v-for="(split, index) in splits" class="row gx-3 mb-3">
                                     <div class="col-md-6">
                                         <label class="small mb-1">Account</label>
@@ -237,6 +278,12 @@ export default {
                                         <label class="small mb-1">Amount</label>
                                         <input class="form-control" v-model="splits[index].amount" name="amount" type="number" value="0.00" step="any">
                                     </div>
+                                </div>
+                                <div class="mb-3">
+                                  <label class="small mb-1">Notes</label>
+                                  <div class="mb-3">
+                                    <textarea class="form-control" type="text" rows=2 v-model="note.note"></textarea>
+                                  </div>
                                 </div>
                                 <div class="row">
                                     <div class="col-auto">

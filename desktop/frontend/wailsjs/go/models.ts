@@ -268,6 +268,54 @@ export namespace types {
 	        this.data = source["data"];
 	    }
 	}
+	export class Note {
+	    id: number;
+	    note: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Note(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.note = source["note"];
+	    }
+	}
+	export class NoteResponse {
+	    success: boolean;
+	    msg: string;
+	    data: Note;
+	
+	    static createFrom(source: any = {}) {
+	        return new NoteResponse(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.success = source["success"];
+	        this.msg = source["msg"];
+	        this.data = this.convertValues(source["data"], Note);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 	export class Split {
 	    id: number;
 	    value_num: number;

@@ -58,3 +58,11 @@ the transaction memo is done when account matches are processed.
 
 Account matches are processed via the Tasks page or when an account match has
 been updated.
+
+### Tags
+
+Transactions can be tagged to help group transactions. A Transaction can belong to many Tags, unlike Accounts where a Transaction can belong to only one Account.
+
+An example use case for Tags is when you go on a holiday you still want to categorise Transactions in their Accounts but you may want to understand how much you spent on the holiday.
+
+Consider Transactions like airfares, hotels, dining, groceries and travel insurance. These Transactions will be assigned their appropriate Accounts but you can also assign them all to the "Overseas Holiday 2024" Tag.

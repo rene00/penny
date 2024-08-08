@@ -14,6 +14,8 @@
 // 000006_account_match.up.sql
 // 000007_tags.down.sql
 // 000007_tags.up.sql
+// 000008_comments.down.sql
+// 000008_comments.up.sql
 // migrations.go
 // migrations_test.go
 package migrations
@@ -296,7 +298,7 @@ func _000006_account_matchDownSql() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "000006_account_match.down.sql", size: 125, mode: os.FileMode(420), modTime: time.Unix(1722729088, 0)}
+	info := bindataFileInfo{name: "000006_account_match.down.sql", size: 125, mode: os.FileMode(420), modTime: time.Unix(1723148738, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -316,7 +318,7 @@ func _000006_account_matchUpSql() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "000006_account_match.up.sql", size: 911, mode: os.FileMode(420), modTime: time.Unix(1722729088, 0)}
+	info := bindataFileInfo{name: "000006_account_match.up.sql", size: 911, mode: os.FileMode(420), modTime: time.Unix(1723148738, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -336,7 +338,7 @@ func _000007_tagsDownSql() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "000007_tags.down.sql", size: 134, mode: os.FileMode(420), modTime: time.Unix(1722739904, 0)}
+	info := bindataFileInfo{name: "000007_tags.down.sql", size: 134, mode: os.FileMode(420), modTime: time.Unix(1723148758, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -356,7 +358,47 @@ func _000007_tagsUpSql() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "000007_tags.up.sql", size: 846, mode: os.FileMode(420), modTime: time.Unix(1722739890, 0)}
+	info := bindataFileInfo{name: "000007_tags.up.sql", size: 846, mode: os.FileMode(420), modTime: time.Unix(1723148758, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
+var __000008_commentsDownSql = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x72\x09\xf2\x0f\x50\x08\x71\x74\xf2\x71\x55\xf0\x74\x53\x70\x8d\xf0\x0c\x0e\x09\x56\xc8\xcb\x2f\x49\xb5\xe6\xc2\x29\x15\x5f\x52\x94\x98\x57\x9c\x98\x5c\x92\x99\x9f\x57\x6c\xcd\x05\x08\x00\x00\xff\xff\x40\x7f\x58\x3e\x43\x00\x00\x00")
+
+func _000008_commentsDownSqlBytes() ([]byte, error) {
+	return bindataRead(
+		__000008_commentsDownSql,
+		"000008_comments.down.sql",
+	)
+}
+
+func _000008_commentsDownSql() (*asset, error) {
+	bytes, err := _000008_commentsDownSqlBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "000008_comments.down.sql", size: 67, mode: os.FileMode(420), modTime: time.Unix(1723153318, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
+var __000008_commentsUpSql = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x94\xd0\xb1\x8a\x83\x40\x18\x04\xe0\x7e\x9f\x62\x4a\x05\xdf\xe0\x2a\x4f\x46\x59\xce\x5b\xef\x7e\x7f\x41\x2b\x91\x24\x85\x8d\x42\xf4\xfd\x09\xab\x49\x10\x31\x84\xd4\xff\x37\x33\xec\x26\xc2\x58\x09\x8d\xbf\x73\xc2\xa6\x70\x85\x82\xb5\x2d\xb5\xc4\x30\xce\x17\x13\x18\x00\xe8\xcf\xb0\x4e\x99\x51\x16\xe0\xaa\x3c\xc7\x9f\xd8\xdf\x58\x1a\xfc\xb0\x89\x16\xe4\x3d\x94\xb5\x3e\x8d\x09\xbf\x8c\x79\xb3\xd0\xce\xd7\x6e\x98\xba\xd3\xdc\x8f\xc3\xf4\xe9\x5c\x7b\x20\xd7\xeb\xb6\xf5\xb5\xaa\x9c\xfd\xaf\x18\xdc\xab\xa2\x7d\x2a\x5c\x55\x5a\x08\x6d\xe6\xfc\xf4\x83\x86\x10\xa6\x14\xba\x84\xeb\x33\x82\x43\xbd\xef\xdb\xa6\xb6\x37\x9f\xf6\x9f\x75\x0b\x00\x00\xff\xff\x8a\xd7\xd2\x3a\x8e\x01\x00\x00")
+
+func _000008_commentsUpSqlBytes() ([]byte, error) {
+	return bindataRead(
+		__000008_commentsUpSql,
+		"000008_comments.up.sql",
+	)
+}
+
+func _000008_commentsUpSql() (*asset, error) {
+	bytes, err := _000008_commentsUpSqlBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "000008_comments.up.sql", size: 398, mode: os.FileMode(420), modTime: time.Unix(1723153297, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -467,6 +509,8 @@ var _bindata = map[string]func() (*asset, error){
 	"000006_account_match.up.sql": _000006_account_matchUpSql,
 	"000007_tags.down.sql": _000007_tagsDownSql,
 	"000007_tags.up.sql": _000007_tagsUpSql,
+	"000008_comments.down.sql": _000008_commentsDownSql,
+	"000008_comments.up.sql": _000008_commentsUpSql,
 	"migrations.go": migrationsGo,
 	"migrations_test.go": migrations_testGo,
 }
@@ -525,6 +569,8 @@ var _bintree = &bintree{nil, map[string]*bintree{
 	"000006_account_match.up.sql": &bintree{_000006_account_matchUpSql, map[string]*bintree{}},
 	"000007_tags.down.sql": &bintree{_000007_tagsDownSql, map[string]*bintree{}},
 	"000007_tags.up.sql": &bintree{_000007_tagsUpSql, map[string]*bintree{}},
+	"000008_comments.down.sql": &bintree{_000008_commentsDownSql, map[string]*bintree{}},
+	"000008_comments.up.sql": &bintree{_000008_commentsUpSql, map[string]*bintree{}},
 	"migrations.go": &bintree{migrationsGo, map[string]*bintree{}},
 	"migrations_test.go": &bintree{migrations_testGo, map[string]*bintree{}},
 }}
