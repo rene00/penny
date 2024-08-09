@@ -18,6 +18,8 @@ var TableNames = struct {
 	EntityAttributes          string
 	EntityType                string
 	EntityTypeAttributes      string
+	Note                      string
+	NoteTransactions          string
 	Splits                    string
 	SplitsAttributes          string
 	Tag                       string
@@ -45,6 +47,8 @@ var TableNames = struct {
 	EntityAttributes:          "entity_attributes",
 	EntityType:                "entity_type",
 	EntityTypeAttributes:      "entity_type_attributes",
+	Note:                      "note",
+	NoteTransactions:          "note_transactions",
 	Splits:                    "splits",
 	SplitsAttributes:          "splits_attributes",
 	Tag:                       "tag",
