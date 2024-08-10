@@ -13,10 +13,19 @@ type Config struct {
 }
 
 type Opts struct {
-	Debug     bool
-	DBFile    string
-	DataHome  string
+	Debug bool
+
+	// The path of the sqlite3 db file.
+	DBFile string
+
+	// The path of the app home dir.
+	DataHome string
+
+	// The path of the import dir where imported files are temporarily stored.
 	ImportDir string
+
+	// The path of the temp dir.
+	TmpDir string
 }
 
 type OptFunc func(*Opts)
@@ -76,6 +85,10 @@ func NewConfig(opts ...OptFunc) (Config, error) {
 		return c, err
 	}
 
+	if err = c.setTmpDir(); err != nil {
+		return c, err
+	}
+
 	return c, nil
 }
 
@@ -99,10 +112,9 @@ func (c *Config) setDataHome() error {
 }
 
 func (c *Config) setImportDir() error {
-	if c.ImportDir != "" {
-		return os.MkdirAll(c.ImportDir, os.ModePerm)
+	if c.ImportDir == "" {
+		c.ImportDir = path.Join(c.DataHome, "import")
 	}
-	c.ImportDir = path.Join(c.DataHome, "import")
 	return os.MkdirAll(c.ImportDir, os.ModePerm)
 }
 
@@ -112,4 +124,11 @@ func (c *Config) setDBFile() error {
 	}
 	c.DBFile = path.Join(c.DataHome, "pennyapp.db")
 	return os.MkdirAll(filepath.Dir(c.DBFile), os.ModePerm)
+}
+
+func (c *Config) setTmpDir() error {
+	if c.TmpDir == "" {
+		c.TmpDir = path.Join(c.DataHome, "tmp")
+	}
+	return os.MkdirAll(c.TmpDir, os.ModePerm)
 }

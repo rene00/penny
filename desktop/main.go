@@ -56,6 +56,7 @@ func main() {
 	accountMatchesSvc := services.AccountMatch()
 	tagSvc := services.Tag()
 	noteSvc := services.Note()
+	attachmentSvc := services.Attachment()
 
 	// Create an instance of the app structure
 	app := NewApp()
@@ -88,8 +89,12 @@ func main() {
 			accountMatchesSvc.Start(ctx, dbSvc.DB, logger, defaultResources)
 			tagSvc.Start(ctx, dbSvc.DB, logger)
 			noteSvc.Start(ctx, dbSvc.DB, logger)
+			attachmentSvc.Start(ctx, conf, dbSvc.DB, logger)
 
 			app.startup(ctx)
+		},
+		OnShutdown: func(ctx context.Context) {
+			attachmentSvc.Shutdown(ctx, conf, logger)
 		},
 		Bind: []interface{}{
 			dbSvc,
@@ -100,6 +105,7 @@ func main() {
 			accountMatchesSvc,
 			tagSvc,
 			noteSvc,
+			attachmentSvc,
 		},
 	})
 

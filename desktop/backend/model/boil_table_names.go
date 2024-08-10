@@ -12,6 +12,8 @@ var TableNames = struct {
 	AccountMatchRegex         string
 	AccountType               string
 	AccountTypeAttributes     string
+	Attachment                string
+	AttachmentTransactions    string
 	Currency                  string
 	CurrencyAttributes        string
 	Entity                    string
@@ -41,6 +43,8 @@ var TableNames = struct {
 	AccountMatchRegex:         "account_match_regex",
 	AccountType:               "account_type",
 	AccountTypeAttributes:     "account_type_attributes",
+	Attachment:                "attachment",
+	AttachmentTransactions:    "attachment_transactions",
 	Currency:                  "currency",
 	CurrencyAttributes:        "currency_attributes",
 	Entity:                    "entity",

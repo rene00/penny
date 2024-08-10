@@ -3,12 +3,15 @@ import { GetTransaction, UpdateTransaction, DeleteTransaction, UndeleteTransacti
 import { GetAccounts } from 'wailsjs/go/services/accountService.js'
 import { GetTransactionNote, CreateTransactionNote, DeleteTransactionNote, UpdateTransactionNote } from 'wailsjs/go/services/noteService.js'
 import { UpdateSplit, CreateSplit, DeleteSplit, UndeleteSplit } from 'wailsjs/go/services/splitsService.js'
+import { CreateAttachment, GetTransactionAttachments, GetAttachment } from 'wailsjs/go/services/attachmentService.js'
 
 export default {
   props: ['id'],
   data() {
     return {
-      transaction: {},
+      transaction: {
+        attachments: [],
+      },
       splits: [],
       accounts: [],
       note: {
@@ -71,7 +74,8 @@ export default {
         id: data.id,
         memo: data.memo,
         date: data.date,
-        deleted: data.deleted
+        deleted: data.deleted,
+        attachments: [],
       }
 
       for (const split of data.splits) {
@@ -108,6 +112,24 @@ export default {
       if ('note' in transactionNoteResp.data) {
         this.note = transactionNoteResp.data
       }
+
+      const transactionAttachmentsResp = await GetTransactionAttachments(Number(this.id))
+      if (!transactionAttachmentsResp.success) {
+        $message.error(transactionAttachmentsResp.msg)
+        return
+      }
+      let attachments = []
+      for (const attachment of transactionAttachmentsResp.data) {
+        attachments.push({
+          id: attachment.id,
+          name: attachment.name,
+          size: attachment.size,
+          data: attachment.data,
+          createdAt: attachment.created_at,
+        })
+      }
+      transaction.attachments = attachments
+
       this.transaction = transaction
       this.splits = splits
     },
@@ -224,6 +246,28 @@ export default {
         }
     },
 
+    newAttachment(event) {
+      const files = event.target.files
+      this.fileName = files[0].name
+      const fileReader = new FileReader()
+      fileReader.addEventListener('load', () => {
+          this.fileContents = fileReader.result
+          const createAttachmentResp = CreateAttachment(Number(this.transaction.id), this.fileName, this.fileContents)
+          if (!createAttachmentResp.success) {
+                $message.error(createAttachmentResp.msg)
+                return
+          }
+      })
+      fileReader.readAsDataURL(files[0])
+    },
+
+    async downloadAttachment(id) {
+      const getAttachmentResp = await GetAttachment(Number(id))
+      if (!getAttachmentResp.success) {
+        $message.error(getAttachmentResp.msg)
+        return
+      }
+    }
   },
 }
 </script>
@@ -277,6 +321,21 @@ export default {
                                     <div class="col-md-6">
                                         <label class="small mb-1">Amount</label>
                                         <input class="form-control" v-model="splits[index].amount" name="amount" type="number" value="0.00" step="any">
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="small mb-1">
+                                      Attachments
+                                    </label>
+                                    <div class="mb-3">
+                                      <input type="file" ref="fileInput" @change="newAttachment">
+                                    </div>
+                                    <div v-for="(attachment, index) in transaction.attachments" class="row gx-3 mb-3">
+                                        <div class="col-md-6">
+                                          <label class="small mb-1">
+                                            <a @click.prevent="downloadAttachment(attachment.id)" v-text="attachment.name"/>
+                                          </label>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="mb-3">

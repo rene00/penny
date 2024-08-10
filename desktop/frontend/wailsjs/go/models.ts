@@ -252,6 +252,92 @@ export namespace types {
 		}
 	}
 	
+	export class Attachment {
+	    id: number;
+	    name: string;
+	    size: number;
+	    data: number[];
+	
+	    static createFrom(source: any = {}) {
+	        return new Attachment(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.name = source["name"];
+	        this.size = source["size"];
+	        this.data = source["data"];
+	    }
+	}
+	export class AttachmentResponse {
+	    success: boolean;
+	    msg: string;
+	    data: Attachment;
+	
+	    static createFrom(source: any = {}) {
+	        return new AttachmentResponse(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.success = source["success"];
+	        this.msg = source["msg"];
+	        this.data = this.convertValues(source["data"], Attachment);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class AttachmentsResponse {
+	    success: boolean;
+	    msg: string;
+	    data: Attachment[];
+	
+	    static createFrom(source: any = {}) {
+	        return new AttachmentsResponse(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.success = source["success"];
+	        this.msg = source["msg"];
+	        this.data = this.convertValues(source["data"], Attachment);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 	export class JSResp {
 	    success: boolean;
 	    msg: string;
