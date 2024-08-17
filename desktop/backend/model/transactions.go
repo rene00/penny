@@ -81,6 +81,7 @@ var TransactionWhere = struct {
 var TransactionRels = struct {
 	Entity                 string
 	Currency               string
+	AttachmentTransactions string
 	NoteTransactions       string
 	Splits                 string
 	TagTransactions        string
@@ -89,6 +90,7 @@ var TransactionRels = struct {
 }{
 	Entity:                 "Entity",
 	Currency:               "Currency",
+	AttachmentTransactions: "AttachmentTransactions",
 	NoteTransactions:       "NoteTransactions",
 	Splits:                 "Splits",
 	TagTransactions:        "TagTransactions",
@@ -100,6 +102,7 @@ var TransactionRels = struct {
 type transactionR struct {
 	Entity                 *Entity                    `boil:"Entity" json:"Entity" toml:"Entity" yaml:"Entity"`
 	Currency               *Currency                  `boil:"Currency" json:"Currency" toml:"Currency" yaml:"Currency"`
+	AttachmentTransactions AttachmentTransactionSlice `boil:"AttachmentTransactions" json:"AttachmentTransactions" toml:"AttachmentTransactions" yaml:"AttachmentTransactions"`
 	NoteTransactions       NoteTransactionSlice       `boil:"NoteTransactions" json:"NoteTransactions" toml:"NoteTransactions" yaml:"NoteTransactions"`
 	Splits                 SplitSlice                 `boil:"Splits" json:"Splits" toml:"Splits" yaml:"Splits"`
 	TagTransactions        TagTransactionSlice        `boil:"TagTransactions" json:"TagTransactions" toml:"TagTransactions" yaml:"TagTransactions"`
@@ -124,6 +127,13 @@ func (r *transactionR) GetCurrency() *Currency {
 		return nil
 	}
 	return r.Currency
+}
+
+func (r *transactionR) GetAttachmentTransactions() AttachmentTransactionSlice {
+	if r == nil {
+		return nil
+	}
+	return r.AttachmentTransactions
 }
 
 func (r *transactionR) GetNoteTransactions() NoteTransactionSlice {
@@ -283,6 +293,20 @@ func (o *Transaction) Currency(mods ...qm.QueryMod) currencyQuery {
 	queryMods = append(queryMods, mods...)
 
 	return Currencies(queryMods...)
+}
+
+// AttachmentTransactions retrieves all the attachment_transaction's AttachmentTransactions with an executor.
+func (o *Transaction) AttachmentTransactions(mods ...qm.QueryMod) attachmentTransactionQuery {
+	var queryMods []qm.QueryMod
+	if len(mods) != 0 {
+		queryMods = append(queryMods, mods...)
+	}
+
+	queryMods = append(queryMods,
+		qm.Where("\"attachment_transactions\".\"transactions_id\"=?", o.ID),
+	)
+
+	return AttachmentTransactions(queryMods...)
 }
 
 // NoteTransactions retrieves all the note_transaction's NoteTransactions with an executor.
@@ -571,6 +595,113 @@ func (transactionL) LoadCurrency(ctx context.Context, e boil.ContextExecutor, si
 					foreign.R = &currencyR{}
 				}
 				foreign.R.Transactions = append(foreign.R.Transactions, local)
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
+// LoadAttachmentTransactions allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-M or N-M relationship.
+func (transactionL) LoadAttachmentTransactions(ctx context.Context, e boil.ContextExecutor, singular bool, maybeTransaction interface{}, mods queries.Applicator) error {
+	var slice []*Transaction
+	var object *Transaction
+
+	if singular {
+		var ok bool
+		object, ok = maybeTransaction.(*Transaction)
+		if !ok {
+			object = new(Transaction)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeTransaction)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeTransaction))
+			}
+		}
+	} else {
+		s, ok := maybeTransaction.(*[]*Transaction)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeTransaction)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeTransaction))
+			}
+		}
+	}
+
+	args := make([]interface{}, 0, 1)
+	if singular {
+		if object.R == nil {
+			object.R = &transactionR{}
+		}
+		args = append(args, object.ID)
+	} else {
+	Outer:
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &transactionR{}
+			}
+
+			for _, a := range args {
+				if a == obj.ID {
+					continue Outer
+				}
+			}
+
+			args = append(args, obj.ID)
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	query := NewQuery(
+		qm.From(`attachment_transactions`),
+		qm.WhereIn(`attachment_transactions.transactions_id in ?`, args...),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load attachment_transactions")
+	}
+
+	var resultSlice []*AttachmentTransaction
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice attachment_transactions")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results in eager load on attachment_transactions")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for attachment_transactions")
+	}
+
+	if singular {
+		object.R.AttachmentTransactions = resultSlice
+		for _, foreign := range resultSlice {
+			if foreign.R == nil {
+				foreign.R = &attachmentTransactionR{}
+			}
+			foreign.R.Transaction = object
+		}
+		return nil
+	}
+
+	for _, foreign := range resultSlice {
+		for _, local := range slice {
+			if local.ID == foreign.TransactionsID {
+				local.R.AttachmentTransactions = append(local.R.AttachmentTransactions, foreign)
+				if foreign.R == nil {
+					foreign.R = &attachmentTransactionR{}
+				}
+				foreign.R.Transaction = local
 				break
 			}
 		}
@@ -1205,6 +1336,59 @@ func (o *Transaction) SetCurrency(ctx context.Context, exec boil.ContextExecutor
 		related.R.Transactions = append(related.R.Transactions, o)
 	}
 
+	return nil
+}
+
+// AddAttachmentTransactions adds the given related objects to the existing relationships
+// of the transaction, optionally inserting them as new records.
+// Appends related to o.R.AttachmentTransactions.
+// Sets related.R.Transaction appropriately.
+func (o *Transaction) AddAttachmentTransactions(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*AttachmentTransaction) error {
+	var err error
+	for _, rel := range related {
+		if insert {
+			rel.TransactionsID = o.ID
+			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
+				return errors.Wrap(err, "failed to insert into foreign table")
+			}
+		} else {
+			updateQuery := fmt.Sprintf(
+				"UPDATE \"attachment_transactions\" SET %s WHERE %s",
+				strmangle.SetParamNames("\"", "\"", 0, []string{"transactions_id"}),
+				strmangle.WhereClause("\"", "\"", 0, attachmentTransactionPrimaryKeyColumns),
+			)
+			values := []interface{}{o.ID, rel.ID}
+
+			if boil.IsDebug(ctx) {
+				writer := boil.DebugWriterFrom(ctx)
+				fmt.Fprintln(writer, updateQuery)
+				fmt.Fprintln(writer, values)
+			}
+			if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+				return errors.Wrap(err, "failed to update foreign table")
+			}
+
+			rel.TransactionsID = o.ID
+		}
+	}
+
+	if o.R == nil {
+		o.R = &transactionR{
+			AttachmentTransactions: related,
+		}
+	} else {
+		o.R.AttachmentTransactions = append(o.R.AttachmentTransactions, related...)
+	}
+
+	for _, rel := range related {
+		if rel.R == nil {
+			rel.R = &attachmentTransactionR{
+				Transaction: o,
+			}
+		} else {
+			rel.R.Transaction = o
+		}
+	}
 	return nil
 }
 

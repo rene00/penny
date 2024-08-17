@@ -16,6 +16,8 @@
 // 000007_tags.up.sql
 // 000008_comments.down.sql
 // 000008_comments.up.sql
+// 000009_attachments.down.sql
+// 000009_attachments.up.sql
 // migrations.go
 // migrations_test.go
 package migrations
@@ -338,7 +340,7 @@ func _000007_tagsDownSql() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "000007_tags.down.sql", size: 134, mode: os.FileMode(420), modTime: time.Unix(1723148758, 0)}
+	info := bindataFileInfo{name: "000007_tags.down.sql", size: 134, mode: os.FileMode(420), modTime: time.Unix(1723236028, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -358,7 +360,7 @@ func _000007_tagsUpSql() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "000007_tags.up.sql", size: 846, mode: os.FileMode(420), modTime: time.Unix(1723148758, 0)}
+	info := bindataFileInfo{name: "000007_tags.up.sql", size: 846, mode: os.FileMode(420), modTime: time.Unix(1723236028, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -378,7 +380,7 @@ func _000008_commentsDownSql() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "000008_comments.down.sql", size: 67, mode: os.FileMode(420), modTime: time.Unix(1723153318, 0)}
+	info := bindataFileInfo{name: "000008_comments.down.sql", size: 67, mode: os.FileMode(420), modTime: time.Unix(1723236041, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -398,7 +400,47 @@ func _000008_commentsUpSql() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "000008_comments.up.sql", size: 398, mode: os.FileMode(420), modTime: time.Unix(1723153297, 0)}
+	info := bindataFileInfo{name: "000008_comments.up.sql", size: 398, mode: os.FileMode(420), modTime: time.Unix(1723236041, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
+var __000009_attachmentsDownSql = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x72\x09\xf2\x0f\x50\x08\x71\x74\xf2\x71\x55\xf0\x74\x53\x70\x8d\xf0\x0c\x0e\x09\x56\x48\x2c\x29\x49\x4c\xce\xc8\x4d\xcd\x2b\xb1\xe6\x22\xa0\x20\xbe\xa4\x28\x31\xaf\x38\x31\xb9\x24\x33\x3f\xaf\xd8\x9a\x0b\x10\x00\x00\xff\xff\x1a\x06\xdc\x2c\x4f\x00\x00\x00")
+
+func _000009_attachmentsDownSqlBytes() ([]byte, error) {
+	return bindataRead(
+		__000009_attachmentsDownSql,
+		"000009_attachments.down.sql",
+	)
+}
+
+func _000009_attachmentsDownSql() (*asset, error) {
+	bytes, err := _000009_attachmentsDownSqlBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "000009_attachments.down.sql", size: 79, mode: os.FileMode(420), modTime: time.Unix(1723324013, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
+var __000009_attachmentsUpSql = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x94\x90\xc1\x6a\x84\x30\x10\x86\xef\x79\x8a\x39\x1a\xf0\x0d\x7a\xd2\x65\x5c\x42\xd3\xd8\x66\x23\xec\x9e\x96\x41\x03\xdd\x83\x29\xe8\x9c\xfa\xf4\x25\xa6\x94\x68\x15\xda\xeb\xcc\xf7\xfd\x99\x3f\x27\x8b\x95\x43\x70\x55\xad\x11\x54\x03\xa6\x75\x80\x57\x75\x71\x17\x20\x66\xea\xdf\x47\x1f\x58\x14\x02\x00\xe0\x31\x80\x32\x0e\xcf\x68\x17\xcc\x74\x5a\xc3\xab\x55\x2f\x95\xbd\xc1\x33\xde\xca\x05\x0a\x34\x7a\x70\x78\x75\x3f\x4c\x9a\xcf\x9f\xbf\xe4\xb4\x18\x88\x09\x6a\xdd\xd6\x9b\x79\x3f\x79\x62\x3f\xdc\x89\x0f\xc4\xce\xa8\xb7\x0e\x8b\xf8\x60\xb9\xa4\x48\x21\x9f\x84\xf8\x53\xa3\x3b\x4f\x14\x66\xea\xf9\xf1\x11\xe6\xff\xd4\xcb\x22\x76\xf8\xc4\xe4\xd9\xc7\xd4\xf7\xf9\xab\xc0\x72\xeb\xca\xc4\x36\xad\x45\x75\x36\xf1\x8c\xb5\x20\xc1\x62\x83\x16\xcd\x09\xf3\x7a\xc5\xae\xb9\xcd\xce\xdd\x7c\x17\xed\xf8\x95\x5f\x01\x00\x00\xff\xff\x85\xc2\x46\x63\x1c\x02\x00\x00")
+
+func _000009_attachmentsUpSqlBytes() ([]byte, error) {
+	return bindataRead(
+		__000009_attachmentsUpSql,
+		"000009_attachments.up.sql",
+	)
+}
+
+func _000009_attachmentsUpSql() (*asset, error) {
+	bytes, err := _000009_attachmentsUpSqlBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "000009_attachments.up.sql", size: 540, mode: os.FileMode(420), modTime: time.Unix(1723374891, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -511,6 +553,8 @@ var _bindata = map[string]func() (*asset, error){
 	"000007_tags.up.sql": _000007_tagsUpSql,
 	"000008_comments.down.sql": _000008_commentsDownSql,
 	"000008_comments.up.sql": _000008_commentsUpSql,
+	"000009_attachments.down.sql": _000009_attachmentsDownSql,
+	"000009_attachments.up.sql": _000009_attachmentsUpSql,
 	"migrations.go": migrationsGo,
 	"migrations_test.go": migrations_testGo,
 }
@@ -571,6 +615,8 @@ var _bintree = &bintree{nil, map[string]*bintree{
 	"000007_tags.up.sql": &bintree{_000007_tagsUpSql, map[string]*bintree{}},
 	"000008_comments.down.sql": &bintree{_000008_commentsDownSql, map[string]*bintree{}},
 	"000008_comments.up.sql": &bintree{_000008_commentsUpSql, map[string]*bintree{}},
+	"000009_attachments.down.sql": &bintree{_000009_attachmentsDownSql, map[string]*bintree{}},
+	"000009_attachments.up.sql": &bintree{_000009_attachmentsUpSql, map[string]*bintree{}},
 	"migrations.go": &bintree{migrationsGo, map[string]*bintree{}},
 	"migrations_test.go": &bintree{migrations_testGo, map[string]*bintree{}},
 }}

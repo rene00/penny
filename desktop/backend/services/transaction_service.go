@@ -357,7 +357,7 @@ func (t *transactionService) ImportTransactions(s string) types.JSResp {
 
 	sArray := strings.Split(s, ",")
 	if len(sArray) != 2 {
-		resp.Msg = fmt.Sprintf("Failed to split transaction string")
+		resp.Msg = "Failed to split transaction string"
 		t.logger.Error(resp.Msg)
 		return resp
 	}
