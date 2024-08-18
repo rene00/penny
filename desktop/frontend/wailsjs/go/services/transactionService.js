@@ -22,6 +22,14 @@ export function GetTransactions() {
   return window['go']['services']['transactionService']['GetTransactions']();
 }
 
+export function GetTransactionsAccount(arg1) {
+  return window['go']['services']['transactionService']['GetTransactionsAccount'](arg1);
+}
+
+export function GetTransactionsTag(arg1) {
+  return window['go']['services']['transactionService']['GetTransactionsTag'](arg1);
+}
+
 export function ImportTransactions(arg1) {
   return window['go']['services']['transactionService']['ImportTransactions'](arg1);
 }

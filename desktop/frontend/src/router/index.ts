@@ -36,6 +36,18 @@ const router = createRouter({
         component: () => import('../views/GetTransactions.vue')
     },
     {
+        path: '/get-transactions/account/:accountid',
+        name: 'get-transactions-account',
+        component: () => import('../views/GetTransactions.vue'),
+        props: true
+    },
+    {
+        path: '/get-transactions/tag/:tagid',
+        name: 'get-transactions-tag',
+        component: () => import('../views/GetTransactions.vue'),
+        props: true
+    },
+    {
         path: '/get-transaction/:id',
         name: 'get-transaction',
         component: () => import('../views/GetTransaction.vue'),

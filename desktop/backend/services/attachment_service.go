@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"pennyapp/backend/config"
+	"pennyapp/backend/internal/dberror"
 	"pennyapp/backend/logwrap"
 	"pennyapp/backend/model"
 	"pennyapp/backend/types"
@@ -76,21 +77,32 @@ func (a *attachmentService) CreateAttachment(transactionID int64, name, data str
 		return resp
 	}
 
-	decoded, err := base64.StdEncoding.DecodeString(sArray[1])
+	attachmentBlob := sArray[1]
+
+	decoded, err := base64.StdEncoding.DecodeString(attachmentBlob)
 	if err != nil {
 		resp.Msg = fmt.Sprintf("Failed to decode: %s", err.Error())
 		a.logger.Error(resp.Msg)
 		return resp
 	}
 
-	attachment := model.Attachment{
+	attachment := &model.Attachment{
 		Name:      name,
 		SZ:        int64(len(decoded)),
-		Data:      []byte(sArray[1]),
+		Data:      []byte(attachmentBlob),
 		CreatedAt: time.Now().UTC().Unix(),
 	}
 
-	if err = attachment.Insert(a.ctx, tx, boil.Infer()); err != nil {
+	err = attachment.Insert(a.ctx, tx, boil.Infer())
+	switch {
+	case dberror.IsUniqueConstraint(err):
+		attachment, err = model.Attachments(qm.Where("name=? AND data=?", name, []byte(attachmentBlob))).One(a.ctx, tx)
+		if err != nil {
+			resp.Msg = err.Error()
+			a.logger.Error(resp.Msg)
+			return resp
+		}
+	case err != nil:
 		resp.Msg = err.Error()
 		a.logger.Error(resp.Msg)
 		return resp

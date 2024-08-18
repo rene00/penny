@@ -145,7 +145,9 @@ export default {
                                     <label class="small mb-1">
                                       Amount
                                     </label>
-                                    <input class="form-control" readonly type="text" v-model="account.amount">
+                                    <div>
+                                      <router-link :to="{ name: 'get-transactions-account', params: { accountid: account.id }}">{{ account.amount }}</router-link>
+                                    </div>
                                 </div>
                                 <div class="mb-1">
                                     <label class="small mb-1">

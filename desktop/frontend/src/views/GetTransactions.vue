@@ -1,9 +1,13 @@
 <script>
 import { ref } from 'vue';
-import { GetTransactions } from 'wailsjs/go/services/transactionService.js'
+import { GetTransactions, GetTransactionsAccount, GetTransactionsTag } from 'wailsjs/go/services/transactionService.js'
 import { useRouter } from 'vue-router';
 
 export default {
+  props: [
+    'accountid',
+    'tagid',
+  ],
   setup() {
     const router = useRouter();
     return {
@@ -50,11 +54,41 @@ export default {
   methods: {
     async getTransactions() {
       let transactions = [];
-      const { success, msg, data } = await GetTransactions()
-      if (!success) {
-          $message.error(msg)
-          return
+
+			let success = false
+			let msg = ""
+			let data = {}
+
+      if (typeof this.accountid !== 'undefined') {
+        const getTransactionsAccountResp = await GetTransactionsAccount(Number(this.accountid))
+				success = getTransactionsAccountResp.success
+				msg = getTransactionsAccountResp.msg
+				data = getTransactionsAccountResp.data
+        if (!success) {
+            $message.error(msg)
+            return
+        }
+      } else if (typeof this.tagid !== 'undefined') {
+        const getTransactionsTagResp = await GetTransactionsTag(Number(this.tagid))
+				success = getTransactionsTagResp.success
+				msg = getTransactionsTagResp.msg
+				data = getTransactionsTagResp.data
+        if (!success) {
+            $message.error(msg)
+            return
+        }
+
+			} else {
+				const getTransactionsResp = await GetTransactions()
+				success = getTransactionsResp.success
+				msg = getTransactionsResp.msg
+				data = getTransactionsResp.data
+				if (!success) {
+						$message.error(msg)
+						return
+				}
       }
+
       for (const transaction of data) {
         let t = {
           id: transaction.id,
