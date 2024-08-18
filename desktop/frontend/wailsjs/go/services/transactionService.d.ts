@@ -14,7 +14,11 @@ export function DeleteTransaction(arg1:number):Promise<types.TransactionResponse
 
 export function GetTransaction(arg1:number):Promise<types.TransactionResponse>;
 
-export function GetTransactions():Promise<types.JSResp>;
+export function GetTransactions():Promise<types.TransactionsResponse>;
+
+export function GetTransactionsAccount(arg1:number):Promise<types.TransactionsResponse>;
+
+export function GetTransactionsTag(arg1:number):Promise<types.TransactionsResponse>;
 
 export function ImportTransactions(arg1:string):Promise<types.JSResp>;
 

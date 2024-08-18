@@ -72,35 +72,101 @@ func (t *transactionService) GetTransaction(id int64) types.TransactionResponse 
 		return resp
 	}
 
-	data, err := types.NewTransaction(t.logger, transaction)
+	resp.Data, err = types.NewTransaction(t.ctx, t.db, transaction)
 	if err != nil {
 		resp.Msg = err.Error()
 		t.logger.Error(resp.Msg)
 		return resp
 	}
 
-	if err := data.SetAttributes(t.ctx, t.db); err != nil {
-		resp.Msg = fmt.Sprintf("Failed to set attributes for transaction %d: %s", transaction.ID, err.Error())
-		t.logger.Error(resp.Msg)
-		return resp
-	}
-
-	if err := data.SetSplits(t.ctx, t.db); err != nil {
-		resp.Msg = err.Error()
-		t.logger.Error(resp.Msg)
-		return resp
-	}
-
 	resp.Success = true
-	resp.Data = data
 
 	return resp
 
 }
 
-func (t *transactionService) GetTransactions() types.JSResp {
+func (t *transactionService) GetTransactionsTag(id int64) types.TransactionsResponse {
+	var resp types.TransactionsResponse
+	var q []qm.QueryMod
+
+	q = []qm.QueryMod{
+		qm.Where("tag.id=?", id),
+		qm.InnerJoin("tag on tag.id = tag_transactions.tag_id"),
+		qm.InnerJoin("tag_transactions on tag_transactions.transactions_id = transactions.id"),
+		qm.InnerJoin("splits on splits.transactions_id = transactions.id"),
+		qm.InnerJoin("account on account.id = splits.account_id"),
+		qm.Load("Splits"),
+		qm.Load("Splits.Account"),
+		qm.Load("TagTransactions"),
+	}
+	transactions, err := model.Transactions(q...).All(t.ctx, t.db)
+	if err != nil {
+		resp.Msg = err.Error()
+		t.logger.Error(resp.Msg)
+		return resp
+	}
+
+	resp.Data = []types.Transaction{}
+	for _, i := range transactions {
+		transaction, err := types.NewTransaction(t.ctx, t.db, i)
+		if err != nil {
+			resp.Msg = err.Error()
+			t.logger.Error(resp.Msg)
+			return resp
+		}
+
+		if transaction.Deleted == true {
+			continue
+		}
+
+		resp.Data = append(resp.Data, transaction)
+	}
+
+	resp.Success = true
+	return resp
+}
+
+func (t *transactionService) GetTransactionsAccount(id int64) types.TransactionsResponse {
+	var resp types.TransactionsResponse
+	var q []qm.QueryMod
+
+	q = []qm.QueryMod{
+		qm.Where("account.id=?", id),
+		qm.InnerJoin("splits on splits.transactions_id = transactions.id"),
+		qm.InnerJoin("account on account.id = splits.account_id"),
+		qm.Load("Splits"),
+		qm.Load("Splits.Account"),
+	}
+	transactions, err := model.Transactions(q...).All(t.ctx, t.db)
+	if err != nil {
+		resp.Msg = err.Error()
+		t.logger.Error(resp.Msg)
+		return resp
+	}
+
+	resp.Data = []types.Transaction{}
+	for _, i := range transactions {
+		transaction, err := types.NewTransaction(t.ctx, t.db, i)
+		if err != nil {
+			resp.Msg = err.Error()
+			t.logger.Error(resp.Msg)
+			return resp
+		}
+
+		if transaction.Deleted == true {
+			continue
+		}
+
+		resp.Data = append(resp.Data, transaction)
+	}
+
+	resp.Success = true
+	return resp
+}
+
+func (t *transactionService) GetTransactions() types.TransactionsResponse {
+	var resp types.TransactionsResponse
 	var err error
-	var resp types.JSResp
 	var q []qm.QueryMod
 
 	q = []qm.QueryMod{
@@ -114,24 +180,12 @@ func (t *transactionService) GetTransactions() types.JSResp {
 		return resp
 	}
 
-	data := []types.Transaction{}
+	resp.Data = []types.Transaction{}
 
 	for _, i := range transactions {
-		transaction, err := types.NewTransaction(t.logger, i)
+		transaction, err := types.NewTransaction(t.ctx, t.db, i)
 		if err != nil {
 			resp.Msg = err.Error()
-			t.logger.Error(resp.Msg)
-			return resp
-		}
-
-		if err := transaction.SetSplits(t.ctx, t.db); err != nil {
-			resp.Msg = fmt.Sprintf("Failed to get splits for transaction %d: %s", i.ID, err.Error())
-			t.logger.Error(resp.Msg)
-			return resp
-		}
-
-		if err := transaction.SetAttributes(t.ctx, t.db); err != nil {
-			resp.Msg = fmt.Sprintf("Failed to set attributes for transaction %d: %s", i.ID, err.Error())
 			t.logger.Error(resp.Msg)
 			return resp
 		}
@@ -140,14 +194,10 @@ func (t *transactionService) GetTransactions() types.JSResp {
 			continue
 		}
 
-		transaction.SetAmount()
-		transaction.SetDisplay()
-
-		data = append(data, transaction)
+		resp.Data = append(resp.Data, transaction)
 	}
 
 	resp.Success = true
-	resp.Data = data
 
 	return resp
 }

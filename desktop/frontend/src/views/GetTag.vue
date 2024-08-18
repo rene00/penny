@@ -168,7 +168,9 @@ export default {
                                     <label class="small mb-1">
                                       Amount
                                     </label>
-                                    <input class="form-control" readonly type="text" v-model="tag.amount">
+                                    <div>
+                                      <router-link :to="{ name: 'get-transactions-tag', params: { tagid: tag.id }}">{{ tag.amount }}</router-link>
+                                    </div>
                                 </div>
                                 <div v-for="(regex, idx) in tag.regexes" class="row gx-3 mb-3">
                                   <div class="col-md-6">

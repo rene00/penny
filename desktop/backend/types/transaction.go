@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"math/big"
 	"pennyapp/backend/internal/dberror"
-	"pennyapp/backend/logwrap"
 	"pennyapp/backend/model"
 	"time"
 
@@ -23,6 +22,12 @@ type TransactionResponse struct {
 	Data    Transaction `json:"data"`
 }
 
+type TransactionsResponse struct {
+	Success bool          `json:"success"`
+	Msg     string        `json:"msg"`
+	Data    []Transaction `json:"data"`
+}
+
 // NewTransactionResponse returns a default TransactionResponse. All attributes
 // of TransactionResponse must be set or else the struct wont be returned
 // correctly to the frontend.
@@ -36,19 +41,14 @@ func NewTransactionResponse() TransactionResponse {
 }
 
 type Transaction struct {
-	ID       int64  `json:"id"`
-	Memo     string `json:"memo"`
-	Date     string `json:"date"`
+	ID       int64              `json:"id"`
+	Memo     string             `json:"memo"`
+	Date     string             `json:"date"`
+	Splits   []Split            `json:"splits"`
+	Amount   string             `json:"amount"`
+	Deleted  bool               `json:"deleted"`
+	Display  TransactionDisplay `json:"display"`
 	Currency `json:"currency"`
-	Splits   []Split `json:"splits"`
-	Amount   string  `json:"amount"`
-	Deleted  bool    `json:"deleted"`
-
-	modelTransaction *model.Transaction
-	logger           *logwrap.LogWrap
-
-	// Display attributes are potentially shown in UI and not used in any other logic.
-	Display TransactionDisplay `json:"display"`
 }
 
 type TransactionDisplay struct {
@@ -60,12 +60,12 @@ type TransactionDisplayAccount struct {
 	ID   int64  `json:"id"`
 }
 
-func NewTransaction(logger *logwrap.LogWrap, t *model.Transaction) (Transaction, error) {
+func NewTransaction(ctx context.Context, db *sql.DB, t *model.Transaction) (Transaction, error) {
+	var err error
+
 	transaction := Transaction{
-		ID:               t.ID,
-		Memo:             t.Memo,
-		modelTransaction: t,
-		logger:           logger,
+		ID:   t.ID,
+		Memo: t.Memo,
 	}
 
 	date, err := time.Parse(DefaultDBTimeLayout, t.Date)
@@ -74,13 +74,23 @@ func NewTransaction(logger *logwrap.LogWrap, t *model.Transaction) (Transaction,
 	}
 	transaction.Date = date.Format("2006-01-02")
 
+	if err = transaction.setSplits(ctx, db, t); err != nil {
+		return transaction, err
+	}
+
+	if err = transaction.setDeleted(ctx, db, t); err != nil {
+		return transaction, err
+	}
+
+	transaction.setAmount()
+	transaction.setDisplay()
+
 	return transaction, nil
 }
 
-func (t *Transaction) SetSplits(ctx context.Context, db *sql.DB) error {
-	splits, err := t.modelTransaction.Splits(qm.Select("splits.id, splits.transactions_id, splits.account_id, splits.value_num, splits.value_denom")).All(ctx, db)
+func (t *Transaction) setSplits(ctx context.Context, db *sql.DB, transaction *model.Transaction) error {
+	splits, err := transaction.Splits(qm.Select("splits.id, splits.transactions_id, splits.account_id, splits.value_num, splits.value_denom")).All(ctx, db)
 	if err != nil {
-		t.logger.Error(err.Error())
 		return err
 	}
 
@@ -89,13 +99,11 @@ func (t *Transaction) SetSplits(ctx context.Context, db *sql.DB) error {
 	for _, ii := range splits {
 		account, err := model.FindAccount(ctx, db, ii.AccountID)
 		if err != nil {
-			t.logger.Error(err.Error())
 			return err
 		}
 
 		accountType, err := model.FindAccountType(ctx, db, account.AccountTypeID)
 		if err != nil {
-			t.logger.Error(err.Error())
 			return err
 		}
 
@@ -103,7 +111,6 @@ func (t *Transaction) SetSplits(ctx context.Context, db *sql.DB) error {
 		if accountType.ParentID != 0 {
 			pat, err := model.FindAccountType(ctx, db, accountType.ParentID)
 			if err != nil {
-				t.logger.Error(err.Error())
 				return err
 			}
 			parentAccountType = &ParentAccountType{
@@ -136,7 +143,7 @@ func (t *Transaction) SetSplits(ctx context.Context, db *sql.DB) error {
 	return nil
 }
 
-func (t *Transaction) SetDisplay() {
+func (t *Transaction) setDisplay() {
 	display := TransactionDisplay{
 		Account: TransactionDisplayAccount{},
 	}
@@ -155,7 +162,7 @@ func (t *Transaction) SetDisplay() {
 	return
 }
 
-func (t *Transaction) SetAmount() {
+func (t *Transaction) setAmount() {
 	if len(t.Splits) < 1 {
 		t.Amount = "0"
 		return
@@ -171,15 +178,8 @@ func (t *Transaction) SetAmount() {
 	}
 }
 
-func (t *Transaction) SetAttributes(ctx context.Context, db *sql.DB) error {
-	if err := t.setDeleted(ctx, db); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (t *Transaction) setDeleted(ctx context.Context, db *sql.DB) error {
-	transactionAttribute, err := model.TransactionsAttributes(qm.Where("transactions_id=? AND name=?", t.modelTransaction.ID, "deleted")).One(ctx, db)
+func (t *Transaction) setDeleted(ctx context.Context, db *sql.DB, transaction *model.Transaction) error {
+	transactionAttribute, err := model.TransactionsAttributes(qm.Where("transactions_id=? AND name=?", transaction.ID, "deleted")).One(ctx, db)
 	switch {
 	case dberror.IsNoRowsFound(err):
 	case err != nil:
