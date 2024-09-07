@@ -28,6 +28,8 @@ See [README.md](../README.md) in parent directory.
 
 * [ ] FEAT: transaction attachments should have a size limit
 * [ ] FEAT: Add support for deleting transaction attachments
+* [ ] FEAT: transaction attachments should have a size limit
+* [ ] FEAT: support deleting transaction attachments
 * [ ] FEAT: account matches should not have to be duplicated when matching on
       destination account across multiple source accounts. For example,
       matching for groceries across 2 credit accounts should be a single

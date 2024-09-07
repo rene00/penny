@@ -158,7 +158,6 @@ func (t *transactionService) GetTransactionsAccount(id int64) types.Transactions
 
 	resp.Data = []types.Transaction{}
 	for _, i := range transactions {
-
 		if exists := t.transactionExistsInSlice(i, resp.Data); exists {
 			continue
 		}
