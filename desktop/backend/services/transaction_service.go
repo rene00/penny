@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	"encoding/base64"
 	"fmt"
+	"math/big"
 	"pennyapp/backend/logwrap"
 	"pennyapp/backend/model"
 	"pennyapp/backend/types"
@@ -13,6 +14,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/shopspring/decimal"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
@@ -126,6 +128,15 @@ func (t *transactionService) GetTransactionsTag(id int64) types.TransactionsResp
 	return resp
 }
 
+func (t *transactionService) transactionExistsInSlice(transaction *model.Transaction, transactions []types.Transaction) bool {
+	for _, i := range transactions {
+		if i.ID == transaction.ID {
+			return true
+		}
+	}
+	return false
+}
+
 func (t *transactionService) GetTransactionsAccount(id int64) types.TransactionsResponse {
 	var resp types.TransactionsResponse
 	var q []qm.QueryMod
@@ -134,6 +145,7 @@ func (t *transactionService) GetTransactionsAccount(id int64) types.Transactions
 		qm.Where("account.id=?", id),
 		qm.InnerJoin("splits on splits.transactions_id = transactions.id"),
 		qm.InnerJoin("account on account.id = splits.account_id"),
+		qm.OrderBy("transactions.date DESC"),
 		qm.Load("Splits"),
 		qm.Load("Splits.Account"),
 	}
@@ -146,6 +158,11 @@ func (t *transactionService) GetTransactionsAccount(id int64) types.Transactions
 
 	resp.Data = []types.Transaction{}
 	for _, i := range transactions {
+
+		if exists := t.transactionExistsInSlice(i, resp.Data); exists {
+			continue
+		}
+
 		transaction, err := types.NewTransaction(t.ctx, t.db, i)
 		if err != nil {
 			resp.Msg = err.Error()
@@ -160,6 +177,51 @@ func (t *transactionService) GetTransactionsAccount(id int64) types.Transactions
 		resp.Data = append(resp.Data, transaction)
 	}
 
+	resp.Success = true
+	return resp
+}
+
+func (t *transactionService) GetTotalBalance() types.TransactionsNetAssetsResponse {
+	var resp types.TransactionsNetAssetsResponse
+	var err error
+
+	transactions, err := model.Transactions().All(t.ctx, t.db)
+	if err != nil {
+		resp.Msg = err.Error()
+		t.logger.Error(resp.Msg)
+		return resp
+	}
+
+	imbalancedAccount, err := model.Accounts(qm.Where("name=?", "Imbalanced")).One(t.ctx, t.db)
+	if err != nil {
+		resp.Msg = err.Error()
+		t.logger.Error(resp.Msg)
+		return resp
+	}
+
+	amount := float64(0)
+	for _, i := range transactions {
+		transaction, err := types.NewTransaction(t.ctx, t.db, i)
+		if err != nil {
+			resp.Msg = err.Error()
+			t.logger.Error(resp.Msg)
+			return resp
+		}
+		if transaction.Deleted == true {
+			continue
+		}
+
+		for _, split := range transaction.Splits {
+			if split.Account.ID != imbalancedAccount.ID {
+				continue
+			}
+			r := big.NewRat(split.ValueNum, split.ValueDenom)
+			f, _ := r.Float64()
+			amount = amount + f
+			t.logger.Debug(fmt.Sprintf("%#+v, %#+v", split, amount))
+		}
+	}
+	resp.Data = decimal.NewFromFloat(amount).StringFixed(2)
 	resp.Success = true
 	return resp
 }

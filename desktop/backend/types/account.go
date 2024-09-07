@@ -6,6 +6,7 @@ import (
 	"math/big"
 	"pennyapp/backend/internal/dberror"
 	"pennyapp/backend/model"
+	"strings"
 
 	"github.com/shopspring/decimal"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -80,12 +81,32 @@ func (a *Account) setAmount(ctx context.Context, db *sql.DB, account *model.Acco
 		return err
 	}
 
+	accountType, err := model.AccountTypes(qm.Where("id=?", account.AccountTypeID)).One(ctx, db)
+	if err != nil {
+		return err
+	}
+
 	amount := float64(0)
 	for _, split := range splits {
+		transactionDeleted, err := isTransactionDeleted(ctx, db, split.TransactionsID)
+		if err != nil {
+			return err
+		}
+		if transactionDeleted {
+			continue
+		}
+
 		r := big.NewRat(split.ValueNum, split.ValueDenom)
 		f, _ := r.Float64()
+
+		switch strings.ToLower(accountType.Name) {
+		case "liability", "income":
+			f = -f
+		}
+
 		amount = amount + f
 	}
+
 	a.Amount = decimal.NewFromFloat(amount).StringFixed(2)
 	return nil
 }

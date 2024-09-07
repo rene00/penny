@@ -354,12 +354,23 @@ func (t *transactionImporterService) ofxRespBank(msg ofxgo.Message) error {
 			}
 		}
 
+		imbalancedAccount, err := model.Accounts(qm.Where("name=?", "Imbalanced")).One(t.ctx, t.db)
+		if err != nil {
+			return err
+		}
+
 		splits := []model.Split{
 			{
 				TransactionsID: transaction.ID,
 				AccountID:      account.ID,
 				ValueNum:       i.TrnAmt.Num().Int64(),
 				ValueDenom:     i.TrnAmt.Denom().Int64(),
+			},
+			{
+				TransactionsID: transaction.ID,
+				AccountID:      imbalancedAccount.ID,
+				ValueNum:       -i.TrnAmt.Num().Int64(),
+				ValueDenom:     -i.TrnAmt.Denom().Int64(),
 			},
 		}
 		for _, ii := range splits {
@@ -387,6 +398,17 @@ func (t *transactionImporterService) ofxRespCreditCard(msg ofxgo.Message) error 
 		return err
 	}
 
+	tx, err := t.db.BeginTx(t.ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	imbalancedAccount, err := model.Accounts(qm.Where("name=?", "Imbalanced")).One(t.ctx, tx)
+	if err != nil {
+		return err
+	}
+
 	for _, i := range stmt.BankTranList.Transactions {
 		transaction := model.Transaction{
 			EntityID:   t.defaultResources.EntityID(),
@@ -397,7 +419,7 @@ func (t *transactionImporterService) ofxRespCreditCard(msg ofxgo.Message) error 
 
 		v1Hash := hashers.NewTransactionHashV1()
 		transactionHash := v1Hash.Hash(transaction)
-		hashType, err := model.TransactionsHashTypes(qm.Where("name=?", v1Hash.String())).One(t.ctx, t.db)
+		hashType, err := model.TransactionsHashTypes(qm.Where("name=?", v1Hash.String())).One(t.ctx, tx)
 		if err != nil {
 			return err
 		}
@@ -406,7 +428,7 @@ func (t *transactionImporterService) ofxRespCreditCard(msg ofxgo.Message) error 
 			qm.Where("hash=?", fmt.Sprintf("%x", transactionHash.Sum(nil))),
 			qm.Where("transactions_hash_type_id=?", hashType.ID),
 		}
-		exists, err := model.TransactionsHashes(q...).Exists(t.ctx, t.db)
+		exists, err := model.TransactionsHashes(q...).Exists(t.ctx, tx)
 		if err != nil {
 			return err
 		}
@@ -414,7 +436,7 @@ func (t *transactionImporterService) ofxRespCreditCard(msg ofxgo.Message) error 
 			continue
 		}
 
-		if err := transaction.Insert(t.ctx, t.db, boil.Infer()); err != nil {
+		if err := transaction.Insert(t.ctx, tx, boil.Infer()); err != nil {
 			return err
 		}
 
@@ -423,7 +445,7 @@ func (t *transactionImporterService) ofxRespCreditCard(msg ofxgo.Message) error 
 			TransactionsHashTypeID: hashType.ID,
 			Hash:                   fmt.Sprintf("%x", transactionHash.Sum(nil)),
 		}
-		if err := th.Insert(t.ctx, t.db, boil.Infer()); err != nil {
+		if err := th.Insert(t.ctx, tx, boil.Infer()); err != nil {
 			return err
 		}
 
@@ -449,7 +471,7 @@ func (t *transactionImporterService) ofxRespCreditCard(msg ofxgo.Message) error 
 		}
 
 		for _, ii := range transactionAttributes {
-			if err := ii.Insert(t.ctx, t.db, boil.Infer()); err != nil {
+			if err := ii.Upsert(t.ctx, tx, true, []string{"transactions_id", "name"}, boil.Whitelist("name"), boil.Infer()); err != nil {
 				return err
 			}
 		}
@@ -461,13 +483,25 @@ func (t *transactionImporterService) ofxRespCreditCard(msg ofxgo.Message) error 
 				ValueNum:       i.TrnAmt.Num().Int64(),
 				ValueDenom:     i.TrnAmt.Denom().Int64(),
 			},
+			{
+				TransactionsID: transaction.ID,
+				AccountID:      imbalancedAccount.ID,
+				ValueNum:       -i.TrnAmt.Num().Int64(),
+				ValueDenom:     i.TrnAmt.Denom().Int64(),
+			},
 		}
 		for _, ii := range splits {
-			if err := ii.Insert(t.ctx, t.db, boil.Infer()); err != nil {
+			if err := ii.Insert(t.ctx, tx, boil.Infer()); err != nil {
 				return err
 			}
 		}
+
 	}
+
+	if err := tx.Commit(); err != nil {
+		return err
+	}
+
 	return nil
 }
 

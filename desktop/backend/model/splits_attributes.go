@@ -72,26 +72,15 @@ var SplitsAttributeWhere = struct {
 
 // SplitsAttributeRels is where relationship names are stored.
 var SplitsAttributeRels = struct {
-	Split string
-}{
-	Split: "Split",
-}
+}{}
 
 // splitsAttributeR is where relationships are stored.
 type splitsAttributeR struct {
-	Split *Split `boil:"Split" json:"Split" toml:"Split" yaml:"Split"`
 }
 
 // NewStruct creates a new relationship struct
 func (*splitsAttributeR) NewStruct() *splitsAttributeR {
 	return &splitsAttributeR{}
-}
-
-func (r *splitsAttributeR) GetSplit() *Split {
-	if r == nil {
-		return nil
-	}
-	return r.Split
 }
 
 // splitsAttributeL is where Load methods for each relationship are stored.
@@ -194,176 +183,6 @@ func (q splitsAttributeQuery) Exists(ctx context.Context, exec boil.ContextExecu
 	}
 
 	return count > 0, nil
-}
-
-// Split pointed to by the foreign key.
-func (o *SplitsAttribute) Split(mods ...qm.QueryMod) splitQuery {
-	queryMods := []qm.QueryMod{
-		qm.Where("\"id\" = ?", o.SplitsID),
-	}
-
-	queryMods = append(queryMods, mods...)
-
-	return Splits(queryMods...)
-}
-
-// LoadSplit allows an eager lookup of values, cached into the
-// loaded structs of the objects. This is for an N-1 relationship.
-func (splitsAttributeL) LoadSplit(ctx context.Context, e boil.ContextExecutor, singular bool, maybeSplitsAttribute interface{}, mods queries.Applicator) error {
-	var slice []*SplitsAttribute
-	var object *SplitsAttribute
-
-	if singular {
-		var ok bool
-		object, ok = maybeSplitsAttribute.(*SplitsAttribute)
-		if !ok {
-			object = new(SplitsAttribute)
-			ok = queries.SetFromEmbeddedStruct(&object, &maybeSplitsAttribute)
-			if !ok {
-				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeSplitsAttribute))
-			}
-		}
-	} else {
-		s, ok := maybeSplitsAttribute.(*[]*SplitsAttribute)
-		if ok {
-			slice = *s
-		} else {
-			ok = queries.SetFromEmbeddedStruct(&slice, maybeSplitsAttribute)
-			if !ok {
-				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeSplitsAttribute))
-			}
-		}
-	}
-
-	args := make([]interface{}, 0, 1)
-	if singular {
-		if object.R == nil {
-			object.R = &splitsAttributeR{}
-		}
-		args = append(args, object.SplitsID)
-
-	} else {
-	Outer:
-		for _, obj := range slice {
-			if obj.R == nil {
-				obj.R = &splitsAttributeR{}
-			}
-
-			for _, a := range args {
-				if a == obj.SplitsID {
-					continue Outer
-				}
-			}
-
-			args = append(args, obj.SplitsID)
-
-		}
-	}
-
-	if len(args) == 0 {
-		return nil
-	}
-
-	query := NewQuery(
-		qm.From(`splits`),
-		qm.WhereIn(`splits.id in ?`, args...),
-	)
-	if mods != nil {
-		mods.Apply(query)
-	}
-
-	results, err := query.QueryContext(ctx, e)
-	if err != nil {
-		return errors.Wrap(err, "failed to eager load Split")
-	}
-
-	var resultSlice []*Split
-	if err = queries.Bind(results, &resultSlice); err != nil {
-		return errors.Wrap(err, "failed to bind eager loaded slice Split")
-	}
-
-	if err = results.Close(); err != nil {
-		return errors.Wrap(err, "failed to close results of eager load for splits")
-	}
-	if err = results.Err(); err != nil {
-		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for splits")
-	}
-
-	if len(resultSlice) == 0 {
-		return nil
-	}
-
-	if singular {
-		foreign := resultSlice[0]
-		object.R.Split = foreign
-		if foreign.R == nil {
-			foreign.R = &splitR{}
-		}
-		foreign.R.SplitsAttributes = append(foreign.R.SplitsAttributes, object)
-		return nil
-	}
-
-	for _, local := range slice {
-		for _, foreign := range resultSlice {
-			if local.SplitsID == foreign.ID {
-				local.R.Split = foreign
-				if foreign.R == nil {
-					foreign.R = &splitR{}
-				}
-				foreign.R.SplitsAttributes = append(foreign.R.SplitsAttributes, local)
-				break
-			}
-		}
-	}
-
-	return nil
-}
-
-// SetSplit of the splitsAttribute to the related item.
-// Sets o.R.Split to related.
-// Adds o to related.R.SplitsAttributes.
-func (o *SplitsAttribute) SetSplit(ctx context.Context, exec boil.ContextExecutor, insert bool, related *Split) error {
-	var err error
-	if insert {
-		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
-			return errors.Wrap(err, "failed to insert into foreign table")
-		}
-	}
-
-	updateQuery := fmt.Sprintf(
-		"UPDATE \"splits_attributes\" SET %s WHERE %s",
-		strmangle.SetParamNames("\"", "\"", 0, []string{"splits_id"}),
-		strmangle.WhereClause("\"", "\"", 0, splitsAttributePrimaryKeyColumns),
-	)
-	values := []interface{}{related.ID, o.ID}
-
-	if boil.IsDebug(ctx) {
-		writer := boil.DebugWriterFrom(ctx)
-		fmt.Fprintln(writer, updateQuery)
-		fmt.Fprintln(writer, values)
-	}
-	if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
-		return errors.Wrap(err, "failed to update local table")
-	}
-
-	o.SplitsID = related.ID
-	if o.R == nil {
-		o.R = &splitsAttributeR{
-			Split: related,
-		}
-	} else {
-		o.R.Split = related
-	}
-
-	if related.R == nil {
-		related.R = &splitR{
-			SplitsAttributes: SplitsAttributeSlice{o},
-		}
-	} else {
-		related.R.SplitsAttributes = append(related.R.SplitsAttributes, o)
-	}
-
-	return nil
 }
 
 // SplitsAttributes retrieves all the records using an executor.

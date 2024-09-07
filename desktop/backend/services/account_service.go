@@ -354,6 +354,29 @@ func (a *accountService) getAccount(id int64) (*model.Account, error) {
 	return model.Accounts(q...).One(a.ctx, a.db)
 }
 
+func (a *accountService) GetAccountByName(name string) types.AccountResponse {
+	var resp types.AccountResponse
+	q := []qm.QueryMod{
+		qm.Where("account.name=?", name),
+		qm.InnerJoin("account_type on account_type.id = account.account_type_id"),
+		qm.Load("AccountType"),
+	}
+	account, err := model.Accounts(q...).One(a.ctx, a.db)
+	if err != nil {
+		resp.Msg = err.Error()
+		a.logger.Error(resp.Msg)
+		return resp
+	}
+	resp.Data, err = types.NewAccount(a.ctx, a.db, account)
+	if err != nil {
+		resp.Msg = err.Error()
+		a.logger.Error(resp.Msg)
+		return resp
+	}
+	resp.Success = true
+	return resp
+}
+
 func (a *accountService) GetAccount(id int64) types.AccountResponse {
 	var err error
 

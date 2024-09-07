@@ -165,14 +165,13 @@ export default {
                                 </div>
 
                                 <!-- <div v-for="(split, index) in splits" :key="index" v-show="splits.length >= 2"> -->
-                                <div class="row gx-3 mb-3" v-show="splits[0].amount != '0.00'">
+                                <div class="row gx-3 mb-3" v-show="splits[0].amount != '0.00' && splits[0].account.id != null">
                                   <!-- Form Group (increase account)-->
                                   <div class="col-md-6">
                                       <label class="small mb-1" for="inputFirstName">Account</label>
                                       <div class="mb-3">
                                           <select class="form-select" aria-label="Type" v-model="splits[1].account.id">
                                               <option selected="" disabled="">Select an account:</option>
-                                              <!-- <option v-for="account in accounts.filter(account => account.account_type.name === 'Current Liability')" :value="account.id">{{ account.name }}</option> -->
                                               <option v-for="account in accounts" :value="account.id">{{ account.name }}</option>
                                           </select>
                                       </div>
@@ -188,7 +187,7 @@ export default {
                                 <!-- </div> -->
 
                                 <div class="row gx-3 jjmb-3">
-                                  <div class="col-md-6" v-show="splits[1].amount != '0.00' && splits[0].amount != '0.00'">
+                                  <div class="col-md-6" v-show="splits[1].amount != '0.00' && splits[0].amount != '0.00' && splits[0].account.id != null && splits[1].account.id != null && (splits[0].amount + splits[1].amount == 0)">
                                     <button class="btn btn-primary" type="submit">Create</button>
                                   </div>
                                 </div>

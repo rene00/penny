@@ -58,6 +58,14 @@ tasks:
     cmds:
       - wails build -v 2 -debug
 
+  desktop:wails:dev:nodebug:
+    desc: "wails dev"
+    dir: desktop
+    env:
+      PENNY_DEBUG: false
+    cmds:
+      - wails dev -appargs "--debug=false"
+
   desktop:wails:dev:
     desc: "wails dev"
     dir: desktop
