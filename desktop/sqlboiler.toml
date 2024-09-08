@@ -5,4 +5,4 @@ no-tests = true
 
 [sqlite3]
 dbname = "./.pennyapp.db"
-blacklist = ["schema_migrations"]
+blacklist = ["schema_migrations", "splits_1"]

@@ -38,21 +38,18 @@ func (a *accountMatchService) Start(ctx context.Context, db *sql.DB, logger *log
 	a.defaultResources = defaultResources
 	a.AccountMatchRequestC = make(chan AccountMatchRequest)
 
-	go func() { a.matcher(a.ctx, a.db, a.logger) }()
+	go func() { a.matcher(a.ctx, a.db, a.AccountMatchRequestC, a.logger) }()
 }
 
-func (a *accountMatchService) matcher(ctx context.Context, db *sql.DB, logger *logwrap.LogWrap) {
+func (a *accountMatchService) matcher(ctx context.Context, db *sql.DB, c chan AccountMatchRequest, logger *logwrap.LogWrap) {
 	var q []qm.QueryMod
 
-	for range a.AccountMatchRequestC {
+	for range c {
 		logger.Info(fmt.Sprintf("received new account match request"))
 
-		accountMatches, err := model.AccountMatches().All(ctx, db)
-		if err != nil {
-			logger.Error("Failed to find Account Matches")
-		}
-
 		q = []qm.QueryMod{
+			qm.InnerJoin("splits on splits.transactions_id = transactions.id"),
+			qm.InnerJoin("account on splits.account_id = account.id"),
 			qm.Load("Splits"),
 			qm.Load("Splits.Account"),
 		}
@@ -62,22 +59,27 @@ func (a *accountMatchService) matcher(ctx context.Context, db *sql.DB, logger *l
 			continue
 		}
 
-		for _, accountMatch := range accountMatches {
-			attr, err := model.AccountMatchAttributes(qm.Where("account_match_id=? AND name=?", accountMatch.ID, "deleted")).One(ctx, db)
-			switch {
-			case dberror.IsNoRowsFound(err):
-			case err != nil:
-				logger.Error(err.Error())
-				continue
-			default:
-				if attr.Value == "true" {
-					continue
-				}
-			}
+		q = []qm.QueryMod{
+			qm.InnerJoin("account_match_regex on account_match_regex.account_match_id = account_match.id"),
+			qm.Load("AccountMatchRegexes"),
+		}
+		accountMatches, err := model.AccountMatches(q...).All(ctx, db)
+		if err != nil {
+			logger.Error("Failed to find any Account Matches")
+			continue
+		}
 
-			accountMatchRegexes, err := model.AccountMatchRegexes(qm.Where("account_match_id=?", accountMatch.ID)).All(ctx, db)
+		for _, accountMatch := range accountMatches {
+			attrDeleted, err := model.AccountMatchAttributes(qm.Where("account_match_id=? AND name=? AND value=?", accountMatch.ID, "deleted", "true")).Exists(ctx, db)
 			if err != nil {
 				logger.Error(err.Error())
+				continue
+			}
+			if attrDeleted {
+				continue
+			}
+
+			if accountMatch.R == nil || len(accountMatch.R.AccountMatchRegexes) == 0 {
 				continue
 			}
 
@@ -91,44 +93,50 @@ func (a *accountMatchService) matcher(ctx context.Context, db *sql.DB, logger *l
 					continue
 				}
 
+				if transaction.R == nil || len(transaction.R.Splits) == 0 {
+					continue
+				}
+
+				match, err := a.transactionMemoMatchesAccountMatchRegex(transaction.Memo, accountMatch.R.AccountMatchRegexes)
+				if err != nil {
+					logger.Error(err.Error())
+					continue
+				}
+				if !match {
+					continue
+				}
+
+				// Check if one of the splits is assigned to the source account
+				// of the account match. If it is, an account match should be
+				// performed on all splits for this transaction.
+				transactionMatchesAccountMatchSourceAccount := false
 				for _, split := range transaction.R.Splits {
 					if accountMatch.SourceAccountID == split.R.Account.ID {
-						exists, err := model.Splits(qm.Where("transactions_id=? AND id!=?", split.TransactionsID, split.ID)).Exists(ctx, db)
-						if err != nil {
-							logger.Error(err.Error())
-							continue
-						}
-						if exists {
-							continue
-						}
+						transactionMatchesAccountMatchSourceAccount = true
+						break
+					}
+				}
+				if !transactionMatchesAccountMatchSourceAccount {
+					continue
+				}
 
-						for _, regex := range accountMatchRegexes {
-							r, err := regexp.Compile(fmt.Sprintf("(?i)%s", regex.Regex))
-							if err != nil {
-								logger.Error(fmt.Sprintf("regexp compile %d: %s", regex.ID, err.Error()))
-								continue
-							}
+				for _, split := range transaction.R.Splits {
+					// If split matches source account id, skip this split.
+					// Account match will run on the remaining splits.
+					if accountMatch.SourceAccountID == split.R.Account.ID {
+						continue
+					}
 
-							result := r.FindStringSubmatch(transaction.Memo)
+					// If split matches destination account id, skip this
+					// split. The split has already been assigned to the
+					// account.
+					if accountMatch.DestinationAccountID == split.R.Account.ID {
+						continue
+					}
 
-							valueNum := split.ValueNum
-							if split.ValueNum < 0 {
-								valueNum = split.ValueNum * -1
-							}
-
-							if len(result) > 0 {
-								s := model.Split{
-									TransactionsID: transaction.ID,
-									AccountID:      accountMatch.DestinationAccountID,
-									ValueNum:       valueNum,
-									ValueDenom:     split.ValueDenom,
-								}
-								if err := s.Insert(ctx, db, boil.Infer()); err != nil {
-									logger.Error(err.Error())
-									continue
-								}
-							}
-						}
+					if _, err := a.updateSplitIfImbalanced(ctx, db, split, accountMatch.DestinationAccountID); err != nil {
+						logger.Error(fmt.Sprintf("failed to update split: %d", split.ID))
+						continue
 					}
 				}
 			}
@@ -413,4 +421,38 @@ func (a *accountMatchService) UndeleteAccountMatch(id int64) types.AccountMatchR
 	resp.Success = true
 	resp.Msg = "Account Match undeleted"
 	return resp
+}
+
+// updateSplitIfImbalanced accepts a pointer transaction and accountID. It
+// finds any splits which have an account "Imbalanced" and updates that split
+// account id with the accountID. If split is updated, true is returned else
+// false.
+func (a *accountMatchService) updateSplitIfImbalanced(ctx context.Context, db *sql.DB, split *model.Split, accountID int64) (bool, error) {
+	account, err := model.Accounts(qm.Where("id=?", split.AccountID)).One(ctx, db)
+	if err != nil {
+		return false, err
+	}
+	if account.Name == "Imbalanced" {
+		split.AccountID = accountID
+		if _, err := split.Update(ctx, db, boil.Infer()); err != nil {
+			return false, err
+		}
+		return true, nil
+	}
+	return false, nil
+}
+
+func (a *accountMatchService) transactionMemoMatchesAccountMatchRegex(memo string, accountMatches model.AccountMatchRegexSlice) (bool, error) {
+	for _, regex := range accountMatches {
+		r, err := regexp.Compile(fmt.Sprintf("(?i)%s", regex.Regex))
+		if err != nil {
+			return false, err
+		}
+
+		result := r.FindStringSubmatch(memo)
+		if len(result) != 0 {
+			return true, nil
+		}
+	}
+	return false, nil
 }

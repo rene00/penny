@@ -12,6 +12,8 @@ export function DeleteAccount(arg1:number):Promise<types.AccountResponse>;
 
 export function GetAccount(arg1:number):Promise<types.AccountResponse>;
 
+export function GetAccountByName(arg1:string):Promise<types.AccountResponse>;
+
 export function GetAccounts():Promise<types.JSResp>;
 
 export function GetChildAccountTypes():Promise<types.JSResp>;

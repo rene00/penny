@@ -28,6 +28,22 @@ type TransactionsResponse struct {
 	Data    []Transaction `json:"data"`
 }
 
+// TransactionsTotalBalance is the total balance amount for all non-deleted
+// transactions.
+type TransactionsTotalBalance struct {
+	Success bool   `json:"success"`
+	Msg     string `json:"msg"`
+	Data    string `json:"data"`
+}
+
+// TransactionsNetAssetsResponse is the total net assets amount for all
+// non-deleted transactions.
+type TransactionsNetAssetsResponse struct {
+	Success bool   `json:"success"`
+	Msg     string `json:"msg"`
+	Data    string `json:"data"`
+}
+
 // NewTransactionResponse returns a default TransactionResponse. All attributes
 // of TransactionResponse must be set or else the struct wont be returned
 // correctly to the frontend.

@@ -12,6 +12,8 @@ export function CreateTransaction(arg1:string,arg2:string):Promise<types.Transac
 
 export function DeleteTransaction(arg1:number):Promise<types.TransactionResponse>;
 
+export function GetTotalBalance():Promise<types.TransactionsNetAssetsResponse>;
+
 export function GetTransaction(arg1:number):Promise<types.TransactionResponse>;
 
 export function GetTransactions():Promise<types.TransactionsResponse>;

@@ -14,6 +14,10 @@ export function GetAccount(arg1) {
   return window['go']['services']['accountService']['GetAccount'](arg1);
 }
 
+export function GetAccountByName(arg1) {
+  return window['go']['services']['accountService']['GetAccountByName'](arg1);
+}
+
 export function GetAccounts() {
   return window['go']['services']['accountService']['GetAccounts']();
 }

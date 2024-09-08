@@ -1,6 +1,7 @@
 <script>
 import { ref } from 'vue';
-import { GetTransactions, GetTransactionsAccount, GetTransactionsTag } from 'wailsjs/go/services/transactionService.js'
+import { GetTransactions, GetTransactionsAccount, GetTransactionsTag, GetTotalBalance } from 'wailsjs/go/services/transactionService.js'
+import { GetAccountByName } from 'wailsjs/go/services/accountService.js'
 import { useRouter } from 'vue-router';
 
 export default {
@@ -20,6 +21,8 @@ export default {
       searchValue: ref(),
       searchFields: ['memo', 'amount'],
       transactions: [],
+      totalBalance: ref(),
+      imbalancedAccountID: ref(),
       headers: [
         {
           text: 'Date',
@@ -46,12 +49,29 @@ export default {
       () => this.$route.params,
       () => {
         this.getTransactions()
+        this.getTotalBalance()
+        this.getImbalancedAccountID()
       },
       { immediate: true },
     )
   },
 
   methods: {
+    async getImbalancedAccountID() {
+      const getAccountByNameResp = await GetAccountByName("Imbalanced")
+      if (!getAccountByNameResp.success) {
+        return
+      }
+      this.imbalancedAccountID = getAccountByNameResp.data.id
+    },
+    async getTotalBalance() {
+      const getTotalBalanceResp = await GetTotalBalance()
+      if (!getTotalBalanceResp.success) {
+        $message.error(getTotalBalanceResp.msg)
+        return
+      }
+      this.totalBalance = getTotalBalanceResp.data
+    },
     async getTransactions() {
       let transactions = [];
 
@@ -154,10 +174,16 @@ export default {
                               </EasyDataTable>
                             </div>
                         </div>
+
+                      <div class="col-md-6">
+                          <label class="small mb-1">Total Balance:</label>
+                          <label class="small mb-1"><router-link :to="{ name: 'get-account', params: { id: this.imbalancedAccountID }}">{{ totalBalance }}</router-link></label>
+                      </div>
                     </div>
 
                 </div>
                 <!-- /.container-fluid -->
+
 
             </div>
             <!-- End of Main Content -->

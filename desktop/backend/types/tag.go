@@ -6,6 +6,7 @@ import (
 	"math/big"
 	"pennyapp/backend/internal/dberror"
 	"pennyapp/backend/model"
+	"strings"
 
 	"github.com/shopspring/decimal"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -114,7 +115,6 @@ func (t *Tag) setAmount(ctx context.Context, db *sql.DB, tag *model.Tag) error {
 		qm.Load("Transaction"),
 		qm.Load("Transaction.Splits"),
 		qm.Load("Transaction.Splits.Account"),
-		qm.Load("Transaction.Splits.Account.AccountType"),
 	}
 	tagTransactions, err := model.TagTransactions(q...).All(ctx, db)
 	if err != nil {
@@ -127,10 +127,42 @@ func (t *Tag) setAmount(ctx context.Context, db *sql.DB, tag *model.Tag) error {
 			continue
 		}
 		transaction := tagTransaction.R.Transaction
+
+		transactionDeleted, err := isTransactionDeleted(ctx, db, transaction.ID)
+		if err != nil {
+			return err
+		}
+		if transactionDeleted {
+			continue
+		}
+
 		for _, split := range transaction.R.Splits {
-			r := big.NewRat(split.ValueNum, split.ValueDenom)
-			f, _ := r.Float64()
-			amount = amount + f
+			q = []qm.QueryMod{
+				qm.Where("account.id=?", split.AccountID),
+				qm.InnerJoin("account_type on account_type.id = account.account_type_id"),
+				qm.Load("AccountType"),
+			}
+			account, err := model.Accounts(q...).One(ctx, db)
+			if err != nil {
+				return err
+			}
+
+			accountType, err := account.AccountType().One(ctx, db)
+			if err != nil {
+				return err
+			}
+
+			// Only calculate amount for splits which have an account type of
+			// expense. There is a FEAT that improves Tag support by tagging
+			// transactions by account type which should remove this hack.
+			switch strings.ToLower(accountType.Name) {
+			case "expense":
+				r := big.NewRat(split.ValueNum, split.ValueDenom)
+				f, _ := r.Float64()
+				amount = amount + f
+			default:
+			}
+
 		}
 	}
 	t.Amount = decimal.NewFromFloat(amount).StringFixed(2)

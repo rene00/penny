@@ -157,6 +157,7 @@ export default {
             }
 
             const { success, msg, data } = await UpdateSplit(split.id, split.account_id, Number(split.amount))
+            console.log("DEBUG1: " + JSON.stringify(split))
             if (!success) {
               $message.error(msg)
               return

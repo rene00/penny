@@ -18,6 +18,8 @@
 // 000008_comments.up.sql
 // 000009_attachments.down.sql
 // 000009_attachments.up.sql
+// 000010_doubleentry.down.sql
+// 000010_doubleentry.up.sql
 // migrations.go
 // migrations_test.go
 package migrations
@@ -380,7 +382,7 @@ func _000008_commentsDownSql() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "000008_comments.down.sql", size: 67, mode: os.FileMode(420), modTime: time.Unix(1723236041, 0)}
+	info := bindataFileInfo{name: "000008_comments.down.sql", size: 67, mode: os.FileMode(420), modTime: time.Unix(1723934530, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -400,7 +402,7 @@ func _000008_commentsUpSql() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "000008_comments.up.sql", size: 398, mode: os.FileMode(420), modTime: time.Unix(1723236041, 0)}
+	info := bindataFileInfo{name: "000008_comments.up.sql", size: 398, mode: os.FileMode(420), modTime: time.Unix(1723934530, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -420,7 +422,7 @@ func _000009_attachmentsDownSql() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "000009_attachments.down.sql", size: 79, mode: os.FileMode(420), modTime: time.Unix(1723324013, 0)}
+	info := bindataFileInfo{name: "000009_attachments.down.sql", size: 79, mode: os.FileMode(420), modTime: time.Unix(1723934551, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -440,7 +442,47 @@ func _000009_attachmentsUpSql() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "000009_attachments.up.sql", size: 540, mode: os.FileMode(420), modTime: time.Unix(1723374891, 0)}
+	info := bindataFileInfo{name: "000009_attachments.up.sql", size: 540, mode: os.FileMode(420), modTime: time.Unix(1723934551, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
+var __000010_doubleentryDownSql = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x01\x00\x00\xff\xff\x00\x00\x00\x00\x00\x00\x00\x00")
+
+func _000010_doubleentryDownSqlBytes() ([]byte, error) {
+	return bindataRead(
+		__000010_doubleentryDownSql,
+		"000010_doubleentry.down.sql",
+	)
+}
+
+func _000010_doubleentryDownSql() (*asset, error) {
+	bytes, err := _000010_doubleentryDownSqlBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "000010_doubleentry.down.sql", size: 0, mode: os.FileMode(420), modTime: time.Unix(1724476098, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
+var __000010_doubleentryUpSql = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x74\x91\xcd\x4e\x84\x40\x10\x84\xef\xfd\x14\x7d\x04\xe3\xc5\x33\xf1\x30\x8b\x0d\x99\x08\x03\x69\xda\xc4\x3d\x11\xc2\x8f\x21\xae\x83\xd9\x01\x13\xdf\xde\x80\x18\xc5\x65\xaf\x35\x5f\x25\xdf\x74\xe5\xac\xe2\x54\x61\x37\x9c\xdb\xfe\xc5\x96\xaf\xed\xa7\xbb\x1f\xba\x2e\x00\x50\x89\x10\xa3\xa8\x43\x42\xe8\xde\x4f\xfd\xe8\x90\xc9\xa8\x94\x50\xb2\x35\x28\xef\x02\x80\x90\x49\x09\xad\xa0\x8e\xd0\x64\x82\xf4\xac\x0b\x29\x56\x0a\x3c\x40\x44\xec\x1b\xd4\x46\x28\x26\x5e\x10\xf3\x94\x24\x98\xb3\x4e\x15\x1f\xf1\x91\x8e\xb7\x0b\x34\x9e\x2b\xeb\xaa\x7a\xec\x07\xeb\xca\x9d\xc6\x37\x55\xd5\xf5\x30\xd9\xf1\x3a\xf0\x51\x9d\xa6\xb6\xb4\xd3\x1b\x1e\x74\xac\x8d\xec\x3e\x37\xad\x1d\xae\x00\x51\xc6\xa4\x63\x33\x7b\x79\xff\x94\x7c\x64\x8a\x88\xc9\x84\x54\x6c\x74\xbd\xbe\xf1\x2f\xdb\xbf\xaa\x9b\xe2\x1a\xcf\x1d\xf0\x03\x00\x6d\x0a\x62\x99\x7f\xf3\x73\x5b\x2c\x28\xa1\x50\xf0\x06\x23\xce\xd2\xbf\x07\x7f\xe0\x2c\xdf\xec\xb2\xa4\xbb\x43\xda\x00\xbe\x02\x00\x00\xff\xff\xe8\x95\x40\x5c\xe1\x01\x00\x00")
+
+func _000010_doubleentryUpSqlBytes() ([]byte, error) {
+	return bindataRead(
+		__000010_doubleentryUpSql,
+		"000010_doubleentry.up.sql",
+	)
+}
+
+func _000010_doubleentryUpSql() (*asset, error) {
+	bytes, err := _000010_doubleentryUpSqlBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "000010_doubleentry.up.sql", size: 481, mode: os.FileMode(420), modTime: time.Unix(1724476935, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -555,6 +597,8 @@ var _bindata = map[string]func() (*asset, error){
 	"000008_comments.up.sql": _000008_commentsUpSql,
 	"000009_attachments.down.sql": _000009_attachmentsDownSql,
 	"000009_attachments.up.sql": _000009_attachmentsUpSql,
+	"000010_doubleentry.down.sql": _000010_doubleentryDownSql,
+	"000010_doubleentry.up.sql": _000010_doubleentryUpSql,
 	"migrations.go": migrationsGo,
 	"migrations_test.go": migrations_testGo,
 }
@@ -617,6 +661,8 @@ var _bintree = &bintree{nil, map[string]*bintree{
 	"000008_comments.up.sql": &bintree{_000008_commentsUpSql, map[string]*bintree{}},
 	"000009_attachments.down.sql": &bintree{_000009_attachmentsDownSql, map[string]*bintree{}},
 	"000009_attachments.up.sql": &bintree{_000009_attachmentsUpSql, map[string]*bintree{}},
+	"000010_doubleentry.down.sql": &bintree{_000010_doubleentryDownSql, map[string]*bintree{}},
+	"000010_doubleentry.up.sql": &bintree{_000010_doubleentryUpSql, map[string]*bintree{}},
 	"migrations.go": &bintree{migrationsGo, map[string]*bintree{}},
 	"migrations_test.go": &bintree{migrations_testGo, map[string]*bintree{}},
 }}

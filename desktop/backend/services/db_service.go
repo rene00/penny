@@ -224,26 +224,44 @@ func (d *dbService) initAccount(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	_, err = model.Accounts(qm.Where("name=? AND parent_id=0 AND entity_id=?", "Account", defaultEntity.ID)).One(ctx, d.DB)
-	if err != nil {
-		switch {
-		case dberror.IsNoRowsFound(err):
-			grandParentAccountType, err := d.getGrantParentAccountType()
-			if err != nil {
-				return err
-			}
 
-			grandParentAccount := &model.Account{
-				Name:          "Account",
-				EntityID:      defaultEntity.ID,
-				AccountTypeID: grandParentAccountType.ID,
-				ParentID:      int64(0),
+	grandParentAccountType, err := d.getGrantParentAccountType()
+	if err != nil {
+		return err
+	}
+
+	grandParentAccount, err := model.Accounts(qm.Where("name=? AND parent_id=0 AND entity_id=? AND account_type_id=?", "Account", defaultEntity.ID, grandParentAccountType.ID)).One(ctx, d.DB)
+	switch {
+	case dberror.IsNoRowsFound(err):
+		grandParentAccount = &model.Account{
+			Name:          "Account",
+			EntityID:      defaultEntity.ID,
+			AccountTypeID: grandParentAccountType.ID,
+			ParentID:      int64(0),
+		}
+		if err := grandParentAccount.Insert(ctx, d.DB, boil.Infer()); err != nil {
+			return err
+		}
+	case err != nil:
+		return fmt.Errorf("failed to insert grand parent account: %w", err)
+	}
+
+	assetAccountType, err := model.AccountTypes(qm.Where("name=?", "Asset")).One(ctx, d.DB)
+	if err != nil {
+		return err
+	}
+
+	accounts := []model.Account{
+		{Name: "Imbalanced", ParentID: grandParentAccount.ID, EntityID: defaultEntity.ID, AccountTypeID: assetAccountType.ID},
+	}
+	for _, account := range accounts {
+		if err := account.Insert(ctx, d.DB, boil.Infer()); err != nil {
+			switch {
+			case dberror.IsUniqueConstraint(err):
+				continue
+			default:
+				return fmt.Errorf("failed to insert account: %w", err)
 			}
-			if err := grandParentAccount.Insert(ctx, d.DB, boil.Infer()); err != nil {
-				return err
-			}
-		default:
-			return fmt.Errorf("failed to insert grand parent account: %w", err)
 		}
 	}
 

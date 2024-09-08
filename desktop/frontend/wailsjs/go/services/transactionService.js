@@ -14,6 +14,10 @@ export function DeleteTransaction(arg1) {
   return window['go']['services']['transactionService']['DeleteTransaction'](arg1);
 }
 
+export function GetTotalBalance() {
+  return window['go']['services']['transactionService']['GetTotalBalance']();
+}
+
 export function GetTransaction(arg1) {
   return window['go']['services']['transactionService']['GetTransaction'](arg1);
 }
