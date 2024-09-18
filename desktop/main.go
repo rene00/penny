@@ -57,6 +57,7 @@ func main() {
 	tagSvc := services.Tag()
 	noteSvc := services.Note()
 	attachmentSvc := services.Attachment()
+	reportSvc := services.Report()
 
 	// Create an instance of the app structure
 	app := NewApp()
@@ -90,6 +91,7 @@ func main() {
 			tagSvc.Start(ctx, dbSvc.DB, logger)
 			noteSvc.Start(ctx, dbSvc.DB, logger)
 			attachmentSvc.Start(ctx, conf, dbSvc.DB, logger)
+			reportSvc.Start(ctx, dbSvc.DB, logger)
 
 			app.startup(ctx)
 		},
@@ -106,6 +108,7 @@ func main() {
 			tagSvc,
 			noteSvc,
 			attachmentSvc,
+			reportSvc,
 		},
 	})
 
