@@ -59,50 +59,55 @@ export default {
                         </div>
                         <div class="card-body">
                             <div class="mb-3">
-                                <div>
-                                    <label>
-                                      <h1>Profit and Loss</h1>
-                                    </label>
-                                </div>
-                                <div>
-                                    <label>
-                                      <p>Start: {{ report.start_date }}</p>
-                                    </label>
-                                </div>
-                                <div>
-                                    <label>
-                                      <p>End: {{ report.end_date }}</p>
-                                    </label>
-                                </div>
-                                <div>
-                                  <div>
-                                    <label>
-                                      <h2>Income</h2>
-                                    </label>
-                                  </div>
-                                  <div v-for="account in report.income">
-                                    <label>
-                                      <p>Account: {{ account.name }}: <router-link :to="{ name: 'get-transactions-account', params: { accountid: account.id }}">{{ account.amount }}</router-link></p>
-                                    </label>
-                                  </div>
-                                </div>
-                                <div>
-                                  <div>
-                                    <label>
-                                      <h2>Expenses</h2>
-                                    </label>
-                                  </div>
-                                  <div v-for="account in report.expense">
-                                    <label>
-                                      <p>Account: <router-link :to="{ name: 'get-account', params: { id: account.id }}">{{ account.name }}</router-link>: <router-link :to="{ name: 'get-transactions-account', params: { accountid: account.id }}">{{ account.amount }}</router-link></p>
-                                    </label>
-                                  </div>
-                                </div>
-                                <div>
-                                  <label>
-                                    <p>Net: {{ report.net }}</p>
-                                  </label>
-                                </div>
+
+                              <h2>Income</h2>
+                              <div class="table-responsive">
+                                <table class="table table-bordered table-hover">
+                                  <thead>
+                                    <tr>
+                                      <th>Account</th>
+                                      <th>Amount</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    <tr v-for="account in report.income">
+                                      <td><router-link :to="{ name: 'get-account', params: { id: account.id }}">{{ account.name }}</router-link></td>
+                                      <td><router-link :to="{ name: 'get-transactions-account', params: { accountid: account.id }}">{{ account.amount }}</router-link></td>
+                                    </tr>
+                                    <tr>
+                                      <td>Total</td>
+                                      <td>{{ report.income_amount }}</td>
+                                    </tr>
+                                  </tbody>
+                                </table>
+                              </div>
+
+                              <h2>Expenses</h2>
+                              <div class="table-responsive">
+                                <table class="table table-bordered table-hover">
+                                  <thead>
+                                    <tr>
+                                      <th>Account</th>
+                                      <th>Amount</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    <tr v-for="account in report.expense">
+                                      <td><router-link :to="{ name: 'get-account', params: { id: account.id }}">{{ account.name }}</router-link></td>
+                                      <td><router-link :to="{ name: 'get-transactions-account', params: { accountid: account.id }}">{{ account.amount }}</router-link></td>
+                                    </tr>
+                                    <tr>
+                                      <td>Total</td>
+                                      <td>{{ report.expense_amount }}</td>
+                                    </tr>
+                                  </tbody>
+                                </table>
+                              </div>
+                              <div>
+                                <label>
+                                  <p>Net: {{ report.net }}</p>
+                                </label>
+                              </div>
                             </div>
                         </div>
                     </div>
