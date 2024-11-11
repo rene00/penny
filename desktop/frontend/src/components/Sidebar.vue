@@ -73,6 +73,19 @@
             <hr class="sidebar-divider">
 
             <li class="nav-item">
+                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseReports"
+                    aria-expanded="true" aria-controls="collapseReports">
+                    <i class="fas fa-fw fa-cog"></i>
+                    <span>Reports</span>
+                </a>
+                <div id="collapseReports" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+                    <div class="bg-white py-2 collapse-inner rounded">
+                        <router-link :to="{ name: 'reports-profitloss' }" class="collapse-item">Profit Loss</router-link>
+                    </div>
+                </div>
+            </li>
+
+            <li class="nav-item">
                 <router-link :to="{ name: 'tasks' }" class="nav-link">
                     <i class="fas fa-fw fa-cog"></i>
                     <span>Tasks</span>

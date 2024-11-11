@@ -81,6 +81,12 @@ const router = createRouter({
         props: true
     },
     {
+        path: '/reports/profitloss',
+        name: 'reports-profitloss',
+        component: () => import('../views/ReportsProfitLoss.vue'),
+        props: true
+    },
+    {
         path: '/get-tags',
         name: 'get-tags',
         component: () => import('../views/GetTags.vue'),

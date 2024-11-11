@@ -25,6 +25,7 @@ type Account struct {
 	AccountType AccountType `json:"account_type"`
 	Amount      string      `json:"amount"`
 	Deleted     bool        `json:"deleted"`
+	AccountOpts
 }
 
 type AccountType struct {
@@ -47,12 +48,36 @@ func NewAccountResponse() AccountResponse {
 	return a
 }
 
-func NewAccount(ctx context.Context, db *sql.DB, a *model.Account) (Account, error) {
+type AccountOpts struct {
+	amountAlwaysPositive bool
+}
+
+type AccountOptFunc func(*AccountOpts)
+
+func WithAccountOptsAmountAlwaysPosiive(b bool) AccountOptFunc {
+	return func(opts *AccountOpts) {
+		opts.amountAlwaysPositive = b
+	}
+}
+
+func defaultAccountOpts() AccountOpts {
+	return AccountOpts{
+		amountAlwaysPositive: false,
+	}
+}
+
+func NewAccount(ctx context.Context, db *sql.DB, a *model.Account, opts ...AccountOptFunc) (Account, error) {
 	var err error
 
+	o := defaultAccountOpts()
+	for _, fn := range opts {
+		fn(&o)
+	}
+
 	account := Account{
-		ID:   a.ID,
-		Name: a.Name,
+		ID:          a.ID,
+		Name:        a.Name,
+		AccountOpts: o,
 	}
 
 	if a.R != nil && a.R.AccountType != nil {
@@ -99,9 +124,11 @@ func (a *Account) setAmount(ctx context.Context, db *sql.DB, account *model.Acco
 		r := big.NewRat(split.ValueNum, split.ValueDenom)
 		f, _ := r.Float64()
 
-		switch strings.ToLower(accountType.Name) {
-		case "liability", "income":
-			f = -f
+		if !a.amountAlwaysPositive {
+			switch strings.ToLower(accountType.Name) {
+			case "liability", "income":
+				f = -f
+			}
 		}
 
 		amount = amount + f

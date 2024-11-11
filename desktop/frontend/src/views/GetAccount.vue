@@ -61,6 +61,7 @@ export default {
         name: data.name,
         description: data.description,
         amount: data.amount,
+        amount2: data.amount2,
         account_type: {
           id: data.account_type.id,
           name: data.account_type.name,
@@ -146,7 +147,7 @@ export default {
                                       Amount
                                     </label>
                                     <div>
-                                      <router-link :to="{ name: 'get-transactions-account', params: { accountid: account.id }}">{{ account.amount }}</router-link>
+                                      <router-link :to="{ name: 'get-transactions-account', params: { accountid: account.id }}">{{ account.amount }}, {{ account.amount2 }}</router-link>
                                     </div>
                                 </div>
                                 <div class="mb-1">
